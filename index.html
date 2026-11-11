@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dashboard Kegiatan Dukcapil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: ringkasan di atas (angka + kelengkapan per bidang), lalu dua tab: daftar kegiatan dengan checklist dokumen, dan bank ide per bidang. */
+:root {
+  --bg: #F4F6F9;
+  --surface: #FFFFFF;
+  --surface-2: #EDF1F6;
+  --ink: #14202E;
+  --muted: #566274;
+  --line: #D9E0E9;
+  --accent: #14304F;
+  --on-accent: #FFFFFF;
+  --focus: #2F6FBF;
+  --ok: #1C7A47;
+  --ok-bg: #E2F3E9;
+  --warn: #8F5600;
+  --warn-bg: #FBEFD5;
+  --crit: #B3261E;
+  --crit-bg: #FBE5E3;
+  --b-sekr: #596879;
+  --b-daftar: #0B7285;
+  --b-sipil: #B4531A;
+  --b-piak: #6741D9;
+  --b-pdip: #A1356B;
+  --f-display: "Bricolage Grotesque", "Public Sans", system-ui, sans-serif;
+  --f-body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E151E; --surface: #162130; --surface-2: #1D2B3D; --ink: #E8EDF3; --muted: #9AA8B9; --line: #2A3A4F;
+    --accent: #8DB8EA; --on-accent: #0E151E; --focus: #8DB8EA;
+    --ok: #62C48C; --ok-bg: #173826; --warn: #E7B454; --warn-bg: #3B2D12; --crit: #F0877F; --crit-bg: #3F1D1B;
+    --b-sekr: #9AAABB; --b-daftar: #4CC0D4; --b-sipil: #EE9461; --b-piak: #A593F0; --b-pdip: #E37DB2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E151E; --surface: #162130; --surface-2: #1D2B3D; --ink: #E8EDF3; --muted: #9AA8B9; --line: #2A3A4F;
+  --accent: #8DB8EA; --on-accent: #0E151E; --focus: #8DB8EA;
+  --ok: #62C48C; --ok-bg: #173826; --warn: #E7B454; --warn-bg: #3B2D12; --crit: #F0877F; --crit-bg: #3F1D1B;
+  --b-sekr: #9AAABB; --b-daftar: #4CC0D4; --b-sipil: #EE9461; --b-piak: #A593F0; --b-pdip: #E37DB2;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--f-body); font-size: 15px; line-height: 1.5;
+  padding-block: 20px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; line-height: 1.2; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+
+/* header */
+.top { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: flex-end; justify-content: space-between; }
+.top h1 { font-size: clamp(1.6rem, 4.5vw, 2.2rem); font-weight: 700; letter-spacing: -0.01em; }
+.top p { margin: 4px 0 0; color: var(--muted); }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.btn {
+  background: var(--accent); color: var(--on-accent); border: 1px solid var(--accent);
+  border-radius: 8px; padding: 9px 16px; min-height: 40px; font-weight: 600;
+}
+.btn:hover { filter: brightness(1.08); }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); font-weight: 500; }
+.btn.ghost:hover { background: var(--surface-2); filter: none; }
+.btn.danger { background: transparent; color: var(--crit); border-color: var(--crit); font-weight: 500; }
+.btn.small { min-height: 34px; padding: 5px 12px; font-size: 14px; }
+
+/* summary */
+.summary { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 16px; }
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.tile .k { color: var(--muted); font-size: 13px; }
+.tile .v { font-family: var(--f-display); font-weight: 700; font-size: 2rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tile .s { color: var(--muted); font-size: 13px; }
+.tile.alert { background: var(--crit-bg); border-color: var(--crit); }
+.tile.alert .v { color: var(--crit); }
+.bars { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.bars h2 { font-size: 1rem; }
+.brow { display: grid; gap: 4px; }
+.brow .l { display: flex; justify-content: space-between; gap: 12px; font-size: 13.5px; }
+.brow .l span:first-child { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--c, var(--muted)); }
+.track { height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+.track i { display: block; height: 100%; border-radius: 4px; background: var(--c, var(--accent)); }
+
+/* banner */
+.banner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn); border-radius: 10px; padding: 10px 14px; font-size: 14px; }
+.banner[hidden] { display: none; }
+
+/* tabs */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+.tab { background: none; border: 0; border-bottom: 3px solid transparent; padding: 10px 14px; font-weight: 600; color: var(--muted); margin-bottom: -1px; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.tab .n { font-family: var(--f-mono); font-size: 12px; background: var(--surface-2); border-radius: 10px; padding: 1px 7px; margin-left: 6px; }
+.view { display: flex; flex-direction: column; gap: 14px; }
+
+/* form */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.panel h2 { font-size: 1.1rem; }
+.fgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.fgrid .full { grid-column: 1 / -1; }
+label.f { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); font-weight: 500; min-width: 0; }
+input[type="text"], input[type="password"], input[type="search"], input[type="date"], select {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-height: 40px; width: 100%; color: var(--ink); min-width: 0;
+}
+.preview { background: var(--surface-2); border-radius: 8px; padding: 10px 14px; font-size: 14px; }
+.preview ul { margin: 6px 0 0; padding-left: 18px; columns: 2 220px; column-gap: 24px; }
+.preview li { break-inside: avoid; margin-bottom: 2px; }
+.row-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* toolbar */
+.toolbar { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 10px; }
+
+/* activity list */
+.list { display: flex; flex-direction: column; gap: 10px; }
+.act { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.act.terlambat { border-color: var(--crit); }
+.act-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; width: 100%; text-align: left; background: none; border: 0; padding: 14px 16px; align-items: center; }
+.act-head:hover { background: var(--surface-2); }
+.act-title { font-family: var(--f-display); font-weight: 600; font-size: 1.05rem; line-height: 1.3; }
+.meta { display: flex; flex-wrap: wrap; gap: 4px 14px; color: var(--muted); font-size: 13px; align-items: center; margin-top: 4px; }
+.meta .b { display: inline-flex; align-items: center; gap: 6px; }
+.pill { font-size: 12px; font-weight: 600; border-radius: 999px; padding: 2px 10px; white-space: nowrap; }
+.pill.terlambat { background: var(--crit-bg); color: var(--crit); }
+.pill.berjalan { background: var(--warn-bg); color: var(--warn); }
+.pill.belum { background: var(--surface-2); color: var(--muted); }
+.pill.selesai { background: var(--ok-bg); color: var(--ok); }
+.right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; min-width: 120px; }
+.right .track { width: 120px; }
+.right .track i { background: var(--accent); }
+.act.selesai .right .track i { background: var(--ok); }
+.act.terlambat .right .track i { background: var(--crit); }
+.chev { display: inline-block; transition: transform .15s; color: var(--muted); }
+.act-head[aria-expanded="true"] .chev { transform: rotate(90deg); }
+.act-body { border-top: 1px solid var(--line); padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; background: var(--bg); }
+.docs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 20px; }
+.doc { display: flex; gap: 10px; align-items: flex-start; padding: 6px 8px; border-radius: 6px; min-width: 0; cursor: pointer; }
+.doc:hover { background: var(--surface-2); }
+.doc input { width: 18px; height: 18px; margin-top: 2px; flex: none; accent-color: var(--accent); }
+.doc span { min-width: 0; overflow-wrap: anywhere; }
+.doc input:checked + span { color: var(--muted); text-decoration: line-through; }
+.body-tools { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: flex-end; justify-content: space-between; }
+.adddoc { display: flex; gap: 8px; flex: 1 1 260px; max-width: 460px; }
+.dateedit { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.dateedit input { width: auto; }
+.empty { text-align: center; color: var(--muted); padding: 32px 16px; background: var(--surface); border: 1px dashed var(--line); border-radius: 10px; }
+
+/* ideas */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.ideas { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; }
+.idea { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.idea h3 { font-size: 1rem; font-weight: 600; }
+.idea p { margin: 0; color: var(--muted); font-size: 14px; flex: 1; }
+.idea .foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.idea .cnt { font-size: 12px; color: var(--muted); font-family: var(--f-mono); }
+
+.note { color: var(--muted); font-size: 13px; max-width: 70ch; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-size: 14px; z-index: 20; max-width: calc(100% - 32px); }
+.toast[hidden] { display: none; }
+
+@media (max-width: 760px) {
+  .summary { grid-template-columns: minmax(0, 1fr); }
+  .toolbar { grid-template-columns: minmax(0, 1fr); }
+  .docs { grid-template-columns: minmax(0, 1fr); }
+  .fgrid { grid-template-columns: minmax(0, 1fr); }
+  .act-head { grid-template-columns: minmax(0, 1fr); }
+  .right { flex-direction: row; align-items: center; justify-content: space-between; min-width: 0; }
+  .right .track { flex: 1; }
+}
+@media (prefers-reduced-motion: reduce) { .chev { transition: none; } }
+
+.sync { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.sync i { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); flex: none; }
+.sync.ok i { background: var(--ok); }
+.sync.busy i { background: var(--warn); }
+.sync.err i { background: var(--crit); }
+.top-r { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.docrow { display: flex; align-items: flex-start; gap: 8px; min-width: 0; }
+.docrow .doc { flex: 1 1 auto; }
+.fileact { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex: none; max-width: 45%; font-size: 12.5px; padding-top: 4px; }
+.fileact a { color: var(--accent); overflow-wrap: anywhere; text-align: right; }
+.fileact .btn { min-height: 30px; padding: 3px 10px; font-size: 13px; }
+.fileact .btn:disabled { opacity: .6; cursor: default; }
+@media (max-width: 760px) { .top-r { align-items: flex-start; } }
+
+/* reset untuk halaman mandiri */
+:root { color-scheme: light; }
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow" id="today">Dinas Kependudukan dan Pencatatan Sipil</div>
+      <h1>Dashboard Kegiatan Dukcapil</h1>
+      <p>Pantau kegiatan per bidang, lengkapi dokumennya, dan ambil ide kegiatan baru.</p>
+    </div>
+    <div class="top-r"><span class="sync" id="sync"><i></i><span id="sync-t">Mode lokal</span></span><div class="row-btns"><button class="btn ghost small" id="btn-refresh" type="button" hidden>Muat ulang</button><button class="btn" id="btn-new" type="button">+ Tambah kegiatan</button></div></div>
+  </header>
+
+  <section class="summary" aria-label="Ringkasan">
+    <div class="tiles" id="tiles"></div>
+    <div class="bars" id="bars"></div>
+  </section>
+
+  <form class="panel" id="gate" hidden>
+    <h2>Masukkan PIN</h2>
+    <p class="note" style="margin:0" id="gate-msg">PIN diatur admin di Apps Script. PIN disimpan di browser ini.</p>
+    <div class="row-btns"><input type="password" id="gate-key" autocomplete="off" style="max-width:260px" aria-label="PIN"><button class="btn" type="submit">Masuk</button></div>
+  </form>
+
+  <div class="banner" id="banner" hidden>
+    <span>Kegiatan yang tampil saat ini adalah contoh. Hapus lalu isi dengan kegiatan Anda.</span>
+    <button class="btn ghost small" id="btn-clear-sample" type="button">Hapus contoh</button>
+  </div>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-keg" data-tab="keg" aria-selected="true">Kegiatan<span class="n" id="n-keg">0</span></button>
+    <button class="tab" role="tab" id="tab-ide" data-tab="ide" aria-selected="false">Bank ide<span class="n" id="n-ide">0</span></button>
+  </nav>
+
+  <section class="view" id="view-keg">
+    <form class="panel" id="form" hidden>
+      <h2 id="form-title">Kegiatan baru</h2>
+      <div class="fgrid">
+        <label class="f full" for="f-name">Nama kegiatan
+          <input type="text" id="f-name" required maxlength="140" placeholder="Contoh: Sosialisasi layanan KTP-el di kecamatan">
+        </label>
+        <label class="f" for="f-bidang">Bidang
+          <select id="f-bidang"></select>
+        </label>
+        <label class="f" for="f-tipe">Jenis kegiatan (menentukan daftar dokumen)
+          <select id="f-tipe"></select>
+        </label>
+        <label class="f" for="f-date">Tanggal pelaksanaan / batas selesai
+          <input type="date" id="f-date" required>
+        </label>
+      </div>
+      <div class="preview" id="f-preview"></div>
+      <div class="row-btns">
+        <button class="btn" type="submit">Simpan kegiatan</button>
+        <button class="btn ghost" type="button" id="btn-cancel">Batal</button>
+      </div>
+    </form>
+
+    <div class="toolbar">
+      <select id="fb" aria-label="Filter bidang"></select>
+      <select id="fs" aria-label="Filter status">
+        <option value="all">Semua status</option>
+        <option value="terlambat">Terlambat</option>
+        <option value="berjalan">Berjalan</option>
+        <option value="belum">Belum mulai</option>
+        <option value="selesai">Selesai</option>
+      </select>
+      <input type="search" id="fq" placeholder="Cari kegiatan" aria-label="Cari kegiatan">
+    </div>
+    <div class="list" id="list"></div>
+  </section>
+
+  <section class="view" id="view-ide" hidden>
+    <p class="note" style="margin:0">Ide disusun menurut tugas pokok tiap bidang. Pilih "Jadikan kegiatan" untuk menyalinnya ke daftar kegiatan lengkap dengan daftar dokumennya.</p>
+    <div class="chips" id="chips"></div>
+    <div class="ideas" id="ideas"></div>
+  </section>
+
+  <p class="note" id="foot-note">Pembagian bidang mengikuti pola umum dinas dukcapil kabupaten/kota. Sesuaikan nama bidang dan daftar dokumen dengan struktur organisasi serta ketentuan di daerah Anda. Data tersimpan di browser ini saja.</p>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ====== PENGATURAN ====== */
+var API_URL = 'https://script.google.com/macros/s/AKfycbyZUNFVV_JwLuxab8bpGtMF16BC-V6LhkUwrX-d98tGlWCuAowYQR1DGwaSVl-4Fg4QQA/exec';   // tempel URL Web App Apps Script (berakhiran /exec). Kosong = mode lokal (data hanya di browser).
+var MAKS_MB = 10;   // batas ukuran satu file (samakan dengan CONFIG.MAKS_MB di Code.gs)
+/* ======================== */
+(function () {
+  var BIDANG = {
+    sekr:   { n: 'Sekretariat',                  s: 'Umum, kepegawaian, keuangan, perencanaan' },
+    daftar: { n: 'Pendaftaran Penduduk',         s: 'KTP-el, KK, KIA, pindah datang, IKD' },
+    sipil:  { n: 'Pencatatan Sipil',             s: 'Akta kelahiran, kematian, perkawinan, perceraian' },
+    piak:   { n: 'Informasi Adminduk (PIAK)',    s: 'SIAK, data, jaringan, kerja sama data' },
+    pdip:   { n: 'Pemanfaatan Data & Inovasi',   s: 'Inovasi layanan, data agregat, publikasi' }
+  };
+  var TIPE = {
+    sosialisasi: { n: 'Sosialisasi / bimtek', docs: ['Surat tugas atau SK panitia', 'KAK (kerangka acuan kerja)', 'RAB dan DPA', 'Surat undangan atau permohonan lokasi', 'Materi paparan', 'Daftar hadir peserta', 'Notulen atau berita acara', 'Foto dokumentasi', 'Laporan kegiatan', 'SPJ (kwitansi, bukti pembayaran)'] },
+    jemput: { n: 'Pelayanan jemput bola', docs: ['Surat tugas petugas', 'Surat pemberitahuan ke instansi, desa, atau sekolah lokasi', 'Daftar sasaran (nama dan NIK)', 'Berita acara pelayanan', 'Rekap dokumen terbit (KTP-el, KIA, akta, IKD)', 'Foto dokumentasi', 'Laporan kegiatan', 'SPJ perjalanan dinas dan transport'] },
+    rakor: { n: 'Rapat koordinasi / rekonsiliasi', docs: ['Surat undangan rapat', 'Agenda dan bahan rapat', 'Daftar hadir', 'Notulen', 'Rencana tindak lanjut', 'Foto dokumentasi', 'Laporan hasil rapat'] },
+    pks: { n: 'Kerja sama (PKS / MoU)', docs: ['Surat permohonan atau penawaran kerja sama', 'Draf PKS atau MoU', 'Telaah bagian hukum', 'Persetujuan pimpinan', 'PKS bertanda tangan', 'Rencana kerja bersama', 'Laporan pelaksanaan kerja sama'] },
+    inovasi: { n: 'Inovasi / pengembangan layanan', docs: ['Proposal inovasi', 'SK tim inovasi', 'SOP layanan baru', 'Petunjuk teknis atau manual', 'Hasil uji coba', 'Bahan publikasi (brosur, pengumuman)', 'Laporan pelaksanaan', 'Bukti dukung penilaian inovasi'] },
+    monev: { n: 'Monitoring, evaluasi, survei', docs: ['Surat tugas tim', 'Instrumen atau format monev', 'Data hasil pengumpulan', 'Analisis dan rekomendasi', 'Laporan hasil monev', 'Tindak lanjut rekomendasi'] },
+    pengadaan: { n: 'Pengadaan barang / jasa', docs: ['Usulan kebutuhan', 'Spesifikasi teknis dan HPS', 'Dokumen pemilihan penyedia', 'Kontrak atau SPK', 'Berita acara serah terima', 'Foto bukti barang atau jasa', 'SPJ pembayaran'] },
+    admin: { n: 'Pelaporan & administrasi', docs: ['Data dukung', 'Draf dokumen', 'Reviu atasan', 'Dokumen final bertanda tangan', 'Pengiriman dan pengarsipan'] }
+  };
+  var IDEAS = [
+    { b: 'sekr', t: 'Penyusunan LKjIP dan Perjanjian Kinerja', k: 'admin', d: 'Laporan kinerja instansi tahunan beserta data dukung capaian indikator tiap bidang.' },
+    { b: 'sekr', t: 'Bimtek peningkatan kapasitas petugas layanan', k: 'sosialisasi', d: 'Pelatihan petugas front office dan operator SIAK soal pelayanan prima dan ketentuan terbaru.' },
+    { b: 'sekr', t: 'Survei Kepuasan Masyarakat', k: 'monev', d: 'Ukur kepuasan pengguna layanan secara berkala dan tindak lanjuti keluhan terbanyak.' },
+    { b: 'sekr', t: 'Digitalisasi arsip dokumen kependudukan', k: 'pengadaan', d: 'Pindai dan tata arsip fisik agar pencarian dokumen cepat dan aman dari kerusakan.' },
+    { b: 'daftar', t: 'Perekaman KTP-el pemilih pemula di SMA/SMK', k: 'jemput', d: 'Petugas datang ke sekolah untuk merekam siswa yang sudah atau akan genap 17 tahun.' },
+    { b: 'daftar', t: 'Aktivasi Identitas Kependudukan Digital (IKD) massal', k: 'jemput', d: 'Aktivasi IKD di kantor desa, kampus, atau instansi dengan meja bantuan khusus.' },
+    { b: 'daftar', t: 'Pelayanan khusus lansia, disabilitas, dan warga sakit', k: 'jemput', d: 'Layanan datang ke rumah atau panti untuk warga yang sulit ke kantor.' },
+    { b: 'daftar', t: 'Pendataan KIA (Kartu Identitas Anak) di PAUD dan SD', k: 'jemput', d: 'Percepat kepemilikan KIA lewat kerja sama dengan sekolah dan posyandu.' },
+    { b: 'daftar', t: 'Penertiban data ganda dan NIK tidak aktif', k: 'monev', d: 'Verifikasi data ganda, pindah, dan meninggal agar data penduduk bersih.' },
+    { b: 'daftar', t: 'Sosialisasi pindah datang online', k: 'sosialisasi', d: 'Kenalkan layanan pindah datang tanpa tatap muka ke kecamatan, desa, dan kelurahan.' },
+    { b: 'sipil', t: 'Percepatan akta kelahiran anak', k: 'jemput', d: 'Layanan terpadu di kecamatan atau desa untuk anak yang belum punya akta kelahiran.' },
+    { b: 'sipil', t: 'Kerja sama dengan rumah sakit dan bidan untuk akta kelahiran', k: 'pks', d: 'Pengajuan akta langsung dari fasilitas kesehatan saat bayi lahir.' },
+    { b: 'sipil', t: 'Pelaporan kematian lewat RT/RW, desa, dan puskesmas', k: 'pks', d: 'Alur lapor kematian yang lebih cepat supaya data penduduk tidak tertinggal.' },
+    { b: 'sipil', t: 'Layanan terpadu isbat nikah dan akta', k: 'pks', d: 'Kolaborasi dengan pengadilan agama dan kantor urusan agama untuk dokumen perkawinan.' },
+    { b: 'sipil', t: 'Sosialisasi pentingnya akta bagi calon pengantin dan orang tua baru', k: 'sosialisasi', d: 'Edukasi pencatatan peristiwa penting lewat KUA, posyandu, dan kelompok PKK.' },
+    { b: 'piak', t: 'Rekonsiliasi data kependudukan semester', k: 'rakor', d: 'Cocokkan data daerah dengan data pusat dan siapkan perbaikan yang diperlukan.' },
+    { b: 'piak', t: 'Rekonsiliasi data pemilih dengan KPU', k: 'rakor', d: 'Samakan data penduduk potensial pemilih sebelum tahapan pemilihan.' },
+    { b: 'piak', t: 'PKS pemanfaatan data dengan perbankan, BPJS, dan instansi lain', k: 'pks', d: 'Perluas pemanfaatan data kependudukan untuk verifikasi identitas layanan publik.' },
+    { b: 'piak', t: 'Pemeliharaan jaringan dan pencadangan data SIAK', k: 'pengadaan', d: 'Pastikan perangkat, jaringan, dan cadangan data siap agar layanan tidak terhenti.' },
+    { b: 'piak', t: 'Sosialisasi perlindungan data pribadi bagi operator', k: 'sosialisasi', d: 'Aturan akses, hak pengguna, dan pengamanan data penduduk untuk petugas dan mitra.' },
+    { b: 'pdip', t: 'Mobil layanan dukcapil keliling', k: 'jemput', d: 'Jadwal rutin layanan keliling ke kecamatan jauh dan wilayah kepulauan.' },
+    { b: 'pdip', t: 'Aplikasi antrean dan pengaduan online', k: 'inovasi', d: 'Daftar antrean dari rumah dan pantau status pengaduan secara terbuka.' },
+    { b: 'pdip', t: 'Infografis data agregat kependudukan per semester', k: 'inovasi', d: 'Publikasi jumlah penduduk dan cakupan dokumen agar mudah dipakai perencanaan daerah.' },
+    { b: 'pdip', t: 'Konten edukasi di media sosial dan video layanan', k: 'inovasi', d: 'Seri video singkat soal syarat dan alur layanan agar warga tidak bolak-balik ke kantor.' },
+    { b: 'pdip', t: 'Penghargaan desa/kelurahan tertib administrasi kependudukan', k: 'monev', d: 'Penilaian dan apresiasi wilayah dengan cakupan dokumen dan pelaporan peristiwa terbaik.' }
+  ];
+
+  var KEY = 'dukcapil-kegiatan-v1';
+  var T0 = new Date(); T0.setHours(0, 0, 0, 0);
+  function iso(off) { var d = new Date(T0); d.setDate(d.getDate() + off); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function dayDiff(s) { return Math.round((new Date(s + 'T00:00:00') - T0) / 864e5); }
+  function fmtDate(s) { return new Date(s + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }); }
+  function when(n) { return n < 0 ? 'Lewat ' + (-n) + ' hari' : n === 0 ? 'Hari ini' : 'H-' + n; }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function uid() { return 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  function mkDocs(tipe, done) { return TIPE[tipe].docs.map(function (t, i) { return { t: t, d: i < done }; }); }
+
+  function seed() {
+    function a(name, b, k, off, done) { return { id: uid(), name: name, b: b, k: k, date: iso(off), docs: mkDocs(k, done), sample: true }; }
+    return { acts: [
+      a('Perekaman KTP-el pemilih pemula di SMA/SMK', 'daftar', 'jemput', 6, 5),
+      a('Percepatan akta kelahiran anak di tiga kecamatan', 'sipil', 'jemput', 20, 2),
+      a('Rekonsiliasi data kependudukan semester II', 'piak', 'rakor', -3, 4),
+      a('Penyusunan LKjIP dan Perjanjian Kinerja', 'sekr', 'admin', 14, 1),
+      a('Survei Kepuasan Masyarakat layanan dukcapil', 'pdip', 'monev', 9, 3),
+      a('PKS pemanfaatan data dengan BPJS', 'piak', 'pks', 30, 0),
+      a('Bimtek petugas layanan front office', 'sekr', 'sosialisasi', -12, 10)
+    ] };
+  }
+  function load() {
+    try { var r = localStorage.getItem(KEY); if (r) { var s = JSON.parse(r); if (s && Array.isArray(s.acts)) return s; } } catch (e) {}
+    return seed();
+  }
+  var REMOTE = !!API_URL;
+  var state = REMOTE ? { acts: [] } : load();
+  function save() { if (REMOTE) return; try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+  var ui = { tab: 'keg', fb: 'all', fs: 'all', q: '', ib: 'all', open: {}, confirm: null, busy: {}, loadErr: REMOTE ? 'Memuat data…' : '' };
+  var $ = function (id) { return document.getElementById(id); };
+
+  function info(a) {
+    var t = a.docs.length, d = a.docs.filter(function (x) { return x.d; }).length, days = dayDiff(a.date), st;
+    if (t > 0 && d === t) st = 'selesai'; else if (days < 0) st = 'terlambat'; else if (d > 0) st = 'berjalan'; else st = 'belum';
+    return { t: t, d: d, days: days, st: st, pct: t ? Math.round(d / t * 100) : 0 };
+  }
+  var ST = { terlambat: 'Terlambat', berjalan: 'Berjalan', belum: 'Belum mulai', selesai: 'Selesai' };
+  var ORD = { terlambat: 0, berjalan: 1, belum: 2, selesai: 3 };
+
+  function renderSummary() {
+    var all = state.acts.map(function (a) { return { a: a, i: info(a) }; });
+    var td = 0, tt = 0, late = 0, soon = 0, done = 0;
+    all.forEach(function (x) {
+      td += x.i.d; tt += x.i.t;
+      if (x.i.st === 'selesai') done++;
+      else if (x.i.st === 'terlambat') late++;
+      else if (x.i.days <= 7) soon++;
+    });
+    var attn = late + soon, pct = tt ? Math.round(td / tt * 100) : 0;
+    $('tiles').innerHTML =
+      '<div class="tile"><span class="k">Kegiatan aktif</span><span class="v">' + (all.length - done) + '</span><span class="s">dari ' + all.length + ' kegiatan</span></div>' +
+      '<div class="tile"><span class="k">Dokumen lengkap</span><span class="v">' + pct + '%</span><span class="s">' + td + ' dari ' + tt + ' dokumen</span></div>' +
+      '<div class="tile' + (attn ? ' alert' : '') + '"><span class="k">Perlu perhatian</span><span class="v">' + attn + '</span><span class="s">' + late + ' terlambat, ' + soon + ' jatuh tempo ≤ 7 hari</span></div>' +
+      '<div class="tile"><span class="k">Selesai</span><span class="v">' + done + '</span><span class="s">semua dokumen lengkap</span></div>';
+    var rows = Object.keys(BIDANG).map(function (k) {
+      var d = 0, t = 0;
+      all.forEach(function (x) { if (x.a.b === k) { d += x.i.d; t += x.i.t; } });
+      var p = t ? Math.round(d / t * 100) : 0;
+      return '<div class="brow" style="--c:var(--b-' + k + ')"><div class="l"><span><i class="dot"></i>' + esc(BIDANG[k].n) + '</span><span class="mono">' + (t ? d + '/' + t + ' · ' + p + '%' : 'belum ada') + '</span></div><div class="track"><i style="width:' + p + '%"></i></div></div>';
+    }).join('');
+    $('bars').innerHTML = '<h2>Kelengkapan dokumen per bidang</h2>' + rows;
+    $('n-keg').textContent = all.length;
+    $('banner').hidden = !state.acts.some(function (a) { return a.sample; });
+  }
+
+  function renderList() {
+    if (ui.loadErr) { $('list').innerHTML = '<div class="empty">' + esc(ui.loadErr) + '</div>'; return; }
+    var q = ui.q.trim().toLowerCase();
+    var items = state.acts.map(function (a) { return { a: a, i: info(a) }; }).filter(function (x) {
+      return (ui.fb === 'all' || x.a.b === ui.fb) && (ui.fs === 'all' || x.i.st === ui.fs) && (!q || x.a.name.toLowerCase().indexOf(q) > -1);
+    }).sort(function (p, r) { return ORD[p.i.st] - ORD[r.i.st] || p.a.date.localeCompare(r.a.date); });
+    if (!items.length) {
+      $('list').innerHTML = '<div class="empty">' + (state.acts.length ? 'Tidak ada kegiatan yang cocok dengan filter.' : 'Belum ada kegiatan. Tambahkan kegiatan baru atau ambil dari tab Bank ide.') + '</div>';
+      return;
+    }
+    $('list').innerHTML = items.map(function (x) {
+      var a = x.a, i = x.i, open = !!ui.open[a.id];
+      var docs = a.docs.map(function (d, n) {
+        var fa = '';
+        if (REMOTE) {
+          var busy = ui.busy[a.id + ':' + n];
+          fa = '<div class="fileact">' +
+            (d.f && /^https:\/\//.test(d.f.url) ? '<a href="' + esc(d.f.url) + '" target="_blank" rel="noopener">' + esc(d.f.name) + '</a>' : '') +
+            '<input type="file" hidden id="file-' + a.id + '-' + n + '" data-act="file" data-id="' + a.id + '" data-n="' + n + '">' +
+            '<button class="btn ghost" type="button" data-act="pick" data-id="' + a.id + '" data-n="' + n + '"' + (busy ? ' disabled' : '') + '>' + (busy ? 'Mengunggah…' : (d.f ? 'Ganti file' : 'Unggah')) + '</button></div>';
+        }
+        return '<div class="docrow"><label class="doc"><input type="checkbox" data-act="toggle" data-id="' + a.id + '" data-n="' + n + '"' + (d.d ? ' checked' : '') + '><span>' + esc(d.t) + '</span></label>' + fa + '</div>';
+      }).join('');
+      var del = ui.confirm === a.id
+        ? '<span class="row-btns"><button class="btn danger small" type="button" data-act="del-yes" data-id="' + a.id + '">Ya, hapus</button><button class="btn ghost small" type="button" data-act="del-no">Batal</button></span>'
+        : '<button class="btn ghost small" type="button" data-act="del" data-id="' + a.id + '">Hapus kegiatan</button>';
+      var body = open ? '<div class="act-body">' +
+        '<div class="docs">' + (docs || '<span class="note">Belum ada dokumen. Tambahkan di bawah.</span>') + '</div>' +
+        '<div class="body-tools"><form class="adddoc" data-id="' + a.id + '"><input type="text" placeholder="Tambah dokumen lain" aria-label="Tambah dokumen lain" maxlength="120"><button class="btn ghost small" type="submit">Tambah</button></form>' +
+        '<label class="dateedit">Tanggal <input type="date" data-act="date" data-id="' + a.id + '" value="' + esc(a.date) + '"></label>' + del + '</div></div>' : '';
+      return '<article class="act ' + i.st + '">' +
+        '<button class="act-head" type="button" data-act="open" data-id="' + a.id + '" aria-expanded="' + open + '">' +
+        '<div><div class="act-title">' + esc(a.name) + '</div><div class="meta">' +
+        '<span class="b" style="--c:var(--b-' + a.b + ')"><i class="dot"></i>' + esc(BIDANG[a.b].n) + '</span>' +
+        '<span>' + esc(TIPE[a.k].n) + '</span>' +
+        '<span class="mono">' + fmtDate(a.date) + (i.st === 'selesai' ? '' : ' · ' + when(i.days)) + '</span></div></div>' +
+        '<div class="right"><span class="pill ' + i.st + '">' + ST[i.st] + '</span><div class="track" aria-hidden="true"><i style="width:' + i.pct + '%"></i></div><span class="mono">' + i.d + '/' + i.t + ' <span class="chev">▸</span></span></div>' +
+        '</button>' + body + '</article>';
+    }).join('');
+  }
+
+  function renderIdeas() {
+    $('n-ide').textContent = IDEAS.length;
+    var chips = [['all', 'Semua bidang', IDEAS.length]].concat(Object.keys(BIDANG).map(function (k) {
+      return [k, BIDANG[k].n, IDEAS.filter(function (x) { return x.b === k; }).length];
+    }));
+    $('chips').innerHTML = chips.map(function (c) {
+      var st = c[0] === 'all' ? '' : ' style="--c:var(--b-' + c[0] + ')"';
+      return '<button class="chip" type="button" data-act="ichip" data-b="' + c[0] + '" aria-pressed="' + (ui.ib === c[0]) + '"' + st + '>' + (c[0] === 'all' ? '' : '<i class="dot"></i>') + esc(c[1]) + ' <span class="mono">' + c[2] + '</span></button>';
+    }).join('');
+    $('ideas').innerHTML = IDEAS.map(function (x, n) { return { x: x, n: n }; }).filter(function (o) { return ui.ib === 'all' || o.x.b === ui.ib; }).map(function (o) {
+      var x = o.x;
+      return '<div class="idea"><span class="meta" style="margin:0;--c:var(--b-' + x.b + ')"><span class="b"><i class="dot"></i>' + esc(BIDANG[x.b].n) + '</span></span>' +
+        '<h3>' + esc(x.t) + '</h3><p>' + esc(x.d) + '</p>' +
+        '<div class="foot"><span class="cnt">' + esc(TIPE[x.k].n) + ' · ' + TIPE[x.k].docs.length + ' dokumen</span>' +
+        '<button class="btn small" type="button" data-act="idea" data-n="' + o.n + '">Jadikan kegiatan</button></div></div>';
+    }).join('');
+  }
+
+  function renderAll() { renderSummary(); renderList(); renderIdeas(); }
+
+  /* ---------- sambungan ke Google Sheets & Drive ---------- */
+  var KEYC = 'dukcapil-pin';
+  function getKey() { try { return localStorage.getItem(KEYC) || ''; } catch (e) { return ''; } }
+  function setKey(v) { try { localStorage.setItem(KEYC, v); } catch (e) {} }
+  var pending = {}, timers = {}, inflight = 0, failed = false;
+  function setSync(cls, txt) { $('sync').className = 'sync ' + cls; $('sync-t').textContent = txt; }
+  function refreshSync() {
+    if (!REMOTE) return;
+    if (failed) setSync('err', 'Gagal menyimpan, coba lagi');
+    else if (inflight || Object.keys(pending).length) setSync('busy', 'Menyimpan…');
+    else setSync('ok', 'Tersimpan di Google Sheets');
+  }
+  function showGate(msg) { $('gate').hidden = false; $('gate-msg').textContent = msg; setSync('err', 'Perlu PIN'); }
+  function api(payload) {
+    payload.key = getKey();
+    return fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (j && j.error === 'unauthorized') { showGate('PIN salah atau belum diisi.'); throw new Error('unauthorized'); }
+        if (!j || !j.ok) throw new Error((j && j.error) || 'Gagal');
+        return j;
+      });
+  }
+  function onFail(e) { if (e.message !== 'unauthorized') { failed = true; toast('Gagal menyimpan ke Google Sheets'); } }
+  function findAct(id) { return state.acts.filter(function (x) { return x.id === id; })[0]; }
+  function normAct(a) {
+    return {
+      id: String(a.id), name: String(a.name || ''), b: BIDANG[a.b] ? a.b : 'sekr', k: TIPE[a.k] ? a.k : 'admin', date: a.date || iso(0),
+      docs: (a.docs || []).map(function (d) { return { t: String(d.t || ''), d: !!d.d, f: d.f && d.f.url ? d.f : null }; })
+    };
+  }
+  function pull() {
+    setSync('busy', 'Memuat dari Google Sheets…');
+    return api({ action: 'list' }).then(function (j) {
+      state.acts = j.acts.map(normAct);
+      ui.loadErr = ''; failed = false;
+      $('gate').hidden = true;
+      if (!Object.keys(ui.open).length && state.acts.length) ui.open[state.acts[0].id] = true;
+      refreshSync(); renderAll();
+    }).catch(function (e) {
+      if (e.message !== 'unauthorized') { ui.loadErr = 'Tidak bisa memuat data (' + e.message + '). Periksa URL Apps Script dan koneksi, lalu klik Muat ulang.'; setSync('err', 'Gagal memuat'); renderAll(); }
+    });
+  }
+  function push(a) {
+    if (!REMOTE) return;
+    failed = false; pending[a.id] = true; refreshSync();
+    clearTimeout(timers[a.id]);
+    timers[a.id] = setTimeout(function () {
+      var cur = findAct(a.id);
+      delete pending[a.id];
+      if (!cur) { refreshSync(); return; }
+      inflight++;
+      api({ action: 'upsert', act: cur }).catch(onFail).then(function () { inflight--; refreshSync(); });
+    }, 600);
+  }
+  function pushDel(id) {
+    if (!REMOTE) return;
+    clearTimeout(timers[id]); delete pending[id]; inflight++; refreshSync();
+    api({ action: 'delete', id: id }).catch(onFail).then(function () { inflight--; refreshSync(); });
+  }
+  function idle() { return !inflight && !Object.keys(pending).length && !Object.keys(ui.busy).length; }
+  function uploadFile(a, n, file) {
+    if (!file) return;
+    if (file.size > MAKS_MB * 1024 * 1024) { toast('File terlalu besar (maks ' + MAKS_MB + ' MB)'); return; }
+    var k = a.id + ':' + n;
+    ui.busy[k] = true; renderList();
+    var fr = new FileReader();
+    fr.onerror = function () { delete ui.busy[k]; renderList(); toast('File tidak bisa dibaca'); };
+    fr.onload = function () {
+      var data = String(fr.result).split(',')[1] || '';
+      api({ action: 'upload', actId: a.id, actName: a.name, docNo: n + 1, docTitle: a.docs[n] ? a.docs[n].t : '', name: file.name, mime: file.type, data: data })
+        .then(function (j) {
+          var cur = findAct(a.id) || a;
+          if (cur.docs[n]) { cur.docs[n].f = j.file; cur.docs[n].d = true; }
+          push(cur); toast('File tersimpan di Google Drive');
+        })
+        .catch(function (e) { if (e.message !== 'unauthorized') toast('Gagal mengunggah: ' + e.message); })
+        .then(function () { delete ui.busy[k]; renderAll(); });
+    };
+    fr.readAsDataURL(file);
+  }
+
+
+  function toast(m) {
+    var t = $('toast'); t.textContent = m; t.hidden = false;
+    clearTimeout(toast.h); toast.h = setTimeout(function () { t.hidden = true; }, 2600);
+  }
+  function setTab(t) {
+    ui.tab = t;
+    $('view-keg').hidden = t !== 'keg'; $('view-ide').hidden = t !== 'ide';
+    $('tab-keg').setAttribute('aria-selected', t === 'keg'); $('tab-ide').setAttribute('aria-selected', t === 'ide');
+  }
+  function preview() {
+    var k = $('f-tipe').value;
+    $('f-preview').innerHTML = '<strong>Dokumen yang perlu dilengkapi (' + TIPE[k].docs.length + ')</strong><ul>' + TIPE[k].docs.map(function (d) { return '<li>' + esc(d) + '</li>'; }).join('') + '</ul>';
+  }
+  function openForm(pre) {
+    pre = pre || {};
+    $('form-title').textContent = pre.name ? 'Jadikan kegiatan' : 'Kegiatan baru';
+    $('f-name').value = pre.name || '';
+    $('f-bidang').value = pre.b || 'daftar';
+    $('f-tipe').value = pre.k || 'sosialisasi';
+    $('f-date').value = iso(14);
+    preview();
+    setTab('keg');
+    $('form').hidden = false;
+    $('form').scrollIntoView({ block: 'start', behavior: 'smooth' });
+    $('f-name').focus({ preventScroll: true });
+  }
+
+  /* init static controls */
+  $('today').textContent = 'Dukcapil · ' + T0.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  $('f-bidang').innerHTML = Object.keys(BIDANG).map(function (k) { return '<option value="' + k + '">' + esc(BIDANG[k].n) + '</option>'; }).join('');
+  $('f-tipe').innerHTML = Object.keys(TIPE).map(function (k) { return '<option value="' + k + '">' + esc(TIPE[k].n) + '</option>'; }).join('');
+  $('fb').innerHTML = '<option value="all">Semua bidang</option>' + Object.keys(BIDANG).map(function (k) { return '<option value="' + k + '">' + esc(BIDANG[k].n) + '</option>'; }).join('');
+
+  /* events */
+  $('btn-new').addEventListener('click', function () { openForm(); });
+  $('btn-cancel').addEventListener('click', function () { $('form').hidden = true; });
+  $('f-tipe').addEventListener('change', preview);
+  $('fb').addEventListener('change', function (e) { ui.fb = e.target.value; renderList(); });
+  $('fs').addEventListener('change', function (e) { ui.fs = e.target.value; renderList(); });
+  $('fq').addEventListener('input', function (e) { ui.q = e.target.value; renderList(); });
+  $('btn-clear-sample').addEventListener('click', function () {
+    state.acts = state.acts.filter(function (a) { return !a.sample; });
+    save(); renderAll(); toast('Contoh kegiatan dihapus');
+  });
+  document.querySelectorAll('[data-tab]').forEach(function (b) { b.addEventListener('click', function () { setTab(b.getAttribute('data-tab')); }); });
+
+  $('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = $('f-name').value.trim(), k = $('f-tipe').value;
+    if (!name || !$('f-date').value) return;
+    var a = { id: uid(), name: name, b: $('f-bidang').value, k: k, date: $('f-date').value, docs: mkDocs(k, 0) };
+    state.acts.push(a); push(a);
+    ui.open[a.id] = true; ui.fb = 'all'; ui.fs = 'all'; ui.q = '';
+    $('fb').value = 'all'; $('fs').value = 'all'; $('fq').value = '';
+    save(); $('form').hidden = true; renderAll(); toast('Kegiatan disimpan');
+  });
+
+  document.addEventListener('submit', function (e) {
+    var f = e.target.closest('.adddoc');
+    if (!f) return;
+    e.preventDefault();
+    var inp = f.querySelector('input'), v = inp.value.trim();
+    if (!v) return;
+    var a = state.acts.filter(function (x) { return x.id === f.getAttribute('data-id'); })[0];
+    if (a) { a.docs.push({ t: v, d: false, f: null }); save(); push(a); renderAll(); }
+  });
+
+  document.addEventListener('change', function (e) {
+    var el = e.target, act = el.getAttribute && el.getAttribute('data-act');
+    if (act !== 'toggle' && act !== 'date' && act !== 'file') return;
+    var a = state.acts.filter(function (x) { return x.id === el.getAttribute('data-id'); })[0];
+    if (!a) return;
+    if (act === 'file') { uploadFile(a, +el.getAttribute('data-n'), el.files && el.files[0]); return; }
+    if (act === 'toggle') a.docs[+el.getAttribute('data-n')].d = el.checked;
+    else if (el.value) a.date = el.value;
+    save(); push(a); renderAll();
+  });
+
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-act]');
+    if (!el || el.tagName === 'INPUT') return;
+    var act = el.getAttribute('data-act'), id = el.getAttribute('data-id');
+    if (act === 'open') { ui.open[id] = !ui.open[id]; ui.confirm = null; renderList(); }
+    else if (act === 'del') { ui.confirm = id; renderList(); }
+    else if (act === 'del-no') { ui.confirm = null; renderList(); }
+    else if (act === 'del-yes') { state.acts = state.acts.filter(function (a) { return a.id !== id; }); ui.confirm = null; save(); pushDel(id); renderAll(); toast('Kegiatan dihapus'); }
+    else if (act === 'pick') { var fi = document.getElementById('file-' + id + '-' + el.getAttribute('data-n')); if (fi) fi.click(); }
+    else if (act === 'ichip') { ui.ib = el.getAttribute('data-b'); renderIdeas(); }
+    else if (act === 'idea') { var x = IDEAS[+el.getAttribute('data-n')]; openForm({ name: x.t, b: x.b, k: x.k }); }
+  });
+
+  setTab('keg');
+  var first = state.acts.map(function (a) { return { a: a, i: info(a) }; }).sort(function (p, r) { return ORD[p.i.st] - ORD[r.i.st] || p.a.date.localeCompare(r.a.date); })[0];
+  if (first) ui.open[first.a.id] = true;
+  renderAll();
+  if (REMOTE) {
+    $('btn-refresh').hidden = false;
+    $('banner').hidden = true;
+    $('foot-note').textContent = $('foot-note').textContent.replace('Data tersimpan di browser ini saja.', 'Data tersimpan di Google Sheets dan dokumen di Google Drive.');
+    $('gate').addEventListener('submit', function (e) { e.preventDefault(); var v = $('gate-key').value.trim(); if (!v) return; setKey(v); pull(); });
+    $('btn-refresh').addEventListener('click', function () {
+      if (!idle()) { toast('Tunggu, proses simpan atau unggah belum selesai'); return; }
+      pull().then(function () { if (!ui.loadErr) toast('Data dimuat ulang'); });
+    });
+    document.addEventListener('visibilitychange', function () { if (!document.hidden && idle() && getKey()) pull(); });
+    if (getKey()) pull(); else showGate('Masukkan PIN untuk membuka data.');
+  } else {
+    setSync('', 'Mode lokal: data hanya di browser ini');
+  }
+})();
+</script>
+
+</body>
+</html>
