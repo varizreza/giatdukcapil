@@ -3,55 +3,49 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F0F7F6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0C1514" media="(prefers-color-scheme: dark)">
 <title>Dashboard Kegiatan Dukcapil</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,400..800&family=Roboto+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: ringkasan di atas, lalu tiga tab: Kegiatan (checklist dokumen), Bank ide, Pengaturan (semua isi bisa diubah dari halaman). */
 :root {
-  --bg: #F4F6F9;
-  --surface: #FFFFFF;
-  --surface-2: #EDF1F6;
-  --ink: #14202E;
-  --muted: #566274;
-  --line: #D9E0E9;
-  --accent: #14304F;
-  --on-accent: #FFFFFF;
-  --focus: #2F6FBF;
-  --ok: #1C7A47;
-  --ok-bg: #E2F3E9;
-  --warn: #8F5600;
-  --warn-bg: #FBEFD5;
-  --crit: #B3261E;
-  --crit-bg: #FBE5E3;
-  --p1: #596879;
-  --p2: #0B7285;
-  --p3: #B4531A;
-  --p4: #6741D9;
-  --p5: #A1356B;
-  --p6: #4D7C0F;
-  --p7: #1D4ED8;
-  --p8: #7A5230;
-  --f-display: "Bricolage Grotesque", "Public Sans", system-ui, sans-serif;
-  --f-body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --bg: #F0F7F6; --surface: #FFFFFF; --surface-2: #E1EEEC; --ink: #0D1D1C; --muted: #41585A; --line: #CFE0DE;
+  --accent: #00696B; --on-accent: #FFFFFF; --focus: #00696B;
+  --primary-c: #BEEBE9; --on-primary-c: #00201F;
+  --c1: #C3ECE9; --c2: #CDE5F4; --c3: #D5EBD6; --c4: #DDE1F8;
+  --ok: #1B6B45; --ok-bg: #CFEBDA; --warn: #7A5900; --warn-bg: #FBEBC2; --crit: #B3261E; --crit-bg: #F9DEDC;
+  --p1: #566B70; --p2: #00797F; --p3: #B0602B; --p4: #5A56B8; --p5: #A0467A; --p6: #3F7D3A; --p7: #1F63B4; --p8: #7A5C3A;
+  --elev1: 0 1px 2px rgba(0, 48, 46, .10), 0 1px 3px 1px rgba(0, 48, 46, .07);
+  --elev2: 0 2px 6px rgba(0, 48, 46, .16), 0 4px 12px 2px rgba(0, 48, 46, .08);
+  --spring: cubic-bezier(.34, 1.45, .64, 1);
+  --f-display: "Roboto Flex", "Roboto", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-body: "Roboto Flex", "Roboto", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "Roboto Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0E151E; --surface: #162130; --surface-2: #1D2B3D; --ink: #E8EDF3; --muted: #9AA8B9; --line: #2A3A4F;
-    --accent: #8DB8EA; --on-accent: #0E151E; --focus: #8DB8EA;
-    --ok: #62C48C; --ok-bg: #173826; --warn: #E7B454; --warn-bg: #3B2D12; --crit: #F0877F; --crit-bg: #3F1D1B;
-    --p1: #9AAABB; --p2: #4CC0D4; --p3: #EE9461; --p4: #A593F0; --p5: #E37DB2; --p6: #A3D45B; --p7: #7BA3F5; --p8: #C9A27A;
+    --bg: #0C1514; --surface: #15201F; --surface-2: #1F2D2C; --ink: #DCE8E6; --muted: #A2B8B5; --line: #2F4140;
+    --accent: #59D5D1; --on-accent: #003736; --focus: #59D5D1;
+    --primary-c: #004F4E; --on-primary-c: #B3F0EE;
+    --c1: #0F4140; --c2: #1B3A4E; --c3: #274530; --c4: #343A5E;
+    --ok: #7FD9A5; --ok-bg: #12382A; --warn: #EBC25A; --warn-bg: #3A2D0A; --crit: #FFB4AB; --crit-bg: #4A1713;
+    --p1: #A3B6BA; --p2: #4CD0D6; --p3: #F0A06B; --p4: #AEA9F5; --p5: #EC8FC1; --p6: #A3D98B; --p7: #84B2F2; --p8: #D3AF86;
+    --elev1: 0 1px 2px rgba(0, 0, 0, .5); --elev2: 0 2px 10px rgba(0, 0, 0, .55);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0E151E; --surface: #162130; --surface-2: #1D2B3D; --ink: #E8EDF3; --muted: #9AA8B9; --line: #2A3A4F;
-  --accent: #8DB8EA; --on-accent: #0E151E; --focus: #8DB8EA;
-  --ok: #62C48C; --ok-bg: #173826; --warn: #E7B454; --warn-bg: #3B2D12; --crit: #F0877F; --crit-bg: #3F1D1B;
-  --p1: #9AAABB; --p2: #4CC0D4; --p3: #EE9461; --p4: #A593F0; --p5: #E37DB2; --p6: #A3D45B; --p7: #7BA3F5; --p8: #C9A27A;
+  --bg: #0C1514; --surface: #15201F; --surface-2: #1F2D2C; --ink: #DCE8E6; --muted: #A2B8B5; --line: #2F4140;
+  --accent: #59D5D1; --on-accent: #003736; --focus: #59D5D1;
+  --primary-c: #004F4E; --on-primary-c: #B3F0EE;
+  --c1: #0F4140; --c2: #1B3A4E; --c3: #274530; --c4: #343A5E;
+  --ok: #7FD9A5; --ok-bg: #12382A; --warn: #EBC25A; --warn-bg: #3A2D0A; --crit: #FFB4AB; --crit-bg: #4A1713;
+  --p1: #A3B6BA; --p2: #4CD0D6; --p3: #F0A06B; --p4: #AEA9F5; --p5: #EC8FC1; --p6: #A3D98B; --p7: #84B2F2; --p8: #D3AF86;
+  --elev1: 0 1px 2px rgba(0, 0, 0, .5); --elev2: 0 2px 10px rgba(0, 0, 0, .55);
   color-scheme: dark;
 }
 
@@ -216,9 +210,37 @@ table.bank td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertic
 table.bank tr:last-child td { border-bottom: 0; }
 .kegtop { display: flex; flex-direction: column; gap: 2px; }
 .srow2 select { width: auto; flex: 0 0 auto; max-width: 190px; }
+.jgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 14px; }
+.jcard { display: flex; flex-direction: column; text-align: left; padding: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; cursor: pointer; font: inherit; color: var(--ink); min-width: 0; transition: border-color .15s, box-shadow .15s; }
+.jcard:hover { border-color: var(--accent); box-shadow: 0 2px 10px rgba(20, 32, 46, .12); }
+.jcard:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.jcov { position: relative; aspect-ratio: 16 / 10; background: var(--surface-2); overflow: hidden; }
+.jcov img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.jcov .ph { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: var(--muted); font-size: 13px; background: color-mix(in srgb, var(--c, var(--muted)) 14%, var(--surface-2)); }
+.jcov .ph b { font-family: var(--f-display); font-size: 1.6rem; color: var(--c, var(--muted)); }
+.jcov .bdg { position: absolute; left: 10px; bottom: 10px; background: rgba(20, 32, 46, .78); color: #fff; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; }
+.jcov .dt { position: absolute; right: 10px; top: 10px; background: var(--surface); color: var(--ink); font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; font-family: var(--f-mono); }
+.jcb { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px 14px; min-width: 0; flex: 1; }
+.jcb .tt { font-family: var(--f-display); font-weight: 700; font-size: 1.05rem; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.jcb .wl { color: var(--muted); font-size: 13.5px; overflow-wrap: anywhere; }
+.jcb .st { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 13px; color: var(--muted); }
+.jcb .st b { font-family: var(--f-display); font-size: 1.35rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+.jcb .hc { display: flex; flex-wrap: wrap; gap: 6px; }
+.jcb .hc span { background: var(--surface-2); border-radius: 6px; padding: 2px 8px; font-size: 12.5px; }
+.jcb .ft { margin-top: auto; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.modal { position: fixed; inset: 0; z-index: 60; background: rgba(10, 18, 28, .6); overflow-y: auto; padding: 16px; padding-top: max(16px, env(safe-area-inset-top, 0px)); padding-bottom: max(16px, env(safe-area-inset-bottom, 0px)); }
+.mbox { background: var(--bg); border-radius: 14px; max-width: 880px; margin: 0 auto; overflow: hidden; display: flex; flex-direction: column; }
+.mhero { position: relative; aspect-ratio: 16 / 7; max-height: 320px; background: var(--surface-2); overflow: hidden; }
+.mhero img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mhero .ph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--c, var(--muted)) 14%, var(--surface-2)); color: var(--muted); }
+.mclose { position: absolute; right: 12px; top: 12px; z-index: 2; min-height: 40px; padding: 8px 14px; border: 0; border-radius: 999px; background: var(--surface); color: var(--ink); font: inherit; font-weight: 600; cursor: pointer; box-shadow: 0 1px 6px rgba(0, 0, 0, .25); }
+.mpad { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.mpad .mt { font-family: var(--f-display); font-size: 1.4rem; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
+.noscroll { overflow: hidden; }
+.chips.fl .chip { min-height: 36px; }
 .jbgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .toolbar.t6j { grid-template-columns: 0.8fr 1fr 1fr 1fr 1.4fr auto; }
-.gal { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+.gal { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
 .gwrap { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); overflow: hidden; min-width: 0; font-size: 12px; }
 .gwrap .gth { display: block; color: var(--ink); text-decoration: none; }
 .gwrap img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: var(--surface-2); }
@@ -255,10 +277,150 @@ table.bank tr:last-child td { border-bottom: 0; }
   .tiles.t4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .toolbar.t6, .toolbar.t4, .toolbar.t4i, .toolbar.t6j { grid-template-columns: minmax(0, 1fr); }
   .jbgrid { grid-template-columns: minmax(0, 1fr); }
+  .mhero { aspect-ratio: 16 / 10; }
   .trow { grid-template-columns: auto minmax(0, 1fr); }
   .trow > :nth-child(n+3) { grid-column: 1 / -1; }
 }
 @media (prefers-reduced-motion: reduce) { .chev { transition: none; } }
+
+/* ===== Material 3 Expressive: bentuk besar, kontainer tonal, warna teduh, gerak pegas ===== */
+body { font-size: 15.5px; letter-spacing: .005em; }
+h1, h2, h3 { letter-spacing: -0.012em; }
+.wrap { gap: 22px; }
+.mono { font-family: var(--f-mono); }
+
+/* header: kontainer tonal besar */
+.top { position: relative; isolation: isolate; overflow: hidden; background: var(--primary-c); color: var(--on-primary-c); border-radius: 36px 36px 36px 14px; padding: 26px 28px; align-items: center; }
+.top::before { content: ""; position: absolute; z-index: -1; right: -50px; top: -70px; width: 260px; height: 260px; background: color-mix(in srgb, var(--accent) 16%, transparent); border-radius: 46% 54% 38% 62% / 52% 40% 60% 48%; }
+.top::after { content: ""; position: absolute; z-index: -1; right: 150px; bottom: -60px; width: 130px; height: 130px; background: color-mix(in srgb, var(--accent) 10%, transparent); border-radius: 60% 40% 55% 45% / 45% 55% 45% 55%; }
+.top h1 { font-size: clamp(1.9rem, 5.2vw, 2.8rem); font-weight: 750; letter-spacing: -0.02em; line-height: 1.08; }
+.top p, .top .eyebrow, .top .sync { color: color-mix(in srgb, var(--on-primary-c) 78%, transparent); }
+.eyebrow { font-family: var(--f-body); font-weight: 600; letter-spacing: .1em; }
+.sync i { width: 10px; height: 10px; }
+
+/* tombol: pil, tinggi 48, berubah bentuk saat ditekan */
+.btn { border-radius: 999px; min-height: 48px; padding: 10px 24px; border: 0; font-weight: 600; letter-spacing: .01em; box-shadow: none;
+  transition: border-radius .25s var(--spring), transform .25s var(--spring), box-shadow .2s, background-color .2s; }
+.btn:hover { filter: none; box-shadow: var(--elev1); background: color-mix(in srgb, var(--accent) 90%, var(--ink)); }
+.btn:active { border-radius: 16px; transform: scale(.97); }
+.btn.ghost { background: color-mix(in srgb, var(--accent) 12%, var(--surface)); color: var(--ink); border: 0; font-weight: 600; }
+.btn.ghost:hover { background: color-mix(in srgb, var(--accent) 20%, var(--surface)); box-shadow: none; }
+.btn.danger { background: var(--crit-bg); color: var(--crit); border: 0; font-weight: 600; }
+.btn.danger:hover { background: color-mix(in srgb, var(--crit) 18%, var(--crit-bg)); }
+.btn.small { min-height: 38px; padding: 6px 16px; font-size: 14px; }
+#btn-new, #btn-new-jbl, #btn-new-inov { min-height: 56px; border-radius: 20px; padding: 0 26px; font-size: 15.5px; box-shadow: var(--elev2); }
+#btn-new:active, #btn-new-jbl:active, #btn-new-inov:active { border-radius: 28px; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 12px; }
+
+/* navigasi tab: pil tonal */
+.tabs { background: var(--surface-2); border: 0; border-radius: 999px; padding: 6px; gap: 4px; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { border: 0; margin: 0; border-radius: 999px; padding: 10px 18px; color: var(--muted); transition: background-color .25s, color .25s, border-radius .3s var(--spring); }
+.tab:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.tab[aria-selected="true"] { background: var(--primary-c); color: var(--on-primary-c); box-shadow: var(--elev1); }
+.tab .n { background: color-mix(in srgb, var(--ink) 9%, transparent); border-radius: 999px; font-family: var(--f-body); font-weight: 600; }
+.tab[aria-selected="true"] .n { background: color-mix(in srgb, var(--on-primary-c) 14%, transparent); }
+
+/* ringkasan: kotak tonal berwarna */
+.tile { border: 0; border-radius: 28px; padding: 18px 20px; gap: 4px; background: var(--c1); transition: transform .3s var(--spring), border-radius .3s var(--spring); }
+.tiles > .tile:nth-child(2) { background: var(--c2); border-radius: 28px 28px 10px 28px; }
+.tiles > .tile:nth-child(3) { background: var(--c3); border-radius: 28px 10px 28px 28px; }
+.tiles > .tile:nth-child(4) { background: var(--c4); }
+.tile:hover { transform: translateY(-2px); }
+.tile .k { color: color-mix(in srgb, var(--ink) 74%, transparent); font-weight: 500; font-size: 13.5px; }
+.tile .s { color: color-mix(in srgb, var(--ink) 68%, transparent); }
+.tile .v { font-weight: 750; font-size: 2.35rem; letter-spacing: -0.02em; }
+.tiles > .tile.alert { background: var(--crit-bg); }
+.tile.alert .v, .tile.alert .k, .tile.alert .s { color: var(--crit); }
+.bars, .panel { border: 0; border-radius: 28px; padding: 20px 22px; box-shadow: var(--elev1); }
+.bars h2, .panel h2 { font-weight: 700; }
+.track { height: 10px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 14%, var(--surface-2)); }
+.track i { border-radius: 999px; transition: width .6s var(--spring); }
+.dot { width: 11px; height: 11px; }
+.banner { border: 0; border-radius: 22px; padding: 12px 18px; }
+
+/* daftar dan kartu */
+.act, .idea, .trow { border: 0; border-radius: 26px; box-shadow: var(--elev1); transition: box-shadow .25s, transform .3s var(--spring); }
+.act:hover, .idea:hover { box-shadow: var(--elev2); }
+.act.terlambat { box-shadow: inset 0 0 0 2px var(--crit), var(--elev1); }
+.act-head { padding: 16px 20px; }
+.act-head:hover { background: color-mix(in srgb, var(--accent) 7%, var(--surface)); }
+.act-title { font-weight: 650; }
+.act-body { border-top: 0; background: var(--bg); padding: 16px 20px 20px; border-radius: 0 0 26px 26px; }
+.pill { border-radius: 999px; padding: 3px 12px; font-weight: 600; }
+.pill.belum { background: var(--surface-2); }
+.chev { transition: transform .3s var(--spring); }
+.rin { border: 0; border-radius: 20px; background: var(--surface); padding: 14px; }
+.preview { border-radius: 18px; }
+.empty { border-radius: 26px; border: 2px dashed var(--line); background: transparent; }
+.tablewrap { border: 0; border-radius: 26px; box-shadow: var(--elev1); }
+table.bank th { background: var(--c1); color: var(--ink); }
+.tag { border-radius: 999px; padding: 2px 10px; }
+.tg { background: color-mix(in srgb, var(--accent) 13%, var(--surface-2)); }
+.subh { font-family: var(--f-body); font-weight: 700; letter-spacing: .09em; color: var(--accent); }
+
+/* chip */
+.chip { border: 0; background: var(--surface-2); border-radius: 999px; padding: 8px 16px; min-height: 40px; font-weight: 500; transition: background-color .2s, border-radius .3s var(--spring), transform .25s var(--spring); }
+.chip:hover { background: color-mix(in srgb, var(--accent) 16%, var(--surface-2)); }
+.chip:active { border-radius: 12px; transform: scale(.97); }
+.chip[aria-pressed="true"] { background: var(--primary-c); color: var(--on-primary-c); font-weight: 650; box-shadow: inset 0 0 0 1.5px var(--accent); }
+.chip[aria-pressed="true"]::before { content: "✓"; font-weight: 700; }
+.chip .mono { font-family: var(--f-body); font-weight: 600; opacity: .8; }
+.tgchip { min-height: 34px; padding: 4px 14px; }
+
+/* isian */
+input[type="text"], input[type="password"], input[type="number"], input[type="search"], input[type="date"], select, textarea {
+  border: 1.5px solid var(--line); border-radius: 16px; padding: 10px 14px; min-height: 48px; background: var(--bg);
+  transition: border-color .2s, box-shadow .2s, background-color .2s;
+}
+textarea { min-height: 0; border-radius: 18px; }
+input:hover, select:hover, textarea:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 0; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent); }
+label.f, div.f { gap: 6px; font-weight: 600; }
+input[type="checkbox"] { accent-color: var(--accent); }
+.doc { border-radius: 14px; }
+.doc input { width: 20px; height: 20px; }
+
+/* jemput bola: kartu bergambar */
+.jgrid { gap: 16px; }
+.jcard { padding: 8px; border: 0; border-radius: 30px; box-shadow: var(--elev1); transition: box-shadow .3s, transform .35s var(--spring), border-radius .35s var(--spring); }
+.jcard:hover { border: 0; box-shadow: var(--elev2); transform: translateY(-4px); border-radius: 36px 30px 36px 30px; }
+.jcard:active { transform: scale(.98); }
+.jcov { border-radius: 24px; }
+.jcov .ph { background: color-mix(in srgb, var(--c, var(--accent)) 16%, var(--surface-2)); }
+.jcov .bdg { background: rgba(8, 28, 28, .72); backdrop-filter: blur(6px); padding: 4px 12px; }
+.jcov .dt { background: var(--surface); font-family: var(--f-body); padding: 4px 12px; box-shadow: var(--elev1); }
+.jcb { padding: 14px 12px 12px; gap: 9px; }
+.jcb .tt { font-weight: 700; font-size: 1.1rem; }
+.jcb .st b { font-weight: 750; }
+.jcb .hc span { border-radius: 999px; padding: 3px 11px; background: color-mix(in srgb, var(--accent) 11%, var(--surface-2)); }
+.modal { background: rgba(5, 22, 22, .55); backdrop-filter: blur(4px); animation: m3fade .25s ease-out; }
+.mbox { border-radius: 36px; animation: m3pop .45s var(--spring); box-shadow: var(--elev2); }
+.mhero { border-radius: 0 0 28px 28px; }
+.mclose { border-radius: 999px; min-height: 44px; padding: 8px 20px; background: var(--primary-c); color: var(--on-primary-c); transition: border-radius .25s var(--spring); }
+.mclose:active { border-radius: 14px; }
+.mpad { padding: 20px 22px 26px; }
+.mpad .mt { font-weight: 750; font-size: 1.6rem; letter-spacing: -0.015em; }
+.gwrap { border: 0; border-radius: 20px; background: var(--surface); box-shadow: var(--elev1); }
+.gwrap img, .gwrap .ico { border-radius: 20px 20px 0 0; }
+.upl { border: 0; border-radius: 999px; min-height: 48px; padding: 10px 24px; background: var(--primary-c); color: var(--on-primary-c); font-weight: 650; transition: border-radius .25s var(--spring), transform .25s var(--spring); }
+.upl:active { border-radius: 16px; transform: scale(.97); }
+.toast { border-radius: 18px; padding: 12px 20px; box-shadow: var(--elev2); }
+.vhead h2 { font-size: 1.5rem; font-weight: 750; letter-spacing: -0.015em; }
+
+@keyframes m3fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes m3pop { from { opacity: 0; transform: translateY(24px) scale(.96); } to { opacity: 1; transform: none; } }
+@media (max-width: 760px) {
+  .top { border-radius: 30px 30px 30px 12px; padding: 22px 20px; }
+  .top-r { width: 100%; }
+  .bars, .panel { padding: 18px; border-radius: 26px; }
+  .tab { padding: 10px 15px; }
+  .mbox { border-radius: 28px; }
+  .modal { padding: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .chip, .tab, .tile, .jcard, .upl, .act, .idea, .track i, .modal, .mbox { transition: none !important; animation: none !important; }
+}
 </style>
 </head>
 <body>
@@ -461,7 +623,8 @@ table.bank tr:last-child td { border-bottom: 0; }
       <input type="search" id="jq" placeholder="Cari jemput bola" aria-label="Cari jemput bola">
       <button class="btn ghost" id="btn-csv-jb" type="button">Unduh CSV</button>
     </div>
-    <div class="list" id="jb-list"></div>
+    <div class="chips fl" id="jb-chips"></div>
+    <div class="jgrid" id="jb-list"></div>
   </section>
 
   <section class="view" id="view-inov" hidden>
@@ -573,6 +736,8 @@ table.bank tr:last-child td { border-bottom: 0; }
 
   <p class="note" id="foot-note">Pembagian bidang mengikuti pola umum dinas dukcapil kabupaten/kota. Sesuaikan nama bidang dan daftar dokumen di tab Pengaturan. Data tersimpan di browser ini saja.</p>
 </div>
+<div class="modal" id="jb-modal" role="dialog" aria-modal="true" aria-label="Rincian jemput bola" hidden></div>
+
 <div class="toast" id="toast" hidden></div>
 
 <script>
@@ -804,6 +969,7 @@ var MAKS_MB = 10;
       id: String(v.id), name: str(v.name, 160), date: /^\d{4}-\d{2}-\d{2}$/.test(v.date || '') ? v.date : iso(0), b: String(v.b || ''), k: String(v.k || ''), kid: String(v.kid || ''),
       kec: str(v.kec, 80), desa: str(v.desa, 80), loc: str(v.loc, 200), ptg: str(v.ptg, 160), sas: num0(v.sas), ter: num0(v.ter),
       kend: str(v.kend, 600), tl: str(v.tl, 600), cat: str(v.cat, 400), sample: !!v.sample,
+      cov: /^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(String(v.cov || '')) && String(v.cov).length <= 45000 ? String(v.cov) : '', covi: str(v.covi, 80),
       tags: (Array.isArray(v.tags) ? v.tags : []).map(String).filter(function (x, n, arr) { return arr.indexOf(x) === n && cfg.tags.some(function (t) { return t.id === x; }); }),
       files: (Array.isArray(v.files) ? v.files : []).filter(function (f) { return f && /^https?:\/\//i.test(String(f.u || '')); }).map(function (f) {
         return { n: str(f.n, 120), u: str(f.u, 500), i: str(f.i, 80), k: f.k === 'link' ? 'link' : (f.k === 'foto' ? 'foto' : 'dok'), at: str(f.at, 30) };
@@ -830,7 +996,7 @@ var MAKS_MB = 10;
   function saveInov() { if (REMOTE) return; lsSet(KEYI, JSON.stringify({ items: inov })); }
   function findInov(id) { return inov.filter(function (v) { return v.id === id; })[0]; }
 
-  var ui = { tab: 'dpa', kat: 'dpa', fb: 'all', fs: 'all', ft: 'all', ftags: [], tconfirm: null, q: '', ib: 'all', ik: 'all', bk: { kat: 'all', th: 'all', b: 'all', tg: 'all', q: '' }, open: {}, confirm: null, busy: {}, loadErr: REMOTE ? 'Memuat data…' : '', jy: 'all', jb: 'all', jk: 'all', jt: 'all', jq: '', jopen: {}, jtags: [], jdel: null, jup: {}, jfiles: [], vs: 'all', vb: 'all', vt: 'all', vq: '', vopen: {}, vtags: [], vdel: null, sset: 'conn', sib: 'all', dirty: false };
+  var ui = { tab: 'dpa', kat: 'dpa', fb: 'all', fs: 'all', ft: 'all', ftags: [], tconfirm: null, q: '', ib: 'all', ik: 'all', bk: { kat: 'all', th: 'all', b: 'all', tg: 'all', q: '' }, open: {}, confirm: null, busy: {}, loadErr: REMOTE ? 'Memuat data…' : '', jdoc: 'all', jsel: null, jy: 'all', jb: 'all', jk: 'all', jt: 'all', jq: '', jopen: {}, jtags: [], jdel: null, jup: {}, jfiles: [], vs: 'all', vb: 'all', vt: 'all', vq: '', vopen: {}, vtags: [], vdel: null, sset: 'conn', sib: 'all', dirty: false };
 
   function info(a) {
     var t = a.docs.length, d = a.docs.filter(function (x) { return x.d; }).length, days = dayDiff(a.date), st;
@@ -924,7 +1090,7 @@ var MAKS_MB = 10;
   function jbRows() {
     var q = ui.jq.trim().toLowerCase();
     return jbp.filter(function (v) {
-      return (ui.jy === 'all' || v.date.slice(0, 4) === ui.jy) && (ui.jb === 'all' || v.b === ui.jb) && (ui.jk === 'all' || v.kec === ui.jk) && (ui.jt === 'all' || v.tags.indexOf(ui.jt) > -1) &&
+      return (ui.jy === 'all' || v.date.slice(0, 4) === ui.jy) && (ui.jb === 'all' || v.b === ui.jb) && (ui.jk === 'all' || v.kec === ui.jk) && (ui.jt === 'all' || v.tags.indexOf(ui.jt) > -1) && (ui.jdoc === 'all' || (ui.jdoc === 'ada') === (v.files.length > 0)) &&
         (!q || [v.name, v.kec, v.desa, v.loc, v.ptg, v.kend, v.tl, v.cat, tagNames(v)].join(' ').toLowerCase().indexOf(q) > -1);
     }).sort(function (a, b) { return b.date.localeCompare(a.date); });
   }
@@ -980,16 +1146,31 @@ var MAKS_MB = 10;
     else h = '<input type="text" maxlength="200"' + (k === 'kec' ? ' list="dl-kec"' : '') + at + ' value="' + esc(val) + '">';
     return '<label class="f' + (full ? ' full' : '') + '" for="' + id + '">' + label + h + '</label>';
   }
+  function thumbSrc(v, f, w) {
+    if (f.k !== 'foto' || !f.i) return '';
+    if (v.cov && f.i === v.covi) return v.cov;
+    return 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(f.i) + '&sz=w' + w;
+  }
+  function coverSrc(v) {
+    if (v.cov) return v.cov;
+    for (var i = 0; i < v.files.length; i++) { var u = thumbSrc(v, v.files[i], 640); if (u) return u; }
+    return '';
+  }
+  function coverHtml(v, cls) {
+    var src = coverSrc(v);
+    return src ? '<img class="jbcov" loading="lazy" referrerpolicy="no-referrer" alt="" src="' + esc(src) + '">' : '<div class="ph" style="--c:' + cv(BD(v.b).c) + '"><b>' + esc((BD(v.b).n || '?').charAt(0)) + '</b><span>Belum ada foto</span></div>';
+  }
   function jbGallery(v) {
     if (!v.files.length) return '<p class="note" style="margin:0">Belum ada dokumentasi.</p>';
     return '<div class="gal">' + v.files.map(function (f, n) {
-      var thumb = f.k === 'foto' && f.i ? '<img class="jbth" loading="lazy" referrerpolicy="no-referrer" alt="" src="https://drive.google.com/thumbnail?id=' + encodeURIComponent(f.i) + '&sz=w320">' : '';
+      var src = thumbSrc(v, f, 400);
+      var thumb = src ? '<img class="jbth" loading="lazy" referrerpolicy="no-referrer" alt="" src="' + esc(src) + '">' : '';
       var ico = '<div class="ico">' + (f.k === 'link' ? 'Tautan' : f.k === 'foto' ? 'Foto' : 'Berkas') + '</div>';
       return '<div class="gwrap"><a class="gth" href="' + esc(f.u) + '" target="_blank" rel="noopener">' + (thumb || ico) + '<div class="cap">' + esc(f.n || 'Berkas') + '</div></a>' +
         '<button class="lepas" type="button" data-act="jb-rmf" data-id="' + v.id + '" data-n="' + n + '">Lepas dari daftar</button></div>';
     }).join('') + '</div>';
   }
-  function renderJb() {
+  function renderJb(skipModal) {
     $('n-jbl').textContent = jbp.length;
     jbBuildSelects0();
     var rows = jbRows();
@@ -1020,38 +1201,64 @@ var MAKS_MB = 10;
     $('jb-bw').innerHTML = '<h2>Warga terlayani per kecamatan</h2>' + barRows(kl, 5);
     var hl = HSL.map(function (h) { return { l: h[1], v: hs[h[0]], s: nf(hs[h[0]]) }; }).filter(function (x) { return x.v > 0; });
     $('jb-bh').innerHTML = '<h2>Hasil layanan</h2>' + barRows(hl, 3);
+    var nAda = jbp.filter(function (v) { return v.files.length; }).length;
+    $('jb-chips').innerHTML = [['all', 'Semua', jbp.length], ['ada', 'Ada dokumentasi', nAda], ['belum', 'Belum ada dokumentasi', jbp.length - nAda]].map(function (c) {
+      return '<button class="chip" type="button" data-act="jbdoc" data-s="' + c[0] + '" aria-pressed="' + (ui.jdoc === c[0]) + '">' + c[1] + ' <span class="mono">' + c[2] + '</span></button>';
+    }).join('');
     if (!rows.length) {
-      $('jb-list').innerHTML = '<div class="empty">' + (jbp.length ? 'Tidak ada data yang cocok dengan saringan.' : 'Belum ada catatan. Klik "Catat jemput bola" untuk mencatat pelaksanaan pertama.') + '</div>';
+      $('jb-list').innerHTML = '<div class="empty" style="grid-column:1/-1">' + (jbp.length ? 'Tidak ada data yang cocok dengan saringan.' : 'Belum ada catatan. Klik "Catat jemput bola" untuk mencatat pelaksanaan pertama.') + '</div>';
+    } else {
+      $('jb-list').innerHTML = rows.map(function (v) {
+        var up = ui.jup[v.id], nfoto = v.files.filter(function (f) { return f.k === 'foto'; }).length, nfile = v.files.length;
+        var wil = [v.desa, v.kec].filter(Boolean).join(', ') || v.loc || 'Lokasi belum diisi';
+        var pctv = v.sas ? Math.min(100, Math.round(v.ter / v.sas * 100)) : 0;
+        var hc = HSL.filter(function (h) { return v[h[0]] > 0; }).slice(0, 4).map(function (h) { return '<span>' + esc(h[1]) + ' <b>' + nf(v[h[0]]) + '</b></span>'; }).join('');
+        var bdg = up ? 'Mengunggah ' + up.i + ' dari ' + up.n + '…' : nfoto ? nfoto + ' foto' + (nfile > nfoto ? ' · ' + (nfile - nfoto) + ' lainnya' : '') : nfile ? nfile + ' berkas' : '';
+        return '<button class="jcard" type="button" data-act="jb-open" data-id="' + v.id + '" aria-label="Buka rincian: ' + esc(v.name) + '">' +
+          '<div class="jcov">' + coverHtml(v) + '<span class="dt">' + fmtDate(v.date) + '</span>' + (bdg ? '<span class="bdg">' + esc(bdg) + '</span>' : '') + '</div>' +
+          '<div class="jcb"><div class="tt">' + esc(v.name) + '</div><div class="wl">' + esc(wil) + '</div>' +
+          '<div class="st"><span><b>' + nf(v.ter) + '</b> warga' + (v.sas ? ' dari ' + nf(v.sas) : '') + '</span>' + (v.sas ? '<span class="mono">' + pctv + '%</span>' : '') + '</div>' +
+          (v.sas ? '<div class="track" style="--c:' + cv(BD(v.b).c) + '"><i style="width:' + pctv + '%"></i></div>' : '') +
+          (hc ? '<div class="hc">' + hc + '</div>' : '') +
+          '<div class="ft">' + tagsHtml(v.tags) + (nfile ? '' : '<span class="pill belum">Belum ada dokumentasi</span>') + '</div></div></button>';
+      }).join('');
+    }
+    renderJbModal(skipModal);
+  }
+  function jbBodyHtml(v) {
+    var up = ui.jup[v.id];
+    var del = ui.jdel === v.id
+      ? '<span class="row-btns"><button class="btn danger small" type="button" data-act="jb-del-yes" data-id="' + v.id + '">Ya, hapus</button><button class="btn ghost small" type="button" data-act="jb-del-no">Batal</button></span>'
+      : '<button class="btn ghost small" type="button" data-act="jb-del" data-id="' + v.id + '">Hapus catatan</button>';
+    var upl = REMOTE
+      ? '<label class="upl' + (up ? ' off' : '') + '" for="jbu-' + v.id + '">' + (up ? 'Mengunggah ' + up.i + ' dari ' + up.n + '…' : 'Unggah foto atau berkas') + '<input type="file" id="jbu-' + v.id + '" multiple accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx" data-act="jbfile" data-id="' + v.id + '"' + (up ? ' disabled' : '') + '></label>'
+      : '<span class="note">Hubungkan ke Google Drive di tab Pengaturan untuk mengunggah berkas. Sementara itu Anda bisa menambahkan tautan.</span>';
+    return '<div class="subh">Dokumentasi</div>' + jbGallery(v) +
+      '<div class="row-btns">' + upl + '</div>' +
+      '<div class="fgrid rin"><label class="f full" for="jl-' + v.id + '">Tambah tautan dokumentasi (misalnya folder Google Drive atau berita)<input type="text" id="jl-' + v.id + '" maxlength="500" placeholder="https://"></label></div>' +
+      '<div><button class="btn ghost small" type="button" data-act="jb-addlink" data-id="' + v.id + '">Tambah tautan</button></div>' +
+      '<div class="subh">Rincian pelaksanaan</div><div class="fgrid rin">' +
+      jfi(v, 'name', 'Nama kegiatan', 'text', true) + jfi(v, 'date', 'Tanggal pelaksanaan', 'date') + jfi(v, 'b', 'Bidang') + jfi(v, 'k', 'Jenis layanan') + jfi(v, 'kid', 'Rencana terkait') +
+      jfi(v, 'kec', 'Kecamatan', 'text') + jfi(v, 'desa', 'Desa / kelurahan', 'text') + jfi(v, 'loc', 'Lokasi pelaksanaan', 'text', true) + jfi(v, 'ptg', 'Petugas', 'text', true) +
+      jfi(v, 'sas', 'Sasaran (orang)', 'num') + jfi(v, 'ter', 'Warga terlayani (orang)', 'num') + '</div>' +
+      '<div class="subh">Hasil layanan</div><div class="fgrid rin">' + HSL.map(function (h) { return jfi(v, h[0], h[1], 'num'); }).join('') + '</div>' +
+      '<div class="fgrid rin">' + jfi(v, 'kend', 'Kendala di lapangan', 'area', true) + jfi(v, 'tl', 'Tindak lanjut', 'area', true) + jfi(v, 'cat', 'Catatan', 'text', true) + '</div>' +
+      '<div class="subh">Tagging</div><div class="chips">' + tagPicker(v.tags, 'jbp', v.id) + '</div>' +
+      '<div><button class="btn ghost small" type="button" data-act="goto-tag">Kelola tag</button></div>' +
+      '<div class="body-tools"><span class="note">Menghapus catatan tidak menghapus berkas di Google Drive.</span>' + del + '</div>';
+  }
+  function renderJbModal(skip) {
+    var m = $('jb-modal'), v = ui.jsel ? findJb(ui.jsel) : null;
+    if (!v) { ui.jsel = null; m.hidden = true; m.innerHTML = ''; document.body.classList.remove('noscroll'); return; }
+    if (skip && !m.hidden) {
+      var t = $('jbmt'), mm = $('jbmm'); if (t) t.textContent = v.name; if (mm) mm.innerHTML = jbMetaHtml(v);
       return;
     }
-    $('jb-list').innerHTML = rows.map(function (v) {
-      var open = !!ui.jopen[v.id], up = ui.jup[v.id];
-      var del = ui.jdel === v.id
-        ? '<span class="row-btns"><button class="btn danger small" type="button" data-act="jb-del-yes" data-id="' + v.id + '">Ya, hapus</button><button class="btn ghost small" type="button" data-act="jb-del-no">Batal</button></span>'
-        : '<button class="btn ghost small" type="button" data-act="jb-del" data-id="' + v.id + '">Hapus catatan</button>';
-      var upl = REMOTE
-        ? '<label class="upl' + (up ? ' off' : '') + '" for="jbu-' + v.id + '">' + (up ? 'Mengunggah ' + up.i + ' dari ' + up.n + '…' : 'Unggah foto atau berkas') + '<input type="file" id="jbu-' + v.id + '" multiple accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx" data-act="jbfile" data-id="' + v.id + '"' + (up ? ' disabled' : '') + '></label>'
-        : '<span class="note">Hubungkan ke Google Drive di tab Pengaturan untuk mengunggah berkas. Sementara itu Anda bisa menambahkan tautan.</span>';
-      var body = open ? '<div class="act-body"><div class="subh">Rincian pelaksanaan</div><div class="fgrid rin">' +
-        jfi(v, 'name', 'Nama kegiatan', 'text', true) + jfi(v, 'date', 'Tanggal pelaksanaan', 'date') + jfi(v, 'b', 'Bidang') + jfi(v, 'k', 'Jenis layanan') + jfi(v, 'kid', 'Rencana terkait') +
-        jfi(v, 'kec', 'Kecamatan', 'text') + jfi(v, 'desa', 'Desa / kelurahan', 'text') + jfi(v, 'loc', 'Lokasi pelaksanaan', 'text', true) + jfi(v, 'ptg', 'Petugas', 'text', true) +
-        jfi(v, 'sas', 'Sasaran (orang)', 'num') + jfi(v, 'ter', 'Warga terlayani (orang)', 'num') + '</div>' +
-        '<div class="subh">Hasil layanan</div><div class="fgrid rin">' + HSL.map(function (h) { return jfi(v, h[0], h[1], 'num'); }).join('') + '</div>' +
-        '<div class="fgrid rin">' + jfi(v, 'kend', 'Kendala di lapangan', 'area', true) + jfi(v, 'tl', 'Tindak lanjut', 'area', true) + jfi(v, 'cat', 'Catatan', 'text', true) + '</div>' +
-        '<div class="subh">Dokumentasi</div>' + jbGallery(v) +
-        '<div class="row-btns">' + upl + '</div>' +
-        '<div class="fgrid rin"><label class="f full" for="jl-' + v.id + '">Tambah tautan dokumentasi (misalnya folder Google Drive atau berita)<input type="text" id="jl-' + v.id + '" maxlength="500" placeholder="https://"></label></div>' +
-        '<div><button class="btn ghost small" type="button" data-act="jb-addlink" data-id="' + v.id + '">Tambah tautan</button></div>' +
-        '<div class="subh">Tagging</div><div class="chips">' + tagPicker(v.tags, 'jbp', v.id) + '</div>' +
-        '<div><button class="btn ghost small" type="button" data-act="goto-tag">Kelola tag</button></div>' +
-        '<div class="body-tools"><span class="note">Menghapus catatan tidak menghapus berkas di Google Drive.</span>' + del + '</div></div>' : '';
-      var nfile = v.files.length;
-      return '<article class="act" id="jb-' + v.id + '">' +
-        '<button class="act-head" type="button" data-act="jb-open" data-id="' + v.id + '" aria-expanded="' + open + '">' +
-        '<div><div class="act-title" id="jbtitle-' + v.id + '">' + esc(v.name) + '</div><div class="meta" id="jbmeta-' + v.id + '">' + jbMetaHtml(v) + '</div><div>' + tagsHtml(v.tags) + '</div></div>' +
-        '<div class="right"><span class="pill ' + (nfile ? 'selesai' : 'belum') + '">' + (nfile ? nfile + ' berkas' : 'Belum ada dokumentasi') + '</span><span class="chev">▸</span></div>' +
-        '</button>' + body + '</article>';
-    }).join('');
+    var first = m.hidden, sc = m.scrollTop;
+    m.innerHTML = '<div class="mbox"><div class="mhero"><button class="mclose" type="button" data-act="jb-close">Tutup</button>' + coverHtml(v) + '</div>' +
+      '<div class="mpad"><div><div class="mt" id="jbmt">' + esc(v.name) + '</div><div class="meta" id="jbmm">' + jbMetaHtml(v) + '</div></div>' + jbBodyHtml(v) + '</div></div>';
+    m.hidden = false; document.body.classList.add('noscroll');
+    if (first) { m.scrollTop = 0; var cb = m.querySelector('.mclose'); if (cb) cb.focus({ preventScroll: true }); } else m.scrollTop = sc;
   }
   function jbBuildSelects0() { jbBuildSelects(); }
   function pushJb(v) {
@@ -1071,6 +1278,7 @@ var MAKS_MB = 10;
     clearTimeout(timers[id]); delete pending[id]; inflight++; refreshSync();
     api({ action: 'deljb', id: id }).catch(onFail).then(function () { inflight--; refreshSync(); });
   }
+  function renderAll0() { renderSummary(); renderList(); renderIdeas(); renderJb(true); }
   function jfldChange(el) {
     var v = findJb(el.getAttribute('data-id')), k = el.getAttribute('data-k');
     if (!v) return;
@@ -1081,24 +1289,42 @@ var MAKS_MB = 10;
     else if (k === 'b' || k === 'k' || k === 'kid') v[k] = String(val);
     else v[k] = str(val, k === 'kend' || k === 'tl' ? 600 : k === 'loc' ? 200 : k === 'cat' ? 400 : k === 'ptg' ? 160 : k === 'name' ? 160 : 80).trim();
     saveJb(); pushJb(v);
-    renderAll();
+    renderAll0();
   }
-  /* mengecilkan foto sebelum diunggah supaya cepat dan hemat kuota */
+  /* foto dikecilkan sebelum diunggah; sekaligus dibuat sampul kecil (4:3) yang disimpan di data */
+  function thumbOf(img) {
+    var W = 420, H = 315, c = document.createElement('canvas'), x = c.getContext('2d');
+    c.width = W; c.height = H; x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+    var sr = img.width / img.height, tr = W / H, sx = 0, sy = 0, sw = img.width, sh = img.height;
+    if (sr > tr) { sw = img.height * tr; sx = (img.width - sw) / 2; } else { sh = img.width / tr; sy = (img.height - sh) / 2; }
+    x.drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
+    var q = 0.72, d = c.toDataURL('image/jpeg', q);
+    while (d.length > 40000 && q > 0.3) { q -= 0.1; d = c.toDataURL('image/jpeg', q); }
+    return d.length <= 45000 ? d : '';
+  }
   function shrink(file) {
     return new Promise(function (resolve) {
-      var plain = function () { var fr = new FileReader(); fr.onerror = function () { resolve(null); }; fr.onload = function () { resolve({ data: String(fr.result).split(',')[1] || '', mime: file.type || 'application/octet-stream', name: file.name, size: file.size }); }; fr.readAsDataURL(file); };
-      if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size < 700 * 1024) { plain(); return; }
+      var plain = function (th) {
+        var fr = new FileReader();
+        fr.onerror = function () { resolve(null); };
+        fr.onload = function () { resolve({ data: String(fr.result).split(',')[1] || '', mime: file.type || 'application/octet-stream', name: file.name, size: file.size, thumb: th || '' }); };
+        fr.readAsDataURL(file);
+      };
+      if (!/^image\/(jpeg|png|webp)$/.test(file.type)) { plain(''); return; }
       var url = URL.createObjectURL(file), img = new Image();
-      img.onerror = function () { URL.revokeObjectURL(url); plain(); };
+      img.onerror = function () { URL.revokeObjectURL(url); plain(''); };
       img.onload = function () {
+        var th = '';
+        try { th = thumbOf(img); } catch (e) {}
+        if (file.size < 700 * 1024) { URL.revokeObjectURL(url); plain(th); return; }
         try {
           var r = Math.min(1, 1600 / Math.max(img.width, img.height)), c = document.createElement('canvas');
           c.width = Math.round(img.width * r); c.height = Math.round(img.height * r);
           c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
           URL.revokeObjectURL(url);
           var du = c.toDataURL('image/jpeg', 0.82);
-          resolve({ data: du.split(',')[1] || '', mime: 'image/jpeg', name: file.name.replace(/\.[^.]+$/, '') + '.jpg', size: Math.round(du.length * 0.75) });
-        } catch (e) { URL.revokeObjectURL(url); plain(); }
+          resolve({ data: du.split(',')[1] || '', mime: 'image/jpeg', name: file.name.replace(/\.[^.]+$/, '') + '.jpg', size: Math.round(du.length * 0.75), thumb: th });
+        } catch (e) { URL.revokeObjectURL(url); plain(th); }
       };
       img.src = url;
     });
@@ -1120,7 +1346,9 @@ var MAKS_MB = 10;
         var cur = findJb(id); if (!cur) return null;
         return api({ action: 'uploadjb', jbId: id, jbName: cur.name, jbDate: cur.date, name: x.name, mime: x.mime, data: x.data }).then(function (j) {
           var c2 = findJb(id); if (!c2) return;
-          c2.files.push({ n: j.file.name, u: j.file.url, i: j.file.id || '', k: /^image\//.test(x.mime) ? 'foto' : 'dok', at: j.file.at || '' });
+          var isFoto = /^image\//.test(x.mime);
+          c2.files.push({ n: j.file.name, u: j.file.url, i: j.file.id || '', k: isFoto ? 'foto' : 'dok', at: j.file.at || '' });
+          if (isFoto && !c2.cov && x.thumb) { c2.cov = x.thumb; c2.covi = j.file.id || ''; }
           saveJb(); pushJb(c2); okN++;
         });
       }).catch(function (e) { if (e.message !== 'unauthorized') toast('Gagal mengunggah ' + f.name + ': ' + e.message); }).then(next);
@@ -1886,7 +2114,9 @@ var MAKS_MB = 10;
   });
   $('bk-q').addEventListener('input', function (e) { ui.bk.q = e.target.value; renderBank(); });
   $('btn-csv').addEventListener('click', exportCsv);
-  $('btn-new-jbl').addEventListener('click', function () { openJbForm(); });
+  $('btn-new-jbl').addEventListener('click', function () { ui.jsel = null; renderJbModal(); openJbForm(); });
+  $('jb-modal').addEventListener('click', function (e) { if (e.target === this) { ui.jsel = null; ui.jdel = null; renderJb(); } });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && ui.jsel) { ui.jsel = null; ui.jdel = null; renderJb(); } });
   $('btn-jf-cancel').addEventListener('click', function () { $('jb-form').hidden = true; });
   $('jy').addEventListener('change', function (e) { ui.jy = e.target.value; renderJb(); });
   $('jfb').addEventListener('change', function (e) { ui.jb = e.target.value; renderJb(); });
@@ -1903,7 +2133,7 @@ var MAKS_MB = 10;
     HSL.forEach(function (h) { o[h[0]] = $('jf-h-' + h[0]).value; });
     var v = normJb(o), pend = ui.jfiles.slice();
     jbp.push(v); saveJb(); pushJb(v);
-    ui.jopen[v.id] = true; ui.jy = 'all'; ui.jb = 'all'; ui.jk = 'all'; ui.jt = 'all'; ui.jq = ''; $('jq').value = '';
+    ui.jdoc = 'all'; ui.jy = 'all'; ui.jb = 'all'; ui.jk = 'all'; ui.jt = 'all'; ui.jq = ''; $('jq').value = '';
     ui.jfiles = []; $('jf-files').value = '';
     $('jb-form').hidden = true;
     buildSelects(); renderAll(); toast('Catatan jemput bola disimpan');
@@ -1933,7 +2163,7 @@ var MAKS_MB = 10;
     state.acts = state.acts.filter(function (a) { return !a.sample; });
     save(); renderAll(); toast('Contoh kegiatan dihapus');
   });
-  document.querySelectorAll('[data-tab]').forEach(function (b) { b.addEventListener('click', function () { $('form').hidden = true; $('inov-form').hidden = true; $('jb-form').hidden = true; setTab(b.getAttribute('data-tab')); }); });
+  document.querySelectorAll('[data-tab]').forEach(function (b) { b.addEventListener('click', function () { $('form').hidden = true; $('inov-form').hidden = true; $('jb-form').hidden = true; ui.jsel = null; renderJbModal(); setTab(b.getAttribute('data-tab')); }); });
   $('set-body').addEventListener('input', onSetInput);
   $('set-body').addEventListener('change', onSetInput);
 
@@ -1954,6 +2184,7 @@ var MAKS_MB = 10;
 
   document.addEventListener('error', function (e) {
     var t = e.target;
+    if (t && t.classList && t.classList.contains('jbcov')) { var ph = document.createElement('div'); ph.className = 'ph'; ph.innerHTML = '<b>◩</b><span>Foto belum bisa ditampilkan</span>'; t.parentNode.replaceChild(ph, t); }
     if (t && t.classList && t.classList.contains('jbth')) { var d = document.createElement('div'); d.className = 'ico'; d.textContent = 'Foto'; t.parentNode.replaceChild(d, t); }
   }, true);
 
@@ -2024,12 +2255,14 @@ var MAKS_MB = 10;
       else if (cx === 'iform') { tog(ui.vtags, tid); $('iv-tags').innerHTML = tagPicker(ui.vtags, 'iform', ''); }
       else if (cx === 'idea') { var di = draft.ideas[+id]; if (di) { di.tg = di.tg || []; tog(di.tg, tid); ui.dirty = true; renderSettings(); } }
     }
-    else if (act === 'goto-tag') { $('form').hidden = true; $('inov-form').hidden = true; $('jb-form').hidden = true; setTab('tag'); }
-    else if (act === 'jb-open') { ui.jopen[id] = !ui.jopen[id]; ui.jdel = null; renderJb(); }
+    else if (act === 'goto-tag') { $('form').hidden = true; $('inov-form').hidden = true; $('jb-form').hidden = true; ui.jsel = null; renderJbModal(); setTab('tag'); }
+    else if (act === 'jb-open') { ui.jsel = id; ui.jdel = null; renderJb(); }
+    else if (act === 'jb-close') { ui.jsel = null; ui.jdel = null; renderJb(); }
+    else if (act === 'jbdoc') { ui.jdoc = el.getAttribute('data-s'); renderJb(); }
     else if (act === 'jb-del') { ui.jdel = id; renderJb(); }
     else if (act === 'jb-del-no') { ui.jdel = null; renderJb(); }
-    else if (act === 'jb-del-yes') { jbp = jbp.filter(function (v) { return v.id !== id; }); ui.jdel = null; saveJb(); pushDelJb(id); renderAll(); toast('Catatan dihapus'); }
-    else if (act === 'jb-rmf') { var rv = findJb(id); if (rv) { rv.files.splice(+el.getAttribute('data-n'), 1); saveJb(); pushJb(rv); renderJb(); } }
+    else if (act === 'jb-del-yes') { jbp = jbp.filter(function (v) { return v.id !== id; }); ui.jdel = null; ui.jsel = null; saveJb(); pushDelJb(id); renderAll(); toast('Catatan dihapus'); }
+    else if (act === 'jb-rmf') { var rv = findJb(id); if (rv) { var gone = rv.files.splice(+el.getAttribute('data-n'), 1)[0]; if (gone && gone.i && gone.i === rv.covi) { rv.cov = ''; rv.covi = ''; } saveJb(); pushJb(rv); renderJb(); } }
     else if (act === 'jb-addlink') {
       var lv = findJb(id), li = $('jl-' + id), lu = li ? li.value.trim() : '';
       if (!lv) return;
