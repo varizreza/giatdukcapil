@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600&display=swap">
 <style>
-/* Layout: ringkasan di atas (angka + kelengkapan per bidang), lalu dua tab: daftar kegiatan dengan checklist dokumen, dan bank ide per bidang. */
+/* Layout: ringkasan di atas, lalu tiga tab: Kegiatan (checklist dokumen), Bank ide, Pengaturan (semua isi bisa diubah dari halaman). */
 :root {
   --bg: #F4F6F9;
   --surface: #FFFFFF;
@@ -25,21 +25,25 @@
   --warn-bg: #FBEFD5;
   --crit: #B3261E;
   --crit-bg: #FBE5E3;
-  --b-sekr: #596879;
-  --b-daftar: #0B7285;
-  --b-sipil: #B4531A;
-  --b-piak: #6741D9;
-  --b-pdip: #A1356B;
+  --p1: #596879;
+  --p2: #0B7285;
+  --p3: #B4531A;
+  --p4: #6741D9;
+  --p5: #A1356B;
+  --p6: #4D7C0F;
+  --p7: #1D4ED8;
+  --p8: #7A5230;
   --f-display: "Bricolage Grotesque", "Public Sans", system-ui, sans-serif;
   --f-body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0E151E; --surface: #162130; --surface-2: #1D2B3D; --ink: #E8EDF3; --muted: #9AA8B9; --line: #2A3A4F;
     --accent: #8DB8EA; --on-accent: #0E151E; --focus: #8DB8EA;
     --ok: #62C48C; --ok-bg: #173826; --warn: #E7B454; --warn-bg: #3B2D12; --crit: #F0877F; --crit-bg: #3F1D1B;
-    --b-sekr: #9AAABB; --b-daftar: #4CC0D4; --b-sipil: #EE9461; --b-piak: #A593F0; --b-pdip: #E37DB2;
+    --p1: #9AAABB; --p2: #4CC0D4; --p3: #EE9461; --p4: #A593F0; --p5: #E37DB2; --p6: #A3D45B; --p7: #7BA3F5; --p8: #C9A27A;
     color-scheme: dark;
   }
 }
@@ -47,12 +51,14 @@
   --bg: #0E151E; --surface: #162130; --surface-2: #1D2B3D; --ink: #E8EDF3; --muted: #9AA8B9; --line: #2A3A4F;
   --accent: #8DB8EA; --on-accent: #0E151E; --focus: #8DB8EA;
   --ok: #62C48C; --ok-bg: #173826; --warn: #E7B454; --warn-bg: #3B2D12; --crit: #F0877F; --crit-bg: #3F1D1B;
-  --b-sekr: #9AAABB; --b-daftar: #4CC0D4; --b-sipil: #EE9461; --b-piak: #A593F0; --b-pdip: #E37DB2;
+  --p1: #9AAABB; --p2: #4CC0D4; --p3: #EE9461; --p4: #A593F0; --p5: #E37DB2; --p6: #A3D45B; --p7: #7BA3F5; --p8: #C9A27A;
   color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body {
+  margin: 0;
   background: var(--bg); color: var(--ink);
   font-family: var(--f-body); font-size: 15px; line-height: 1.5;
   padding-block: 20px 48px;
@@ -61,7 +67,7 @@ body {
 }
 .wrap { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
 h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; line-height: 1.2; }
-button, input, select { font: inherit; color: inherit; }
+button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
@@ -71,11 +77,18 @@ button { cursor: pointer; }
 .top h1 { font-size: clamp(1.6rem, 4.5vw, 2.2rem); font-weight: 700; letter-spacing: -0.01em; }
 .top p { margin: 4px 0 0; color: var(--muted); }
 .eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.top-r { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.sync { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.sync i { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); flex: none; }
+.sync.ok i { background: var(--ok); }
+.sync.busy i { background: var(--warn); }
+.sync.err i { background: var(--crit); }
 .btn {
   background: var(--accent); color: var(--on-accent); border: 1px solid var(--accent);
   border-radius: 8px; padding: 9px 16px; min-height: 40px; font-weight: 600;
 }
 .btn:hover { filter: brightness(1.08); }
+.btn:disabled { opacity: .6; cursor: default; }
 .btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); font-weight: 500; }
 .btn.ghost:hover { background: var(--surface-2); filter: none; }
 .btn.danger { background: transparent; color: var(--crit); border-color: var(--crit); font-weight: 500; }
@@ -101,33 +114,34 @@ button { cursor: pointer; }
 
 /* banner */
 .banner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn); border-radius: 10px; padding: 10px 14px; font-size: 14px; }
-.banner[hidden] { display: none; }
 
 /* tabs */
-.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
-.tab { background: none; border: 0; border-bottom: 3px solid transparent; padding: 10px 14px; font-weight: 600; color: var(--muted); margin-bottom: -1px; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+.tab { background: none; border: 0; border-bottom: 3px solid transparent; padding: 10px 14px; font-weight: 600; color: var(--muted); margin-bottom: -1px; white-space: nowrap; }
 .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
 .tab .n { font-family: var(--f-mono); font-size: 12px; background: var(--surface-2); border-radius: 10px; padding: 1px 7px; margin-left: 6px; }
 .view { display: flex; flex-direction: column; gap: 14px; }
 
-/* form */
-.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+/* panels, forms */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 .panel h2 { font-size: 1.1rem; }
 .fgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .fgrid .full { grid-column: 1 / -1; }
-label.f { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); font-weight: 500; min-width: 0; }
-input[type="text"], input[type="password"], input[type="search"], input[type="date"], select {
+label.f, div.f { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); font-weight: 500; min-width: 0; }
+input[type="text"], input[type="password"], input[type="number"], input[type="search"], input[type="date"], select, textarea {
   background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-height: 40px; width: 100%; color: var(--ink); min-width: 0;
 }
+textarea { resize: vertical; line-height: 1.45; }
 .preview { background: var(--surface-2); border-radius: 8px; padding: 10px 14px; font-size: 14px; }
 .preview ul { margin: 6px 0 0; padding-left: 18px; columns: 2 220px; column-gap: 24px; }
 .preview li { break-inside: avoid; margin-bottom: 2px; }
 .row-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.note { color: var(--muted); font-size: 13px; max-width: 70ch; }
+.err { color: var(--crit); }
+.good { color: var(--ok); }
 
-/* toolbar */
+/* toolbar + activity list */
 .toolbar { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 10px; }
-
-/* activity list */
 .list { display: flex; flex-direction: column; gap: 10px; }
 .act { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
 .act.terlambat { border-color: var(--crit); }
@@ -150,11 +164,15 @@ input[type="text"], input[type="password"], input[type="search"], input[type="da
 .act-head[aria-expanded="true"] .chev { transform: rotate(90deg); }
 .act-body { border-top: 1px solid var(--line); padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; background: var(--bg); }
 .docs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 20px; }
-.doc { display: flex; gap: 10px; align-items: flex-start; padding: 6px 8px; border-radius: 6px; min-width: 0; cursor: pointer; }
+.docrow { display: flex; align-items: flex-start; gap: 8px; min-width: 0; }
+.doc { display: flex; gap: 10px; align-items: flex-start; padding: 6px 8px; border-radius: 6px; min-width: 0; cursor: pointer; flex: 1 1 auto; }
 .doc:hover { background: var(--surface-2); }
 .doc input { width: 18px; height: 18px; margin-top: 2px; flex: none; accent-color: var(--accent); }
 .doc span { min-width: 0; overflow-wrap: anywhere; }
 .doc input:checked + span { color: var(--muted); text-decoration: line-through; }
+.fileact { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex: none; max-width: 45%; font-size: 12.5px; padding-top: 4px; }
+.fileact a { color: var(--accent); overflow-wrap: anywhere; text-align: right; }
+.fileact .btn { min-height: 30px; padding: 3px 10px; font-size: 13px; }
 .body-tools { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: flex-end; justify-content: space-between; }
 .adddoc { display: flex; gap: 8px; flex: 1 1 260px; max-width: 460px; }
 .dateedit { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
@@ -172,9 +190,57 @@ input[type="text"], input[type="password"], input[type="search"], input[type="da
 .idea .foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
 .idea .cnt { font-size: 12px; color: var(--muted); font-family: var(--f-mono); }
 
-.note { color: var(--muted); font-size: 13px; max-width: 70ch; }
+/* settings */
+.srow { display: grid; grid-template-columns: 170px minmax(0, 1.2fr) minmax(0, 1.6fr) auto; gap: 8px; align-items: center; }
+.cwrap { display: flex; align-items: center; gap: 8px; }
+.cwrap .dot { width: 12px; height: 12px; }
+.cwrap select { flex: 1; }
+.srow2 { display: flex; gap: 8px; align-items: center; }
+.srow2 input { flex: 1; }
+.setbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.sepl { border-top: 1px solid var(--line); margin: 0; border-bottom: 0; border-left: 0; border-right: 0; }
+
+.tag { font-size: 12px; font-weight: 600; border: 1px solid var(--line); border-radius: 6px; padding: 1px 8px; color: var(--muted); white-space: nowrap; }
+.tag.dpa { color: var(--accent); border-color: var(--accent); }
+.dotl { display: inline-flex; align-items: center; gap: 6px; }
+.subh { font-family: var(--f-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.rin { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+.tiles.t4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.tile .v.sm { font-size: 1.45rem; }
+.toolbar.t6 { grid-template-columns: 1fr 1fr 1fr 1fr 1.4fr auto; }
+.toolbar.t4 { grid-template-columns: 1fr 1fr 1fr 1.4fr; }
+.tablewrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+table.bank { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 880px; }
+table.bank th { text-align: left; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--line); background: var(--surface-2); white-space: nowrap; }
+table.bank td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.bank tr:last-child td { border-bottom: 0; }
+.kegtop { display: flex; flex-direction: column; gap: 2px; }
+.srow2 select { width: auto; flex: 0 0 auto; max-width: 190px; }
+.jbgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.toolbar.t6j { grid-template-columns: 0.8fr 1fr 1fr 1fr 1.4fr auto; }
+.gal { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+.gwrap { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); overflow: hidden; min-width: 0; font-size: 12px; }
+.gwrap .gth { display: block; color: var(--ink); text-decoration: none; }
+.gwrap img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: var(--surface-2); }
+.gwrap .ico { aspect-ratio: 4 / 3; display: flex; align-items: center; justify-content: center; color: var(--muted); font-weight: 600; font-size: 13px; }
+.gwrap .cap { padding: 4px 8px; overflow-wrap: anywhere; color: var(--muted); }
+.gwrap .lepas { border: 0; background: none; color: var(--crit); font: inherit; font-size: 12px; padding: 4px 8px 6px; text-align: left; cursor: pointer; min-height: 28px; }
+.upl { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-weight: 600; font-size: 14px; cursor: pointer; }
+.upl:focus-within { outline: 2px solid var(--focus); outline-offset: 2px; }
+.upl input { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+.upl.off { opacity: .6; pointer-events: none; }
+.vhead { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: flex-end; justify-content: space-between; }
+.toolbar.t4i { grid-template-columns: 1fr 1fr 1.6fr auto; }
+.pill.tunda { background: var(--crit-bg); color: var(--crit); }
+.ivlink a { color: var(--accent); overflow-wrap: anywhere; }
+.fcol { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--muted); font-weight: 500; }
+.tg { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; background: var(--surface-2); color: var(--ink); border-radius: 999px; padding: 2px 10px; }
+.tgrow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.tgchip { padding: 4px 12px; font-size: 13.5px; }
+.trow { display: grid; grid-template-columns: auto minmax(0, 1.5fr) 150px minmax(0, 1fr) auto; gap: 8px 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+.trow .dot { width: 12px; height: 12px; }
+.trow .cnt { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; color: var(--muted); font-size: 13px; }
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-size: 14px; z-index: 20; max-width: calc(100% - 32px); }
-.toast[hidden] { display: none; }
 
 @media (max-width: 760px) {
   .summary { grid-template-columns: minmax(0, 1fr); }
@@ -184,39 +250,33 @@ input[type="text"], input[type="password"], input[type="search"], input[type="da
   .act-head { grid-template-columns: minmax(0, 1fr); }
   .right { flex-direction: row; align-items: center; justify-content: space-between; min-width: 0; }
   .right .track { flex: 1; }
+  .top-r { align-items: flex-start; }
+  .srow { grid-template-columns: minmax(0, 1fr); padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+  .tiles.t4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .toolbar.t6, .toolbar.t4, .toolbar.t4i, .toolbar.t6j { grid-template-columns: minmax(0, 1fr); }
+  .jbgrid { grid-template-columns: minmax(0, 1fr); }
+  .trow { grid-template-columns: auto minmax(0, 1fr); }
+  .trow > :nth-child(n+3) { grid-column: 1 / -1; }
 }
 @media (prefers-reduced-motion: reduce) { .chev { transition: none; } }
-
-.sync { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
-.sync i { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); flex: none; }
-.sync.ok i { background: var(--ok); }
-.sync.busy i { background: var(--warn); }
-.sync.err i { background: var(--crit); }
-.top-r { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-.docrow { display: flex; align-items: flex-start; gap: 8px; min-width: 0; }
-.docrow .doc { flex: 1 1 auto; }
-.fileact { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex: none; max-width: 45%; font-size: 12.5px; padding-top: 4px; }
-.fileact a { color: var(--accent); overflow-wrap: anywhere; text-align: right; }
-.fileact .btn { min-height: 30px; padding: 3px 10px; font-size: 13px; }
-.fileact .btn:disabled { opacity: .6; cursor: default; }
-@media (max-width: 760px) { .top-r { align-items: flex-start; } }
-
-/* reset untuk halaman mandiri */
-:root { color-scheme: light; }
-body { margin: 0; }
-img { max-width: 100%; }
-[hidden] { display: none !important; }
 </style>
 </head>
 <body>
+
 <div class="wrap">
   <header class="top">
     <div>
-      <div class="eyebrow" id="today">Dinas Kependudukan dan Pencatatan Sipil</div>
-      <h1>Dashboard Kegiatan Dukcapil</h1>
+      <div class="eyebrow" id="today">Dukcapil</div>
+      <h1 id="h1">Dashboard Kegiatan Dukcapil</h1>
       <p>Pantau kegiatan per bidang, lengkapi dokumennya, dan ambil ide kegiatan baru.</p>
     </div>
-    <div class="top-r"><span class="sync" id="sync"><i></i><span id="sync-t">Mode lokal</span></span><div class="row-btns"><button class="btn ghost small" id="btn-refresh" type="button" hidden>Muat ulang</button><button class="btn" id="btn-new" type="button">+ Tambah kegiatan</button></div></div>
+    <div class="top-r">
+      <span class="sync" id="sync"><i></i><span id="sync-t">Mode lokal</span></span>
+      <div class="row-btns">
+        <button class="btn ghost small" id="btn-refresh" type="button" hidden>Muat ulang</button>
+        <button class="btn" id="btn-new" type="button">+ Tambah kegiatan</button>
+      </div>
+    </div>
   </header>
 
   <section class="summary" aria-label="Ringkasan">
@@ -236,19 +296,32 @@ img { max-width: 100%; }
   </div>
 
   <nav class="tabs" role="tablist">
-    <button class="tab" role="tab" id="tab-keg" data-tab="keg" aria-selected="true">Kegiatan<span class="n" id="n-keg">0</span></button>
+    <button class="tab" role="tab" id="tab-dpa" data-tab="dpa" aria-selected="true">Kegiatan DPA<span class="n" id="n-dpa">0</span></button>
+    <button class="tab" role="tab" id="tab-jbl" data-tab="jbl" aria-selected="false">Jemput Bola<span class="n" id="n-jbl">0</span></button>
+    <button class="tab" role="tab" id="tab-jb" data-tab="jb" aria-selected="false">Rencana jemput bola<span class="n" id="n-jb">0</span></button>
+    <button class="tab" role="tab" id="tab-inov" data-tab="inov" aria-selected="false">Inovasi<span class="n" id="n-inov">0</span></button>
+    <button class="tab" role="tab" id="tab-bank" data-tab="bank" aria-selected="false">Bank data<span class="n" id="n-bank">0</span></button>
+    <button class="tab" role="tab" id="tab-tag" data-tab="tag" aria-selected="false">Tagging<span class="n" id="n-tag">0</span></button>
     <button class="tab" role="tab" id="tab-ide" data-tab="ide" aria-selected="false">Bank ide<span class="n" id="n-ide">0</span></button>
+    <button class="tab" role="tab" id="tab-set" data-tab="set" aria-selected="false">Pengaturan</button>
   </nav>
 
   <section class="view" id="view-keg">
+    <div>
+      <h2 id="keg-title" style="font-size:1.25rem">Kegiatan DPA</h2>
+      <p class="note" id="keg-desc" style="margin:4px 0 0"></p>
+    </div>
     <form class="panel" id="form" hidden>
       <h2 id="form-title">Kegiatan baru</h2>
       <div class="fgrid">
-        <label class="f full" for="f-name">Nama kegiatan
-          <input type="text" id="f-name" required maxlength="140" placeholder="Contoh: Sosialisasi layanan KTP-el di kecamatan">
+        <label class="f" for="f-kat">Kategori kegiatan
+          <select id="f-kat"><option value="dpa">Kegiatan DPA</option><option value="jb">Jemput bola</option></select>
         </label>
         <label class="f" for="f-bidang">Bidang
           <select id="f-bidang"></select>
+        </label>
+        <label class="f full" for="f-name">Nama kegiatan
+          <input type="text" id="f-name" required maxlength="140" placeholder="Contoh: Sosialisasi layanan KTP-el di kecamatan">
         </label>
         <label class="f" for="f-tipe">Jenis kegiatan (menentukan daftar dokumen)
           <select id="f-tipe"></select>
@@ -256,7 +329,32 @@ img { max-width: 100%; }
         <label class="f" for="f-date">Tanggal pelaksanaan / batas selesai
           <input type="date" id="f-date" required>
         </label>
+        <label class="f" id="w-ds" for="f-ds">Status DPA
+          <select id="f-ds"></select>
+        </label>
+        <label class="f" id="w-th" for="f-th">Tahun anggaran
+          <input type="number" id="f-th" min="2000" max="2100" step="1">
+        </label>
+        <label class="f full" id="w-sub" for="f-sub">Program / sub kegiatan
+          <input type="text" id="f-sub" maxlength="160" placeholder="Contoh: Pengelolaan informasi administrasi kependudukan">
+        </label>
+        <label class="f" id="w-pagu" for="f-pagu">Pagu anggaran (Rp)
+          <input type="number" id="f-pagu" min="0" step="1" placeholder="0">
+        </label>
+        <label class="f" id="w-pptk" for="f-pptk">PPTK / penanggung jawab
+          <input type="text" id="f-pptk" maxlength="100">
+        </label>
+        <label class="f full" id="w-loc" for="f-loc">Lokasi
+          <input type="text" id="f-loc" maxlength="160" placeholder="Contoh: SMAN 1, Desa Sukamaju">
+        </label>
+        <label class="f" id="w-sas" for="f-sas">Target sasaran (orang)
+          <input type="number" id="f-sas" min="0" step="1" placeholder="0">
+        </label>
+        <label class="f" id="w-ptg" for="f-ptg">Petugas / tim
+          <input type="text" id="f-ptg" maxlength="120">
+        </label>
       </div>
+      <div class="f" id="w-tags"><span>Tagging (opsional)</span><div class="chips" id="f-tags"></div></div>
       <div class="preview" id="f-preview"></div>
       <div class="row-btns">
         <button class="btn" type="submit">Simpan kegiatan</button>
@@ -264,7 +362,7 @@ img { max-width: 100%; }
       </div>
     </form>
 
-    <div class="toolbar">
+    <div class="toolbar t4">
       <select id="fb" aria-label="Filter bidang"></select>
       <select id="fs" aria-label="Filter status">
         <option value="all">Semua status</option>
@@ -273,104 +371,466 @@ img { max-width: 100%; }
         <option value="belum">Belum mulai</option>
         <option value="selesai">Selesai</option>
       </select>
+      <select id="ft" aria-label="Filter tag"></select>
       <input type="search" id="fq" placeholder="Cari kegiatan" aria-label="Cari kegiatan">
     </div>
     <div class="list" id="list"></div>
   </section>
 
+  <section class="view" id="view-jbl" hidden>
+    <div class="vhead">
+      <div>
+        <h2 style="font-size:1.25rem">Jemput Bola</h2>
+        <p class="note" style="margin:4px 0 0">Catat setiap pelaksanaan jemput bola di lapangan beserta hasil layanan dan dokumentasinya. Foto dan berkas tersimpan di Google Drive.</p>
+      </div>
+      <button class="btn" id="btn-new-jbl" type="button">+ Catat jemput bola</button>
+    </div>
+    <div class="tiles t4" id="jb-tiles"></div>
+    <div class="jbgrid">
+      <div class="bars" id="jb-bm"></div>
+      <div class="bars" id="jb-bw"></div>
+      <div class="bars" id="jb-bh"></div>
+    </div>
+    <div class="banner" id="jb-banner" hidden>
+      <span>Data jemput bola yang tampil saat ini adalah contoh. Hapus lalu isi dengan data Anda.</span>
+      <button class="btn ghost small" type="button" data-act="jb-clear-sample">Hapus contoh</button>
+    </div>
+    <form class="panel" id="jb-form" hidden>
+      <h2>Catat jemput bola</h2>
+      <div class="fgrid">
+        <label class="f full" for="jf-name">Nama kegiatan
+          <input type="text" id="jf-name" required maxlength="160" placeholder="Contoh: Jemput bola perekaman KTP-el di Desa Sukamaju">
+        </label>
+        <label class="f" for="jf-date">Tanggal pelaksanaan
+          <input type="date" id="jf-date" required>
+        </label>
+        <label class="f" for="jf-b">Bidang
+          <select id="jf-b"></select>
+        </label>
+        <label class="f" for="jf-k">Jenis layanan
+          <select id="jf-k"></select>
+        </label>
+        <label class="f" for="jf-kid">Rencana terkait (opsional)
+          <select id="jf-kid"></select>
+        </label>
+        <label class="f" for="jf-kec">Kecamatan
+          <input type="text" id="jf-kec" maxlength="80" list="dl-kec" autocomplete="off">
+        </label>
+        <label class="f" for="jf-desa">Desa / kelurahan
+          <input type="text" id="jf-desa" maxlength="80" autocomplete="off">
+        </label>
+        <label class="f full" for="jf-loc">Lokasi pelaksanaan (alamat atau tempat)
+          <input type="text" id="jf-loc" maxlength="200" placeholder="Contoh: Balai Desa Sukamaju">
+        </label>
+        <label class="f full" for="jf-ptg">Petugas
+          <input type="text" id="jf-ptg" maxlength="160" placeholder="Nama petugas yang turun ke lapangan">
+        </label>
+        <label class="f" for="jf-sas">Sasaran (orang)
+          <input type="number" id="jf-sas" min="0" inputmode="numeric">
+        </label>
+        <label class="f" for="jf-ter">Warga terlayani (orang)
+          <input type="number" id="jf-ter" min="0" inputmode="numeric">
+        </label>
+      </div>
+      <div class="subh">Hasil layanan (jumlah dokumen atau layanan)</div>
+      <div class="fgrid" id="jf-hasil"></div>
+      <div class="fgrid">
+        <label class="f full" for="jf-kend">Kendala di lapangan
+          <textarea id="jf-kend" rows="2" maxlength="600"></textarea>
+        </label>
+        <label class="f full" for="jf-tl">Tindak lanjut
+          <textarea id="jf-tl" rows="2" maxlength="600"></textarea>
+        </label>
+      </div>
+      <div class="fcol"><span>Tagging (opsional)</span><div class="chips" id="jf-tags"></div></div>
+      <div class="fcol"><span>Dokumentasi (foto, daftar hadir, laporan)</span>
+        <label class="upl" id="jf-uplw" for="jf-files">Pilih berkas<input type="file" id="jf-files" multiple accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx"></label>
+        <span class="note" id="jf-fnote"></span>
+      </div>
+      <div class="row-btns">
+        <button class="btn" type="submit">Simpan jemput bola</button>
+        <button class="btn ghost" type="button" id="btn-jf-cancel">Batal</button>
+      </div>
+    </form>
+    <datalist id="dl-kec"></datalist>
+    <div class="toolbar t6j">
+      <select id="jy" aria-label="Filter tahun"></select>
+      <select id="jfb" aria-label="Filter bidang"></select>
+      <select id="jfk" aria-label="Filter kecamatan"></select>
+      <select id="jft" aria-label="Filter tag"></select>
+      <input type="search" id="jq" placeholder="Cari jemput bola" aria-label="Cari jemput bola">
+      <button class="btn ghost" id="btn-csv-jb" type="button">Unduh CSV</button>
+    </div>
+    <div class="list" id="jb-list"></div>
+  </section>
+
+  <section class="view" id="view-inov" hidden>
+    <div class="vhead">
+      <div>
+        <h2 style="font-size:1.25rem">Inovasi</h2>
+        <p class="note" style="margin:4px 0 0">Catatan semua inovasi layanan: yang direncanakan, sedang berjalan, dan sudah berjalan. Catat sejak ide muncul, lalu ubah statusnya seiring waktu.</p>
+      </div>
+      <button class="btn" id="btn-new-inov" type="button">+ Tambah inovasi</button>
+    </div>
+    <div class="tiles t4" id="inov-tiles"></div>
+    <div class="banner" id="inov-banner" hidden>
+      <span>Inovasi yang tampil saat ini adalah contoh. Hapus lalu isi dengan inovasi Anda.</span>
+      <button class="btn ghost small" type="button" data-act="iv-clear-sample">Hapus contoh</button>
+    </div>
+    <form class="panel" id="inov-form" hidden>
+      <h2>Inovasi baru</h2>
+      <div class="fgrid">
+        <label class="f full" for="iv-name">Nama inovasi
+          <input type="text" id="iv-name" required maxlength="160" placeholder="Contoh: Aplikasi antrean dan pengaduan online">
+        </label>
+        <label class="f" for="iv-st">Status
+          <select id="iv-st"></select>
+        </label>
+        <label class="f" for="iv-b">Bidang
+          <select id="iv-b"></select>
+        </label>
+        <label class="f" for="iv-start">Tanggal mulai
+          <input type="date" id="iv-start">
+        </label>
+        <label class="f" for="iv-end">Target selesai / tanggal selesai
+          <input type="date" id="iv-end">
+        </label>
+        <label class="f" for="iv-pic">Penanggung jawab
+          <input type="text" id="iv-pic" maxlength="120">
+        </label>
+        <label class="f" for="iv-sas">Sasaran / pengguna
+          <input type="text" id="iv-sas" maxlength="160" placeholder="Contoh: pemohon layanan, petugas desa">
+        </label>
+        <label class="f full" for="iv-desc">Deskripsi inovasi
+          <textarea id="iv-desc" rows="3" maxlength="600"></textarea>
+        </label>
+        <label class="f full" for="iv-man">Manfaat atau hasil yang diharapkan
+          <textarea id="iv-man" rows="3" maxlength="600"></textarea>
+        </label>
+        <label class="f full" for="iv-lnk">Tautan (aplikasi, SK, atau bukti)
+          <input type="text" id="iv-lnk" maxlength="300" placeholder="https://">
+        </label>
+      </div>
+      <div class="fcol"><span>Tagging (opsional)</span><div class="chips" id="iv-tags"></div></div>
+      <div class="row-btns">
+        <button class="btn" type="submit">Simpan inovasi</button>
+        <button class="btn ghost" type="button" id="btn-iv-cancel">Batal</button>
+      </div>
+    </form>
+    <div class="chips" id="inov-chips"></div>
+    <div class="toolbar t4i">
+      <select id="ivf-b" aria-label="Filter bidang"></select>
+      <select id="ivf-t" aria-label="Filter tag"></select>
+      <input type="search" id="ivf-q" placeholder="Cari inovasi" aria-label="Cari inovasi">
+      <button class="btn ghost" id="btn-csv-inov" type="button">Unduh CSV</button>
+    </div>
+    <div class="list" id="inov-list"></div>
+  </section>
+
+  <section class="view" id="view-bank" hidden>
+    <p class="note" style="margin:0">Arsip semua kegiatan DPA dan jemput bola. Cari dan saring menurut tahun, lalu unduh sebagai CSV untuk Excel atau laporan.</p>
+    <div class="tiles t4" id="bank-tiles"></div>
+    <div class="toolbar t6">
+      <select id="bk-kat" aria-label="Kategori"><option value="all">Semua kategori</option><option value="dpa">Kegiatan DPA</option><option value="jb">Jemput bola</option></select>
+      <select id="bk-th" aria-label="Tahun"></select>
+      <select id="bk-b" aria-label="Bidang"></select>
+      <select id="bk-tg" aria-label="Tag"></select>
+      <input type="search" id="bk-q" placeholder="Cari nama, lokasi, atau PPTK" aria-label="Cari">
+      <button class="btn ghost" id="btn-csv" type="button">Unduh CSV</button>
+    </div>
+    <div class="tablewrap" id="bank-table"></div>
+  </section>
+
+  <section class="view" id="view-tag" hidden>
+    <p class="note" style="margin:0">Tag mengelompokkan kegiatan menurut sasaran atau topik, misalnya "Pendataan penduduk rentan". Tambahkan tag di sini, lalu pasang pada kegiatan lewat rincian kegiatan. Tag juga bisa dipakai untuk menyaring kegiatan dan Bank data.</p>
+    <form class="panel" id="tag-form">
+      <h2>Tambah tag</h2>
+      <div class="fgrid">
+        <label class="f" for="t-name">Nama tag
+          <input type="text" id="t-name" maxlength="60" placeholder="Contoh: Pendataan penduduk rentan" autocomplete="off">
+        </label>
+        <label class="f" for="t-c">Warna
+          <select id="t-c"></select>
+        </label>
+      </div>
+      <div class="row-btns"><button class="btn" type="submit">Tambah tag</button></div>
+      <div id="t-msg" class="note" role="status"></div>
+    </form>
+    <div class="list" id="tag-list"></div>
+  </section>
+
   <section class="view" id="view-ide" hidden>
-    <p class="note" style="margin:0">Ide disusun menurut tugas pokok tiap bidang. Pilih "Jadikan kegiatan" untuk menyalinnya ke daftar kegiatan lengkap dengan daftar dokumennya.</p>
+    <p class="note" style="margin:0">Ide disusun menurut tugas pokok tiap bidang. Pilih "Jadikan kegiatan" untuk menyalinnya ke daftar kegiatan lengkap dengan daftar dokumennya. Ide bisa diubah di tab Pengaturan.</p>
+    <div class="chips" id="chips2"></div>
     <div class="chips" id="chips"></div>
     <div class="ideas" id="ideas"></div>
   </section>
 
-  <p class="note" id="foot-note">Pembagian bidang mengikuti pola umum dinas dukcapil kabupaten/kota. Sesuaikan nama bidang dan daftar dokumen dengan struktur organisasi serta ketentuan di daerah Anda. Data tersimpan di browser ini saja.</p>
+  <section class="view" id="view-set" hidden>
+    <div class="chips" id="set-nav"></div>
+    <div class="view" id="set-body"></div>
+  </section>
+
+  <p class="note" id="foot-note">Pembagian bidang mengikuti pola umum dinas dukcapil kabupaten/kota. Sesuaikan nama bidang dan daftar dokumen di tab Pengaturan. Data tersimpan di browser ini saja.</p>
 </div>
 <div class="toast" id="toast" hidden></div>
 
 <script>
-/* ====== PENGATURAN ====== */
-var API_URL = 'https://script.google.com/macros/s/AKfycbyZUNFVV_JwLuxab8bpGtMF16BC-V6LhkUwrX-d98tGlWCuAowYQR1DGwaSVl-4Fg4QQA/exec';   // tempel URL Web App Apps Script (berakhiran /exec). Kosong = mode lokal (data hanya di browser).
-var MAKS_MB = 10;   // batas ukuran satu file (samakan dengan CONFIG.MAKS_MB di Code.gs)
-/* ======================== */
-(function () {
-  var BIDANG = {
-    sekr:   { n: 'Sekretariat',                  s: 'Umum, kepegawaian, keuangan, perencanaan' },
-    daftar: { n: 'Pendaftaran Penduduk',         s: 'KTP-el, KK, KIA, pindah datang, IKD' },
-    sipil:  { n: 'Pencatatan Sipil',             s: 'Akta kelahiran, kematian, perkawinan, perceraian' },
-    piak:   { n: 'Informasi Adminduk (PIAK)',    s: 'SIAK, data, jaringan, kerja sama data' },
-    pdip:   { n: 'Pemanfaatan Data & Inovasi',   s: 'Inovasi layanan, data agregat, publikasi' }
-  };
-  var TIPE = {
-    sosialisasi: { n: 'Sosialisasi / bimtek', docs: ['Surat tugas atau SK panitia', 'KAK (kerangka acuan kerja)', 'RAB dan DPA', 'Surat undangan atau permohonan lokasi', 'Materi paparan', 'Daftar hadir peserta', 'Notulen atau berita acara', 'Foto dokumentasi', 'Laporan kegiatan', 'SPJ (kwitansi, bukti pembayaran)'] },
-    jemput: { n: 'Pelayanan jemput bola', docs: ['Surat tugas petugas', 'Surat pemberitahuan ke instansi, desa, atau sekolah lokasi', 'Daftar sasaran (nama dan NIK)', 'Berita acara pelayanan', 'Rekap dokumen terbit (KTP-el, KIA, akta, IKD)', 'Foto dokumentasi', 'Laporan kegiatan', 'SPJ perjalanan dinas dan transport'] },
-    rakor: { n: 'Rapat koordinasi / rekonsiliasi', docs: ['Surat undangan rapat', 'Agenda dan bahan rapat', 'Daftar hadir', 'Notulen', 'Rencana tindak lanjut', 'Foto dokumentasi', 'Laporan hasil rapat'] },
-    pks: { n: 'Kerja sama (PKS / MoU)', docs: ['Surat permohonan atau penawaran kerja sama', 'Draf PKS atau MoU', 'Telaah bagian hukum', 'Persetujuan pimpinan', 'PKS bertanda tangan', 'Rencana kerja bersama', 'Laporan pelaksanaan kerja sama'] },
-    inovasi: { n: 'Inovasi / pengembangan layanan', docs: ['Proposal inovasi', 'SK tim inovasi', 'SOP layanan baru', 'Petunjuk teknis atau manual', 'Hasil uji coba', 'Bahan publikasi (brosur, pengumuman)', 'Laporan pelaksanaan', 'Bukti dukung penilaian inovasi'] },
-    monev: { n: 'Monitoring, evaluasi, survei', docs: ['Surat tugas tim', 'Instrumen atau format monev', 'Data hasil pengumpulan', 'Analisis dan rekomendasi', 'Laporan hasil monev', 'Tindak lanjut rekomendasi'] },
-    pengadaan: { n: 'Pengadaan barang / jasa', docs: ['Usulan kebutuhan', 'Spesifikasi teknis dan HPS', 'Dokumen pemilihan penyedia', 'Kontrak atau SPK', 'Berita acara serah terima', 'Foto bukti barang atau jasa', 'SPJ pembayaran'] },
-    admin: { n: 'Pelaporan & administrasi', docs: ['Data dukung', 'Draf dokumen', 'Reviu atasan', 'Dokumen final bertanda tangan', 'Pengiriman dan pengarsipan'] }
-  };
-  var IDEAS = [
-    { b: 'sekr', t: 'Penyusunan LKjIP dan Perjanjian Kinerja', k: 'admin', d: 'Laporan kinerja instansi tahunan beserta data dukung capaian indikator tiap bidang.' },
-    { b: 'sekr', t: 'Bimtek peningkatan kapasitas petugas layanan', k: 'sosialisasi', d: 'Pelatihan petugas front office dan operator SIAK soal pelayanan prima dan ketentuan terbaru.' },
-    { b: 'sekr', t: 'Survei Kepuasan Masyarakat', k: 'monev', d: 'Ukur kepuasan pengguna layanan secara berkala dan tindak lanjuti keluhan terbanyak.' },
-    { b: 'sekr', t: 'Digitalisasi arsip dokumen kependudukan', k: 'pengadaan', d: 'Pindai dan tata arsip fisik agar pencarian dokumen cepat dan aman dari kerusakan.' },
-    { b: 'daftar', t: 'Perekaman KTP-el pemilih pemula di SMA/SMK', k: 'jemput', d: 'Petugas datang ke sekolah untuk merekam siswa yang sudah atau akan genap 17 tahun.' },
-    { b: 'daftar', t: 'Aktivasi Identitas Kependudukan Digital (IKD) massal', k: 'jemput', d: 'Aktivasi IKD di kantor desa, kampus, atau instansi dengan meja bantuan khusus.' },
-    { b: 'daftar', t: 'Pelayanan khusus lansia, disabilitas, dan warga sakit', k: 'jemput', d: 'Layanan datang ke rumah atau panti untuk warga yang sulit ke kantor.' },
-    { b: 'daftar', t: 'Pendataan KIA (Kartu Identitas Anak) di PAUD dan SD', k: 'jemput', d: 'Percepat kepemilikan KIA lewat kerja sama dengan sekolah dan posyandu.' },
-    { b: 'daftar', t: 'Penertiban data ganda dan NIK tidak aktif', k: 'monev', d: 'Verifikasi data ganda, pindah, dan meninggal agar data penduduk bersih.' },
-    { b: 'daftar', t: 'Sosialisasi pindah datang online', k: 'sosialisasi', d: 'Kenalkan layanan pindah datang tanpa tatap muka ke kecamatan, desa, dan kelurahan.' },
-    { b: 'sipil', t: 'Percepatan akta kelahiran anak', k: 'jemput', d: 'Layanan terpadu di kecamatan atau desa untuk anak yang belum punya akta kelahiran.' },
-    { b: 'sipil', t: 'Kerja sama dengan rumah sakit dan bidan untuk akta kelahiran', k: 'pks', d: 'Pengajuan akta langsung dari fasilitas kesehatan saat bayi lahir.' },
-    { b: 'sipil', t: 'Pelaporan kematian lewat RT/RW, desa, dan puskesmas', k: 'pks', d: 'Alur lapor kematian yang lebih cepat supaya data penduduk tidak tertinggal.' },
-    { b: 'sipil', t: 'Layanan terpadu isbat nikah dan akta', k: 'pks', d: 'Kolaborasi dengan pengadilan agama dan kantor urusan agama untuk dokumen perkawinan.' },
-    { b: 'sipil', t: 'Sosialisasi pentingnya akta bagi calon pengantin dan orang tua baru', k: 'sosialisasi', d: 'Edukasi pencatatan peristiwa penting lewat KUA, posyandu, dan kelompok PKK.' },
-    { b: 'piak', t: 'Rekonsiliasi data kependudukan semester', k: 'rakor', d: 'Cocokkan data daerah dengan data pusat dan siapkan perbaikan yang diperlukan.' },
-    { b: 'piak', t: 'Rekonsiliasi data pemilih dengan KPU', k: 'rakor', d: 'Samakan data penduduk potensial pemilih sebelum tahapan pemilihan.' },
-    { b: 'piak', t: 'PKS pemanfaatan data dengan perbankan, BPJS, dan instansi lain', k: 'pks', d: 'Perluas pemanfaatan data kependudukan untuk verifikasi identitas layanan publik.' },
-    { b: 'piak', t: 'Pemeliharaan jaringan dan pencadangan data SIAK', k: 'pengadaan', d: 'Pastikan perangkat, jaringan, dan cadangan data siap agar layanan tidak terhenti.' },
-    { b: 'piak', t: 'Sosialisasi perlindungan data pribadi bagi operator', k: 'sosialisasi', d: 'Aturan akses, hak pengguna, dan pengamanan data penduduk untuk petugas dan mitra.' },
-    { b: 'pdip', t: 'Mobil layanan dukcapil keliling', k: 'jemput', d: 'Jadwal rutin layanan keliling ke kecamatan jauh dan wilayah kepulauan.' },
-    { b: 'pdip', t: 'Aplikasi antrean dan pengaduan online', k: 'inovasi', d: 'Daftar antrean dari rumah dan pantau status pengaduan secara terbuka.' },
-    { b: 'pdip', t: 'Infografis data agregat kependudukan per semester', k: 'inovasi', d: 'Publikasi jumlah penduduk dan cakupan dokumen agar mudah dipakai perencanaan daerah.' },
-    { b: 'pdip', t: 'Konten edukasi di media sosial dan video layanan', k: 'inovasi', d: 'Seri video singkat soal syarat dan alur layanan agar warga tidak bolak-balik ke kantor.' },
-    { b: 'pdip', t: 'Penghargaan desa/kelurahan tertib administrasi kependudukan', k: 'monev', d: 'Penilaian dan apresiasi wilayah dengan cakupan dokumen dan pelaporan peristiwa terbaik.' }
-  ];
+/* Nilai bawaan (opsional). Biasanya tidak perlu diubah: URL Apps Script, PIN, dan seluruh isi
+   dashboard diatur dari tab Pengaturan di halaman. */
+var API_URL = '';
+var MAKS_MB = 10;
 
-  var KEY = 'dukcapil-kegiatan-v1';
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function uid(p) { return (p || 'a') + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  function str(v, max) { return String(v == null ? '' : v).slice(0, max || 300); }
+
   var T0 = new Date(); T0.setHours(0, 0, 0, 0);
   function iso(off) { var d = new Date(T0); d.setDate(d.getDate() + off); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
   function dayDiff(s) { return Math.round((new Date(s + 'T00:00:00') - T0) / 864e5); }
   function fmtDate(s) { return new Date(s + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }); }
   function when(n) { return n < 0 ? 'Lewat ' + (-n) + ' hari' : n === 0 ? 'Hari ini' : 'H-' + n; }
-  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function uid() { return 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
-  function mkDocs(tipe, done) { return TIPE[tipe].docs.map(function (t, i) { return { t: t, d: i < done }; }); }
 
+  /* ---------- tautan undangan (#setup=...) ---------- */
+  (function () {
+    var m = /^#setup=([A-Za-z0-9_=-]+)$/.exec(location.hash || '');
+    if (!m) return;
+    try {
+      var u = atob(m[1].replace(/-/g, '+').replace(/_/g, '/'));
+      if (/^https:\/\/script\.google\.com\/.+\/exec$/.test(u)) lsSet('dukcapil-api', u);
+    } catch (e) {}
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+  })();
+
+  /* ---------- sambungan (disimpan per browser) ---------- */
+  var KEYC = 'dukcapil-pin';
+  function getKey() { return lsGet(KEYC) || ''; }
+  function setKey(v) { lsSet(KEYC, v); }
+  function apiUrl() { var v = lsGet('dukcapil-api'); return v !== null ? v : API_URL; }
+  function maxMb() { var v = parseInt(lsGet('dukcapil-max'), 10); return v > 0 ? v : MAKS_MB; }
+  var REMOTE = !!apiUrl();
+
+  /* ---------- konfigurasi isi dashboard ---------- */
+  var PALN = ['Tanpa warna', 'Abu-abu', 'Teal', 'Jingga', 'Ungu', 'Merah muda', 'Hijau', 'Biru', 'Cokelat'];
+  function cv(c) { return c ? 'var(--p' + c + ')' : 'var(--muted)'; }
+
+  function dpaT(id, n, docs) {
+    return { id: id, n: n, kat: 'dpa', docs: ['Usulan kegiatan masuk Renja/RKA', 'DPA/DPPA yang disahkan (kegiatan dan pagu tercantum)'].concat(docs) };
+  }
+  function jbT(id, n, docs) { return { id: id, n: n, kat: 'jb', docs: docs }; }
+  var DEF_TAGS = [
+    ['penduduk-rentan', 'Pendataan penduduk rentan', 3], ['perekaman-ktp-el', 'Perekaman KTP-el', 2], ['pemilih-pemula', 'Pemilih pemula', 7],
+    ['akta-kelahiran', 'Akta kelahiran', 5], ['ikd', 'Identitas Kependudukan Digital', 4], ['kia', 'Kartu Identitas Anak', 6],
+    ['disabilitas-lansia', 'Disabilitas dan lansia', 8], ['sosialisasi', 'Sosialisasi', 1], ['kerja-sama', 'Kerja sama', 7],
+    ['inovasi-layanan', 'Inovasi layanan', 2], ['perlindungan-data', 'Perlindungan data pribadi', 4], ['penertiban-data', 'Penertiban data', 1]
+  ];
+  var IDEA_TAGS = {
+    'Bimtek peningkatan kapasitas petugas layanan': ['sosialisasi'],
+    'Survei Kepuasan Masyarakat': ['inovasi-layanan'],
+    'Digitalisasi arsip dokumen kependudukan': ['penertiban-data'],
+    'Perekaman KTP-el pemilih pemula di SMA/SMK': ['perekaman-ktp-el', 'pemilih-pemula'],
+    'Jemput bola perekaman penduduk rentan': ['penduduk-rentan', 'perekaman-ktp-el'],
+    'Aktivasi Identitas Kependudukan Digital (IKD) massal': ['ikd'],
+    'Pelayanan khusus lansia, disabilitas, dan warga sakit': ['penduduk-rentan', 'disabilitas-lansia'],
+    'Pendataan KIA (Kartu Identitas Anak) di PAUD dan SD': ['kia'],
+    'Penertiban data ganda dan NIK tidak aktif': ['penertiban-data'],
+    'Sosialisasi pindah datang online': ['sosialisasi', 'inovasi-layanan'],
+    'Percepatan akta kelahiran anak': ['akta-kelahiran'],
+    'Kerja sama dengan rumah sakit dan bidan untuk akta kelahiran': ['akta-kelahiran', 'kerja-sama'],
+    'Pelaporan kematian lewat RT/RW, desa, dan puskesmas': ['kerja-sama'],
+    'Layanan terpadu isbat nikah dan akta': ['kerja-sama'],
+    'Sosialisasi pentingnya akta bagi calon pengantin dan orang tua baru': ['sosialisasi', 'akta-kelahiran'],
+    'Rekonsiliasi data kependudukan semester': ['penertiban-data'],
+    'PKS pemanfaatan data dengan perbankan, BPJS, dan instansi lain': ['kerja-sama'],
+    'Pemeliharaan jaringan dan pencadangan data SIAK': ['perlindungan-data'],
+    'Sosialisasi perlindungan data pribadi bagi operator': ['sosialisasi', 'perlindungan-data'],
+    'Mobil layanan dukcapil keliling': ['inovasi-layanan'],
+    'Aplikasi antrean dan pengaduan online': ['inovasi-layanan'],
+    'Konten edukasi di media sosial dan video layanan': ['sosialisasi']
+  };
+
+  function defCfg() {
+    var ideas = [
+      ['sekr', 'Penyusunan LKjIP dan Perjanjian Kinerja', 'admin', 'Laporan kinerja instansi tahunan beserta data dukung capaian indikator tiap bidang.'],
+      ['sekr', 'Bimtek peningkatan kapasitas petugas layanan', 'sosialisasi', 'Pelatihan petugas front office dan operator SIAK soal pelayanan prima dan ketentuan terbaru.'],
+      ['sekr', 'Survei Kepuasan Masyarakat', 'monev', 'Ukur kepuasan pengguna layanan secara berkala dan tindak lanjuti keluhan terbanyak.'],
+      ['sekr', 'Digitalisasi arsip dokumen kependudukan', 'pengadaan', 'Pindai dan tata arsip fisik agar pencarian dokumen cepat dan aman dari kerusakan.'],
+      ['daftar', 'Perekaman KTP-el pemilih pemula di SMA/SMK', 'jb-sekolah', 'Petugas datang ke sekolah untuk merekam siswa yang sudah atau akan genap 17 tahun.'],
+      ['daftar', 'Aktivasi Identitas Kependudukan Digital (IKD) massal', 'jemput', 'Aktivasi IKD di kantor desa, kampus, atau instansi dengan meja bantuan khusus.'],
+      ['daftar', 'Pelayanan khusus lansia, disabilitas, dan warga sakit', 'jb-khusus', 'Layanan datang ke rumah atau panti untuk warga yang sulit ke kantor.'],
+      ['daftar', 'Jemput bola perekaman penduduk rentan', 'jb-khusus', 'Rekam KTP-el warga yang sulit datang ke kantor: lansia, penyandang disabilitas, warga sakit, dan penghuni panti.'],
+      ['daftar', 'Pendataan KIA (Kartu Identitas Anak) di PAUD dan SD', 'jb-sekolah', 'Percepat kepemilikan KIA lewat kerja sama dengan sekolah dan posyandu.'],
+      ['daftar', 'Penertiban data ganda dan NIK tidak aktif', 'monev', 'Verifikasi data ganda, pindah, dan meninggal agar data penduduk bersih.'],
+      ['daftar', 'Sosialisasi pindah datang online', 'sosialisasi', 'Kenalkan layanan pindah datang tanpa tatap muka ke kecamatan, desa, dan kelurahan.'],
+      ['sipil', 'Percepatan akta kelahiran anak', 'jemput', 'Layanan terpadu di kecamatan atau desa untuk anak yang belum punya akta kelahiran.'],
+      ['sipil', 'Kerja sama dengan rumah sakit dan bidan untuk akta kelahiran', 'pks', 'Pengajuan akta langsung dari fasilitas kesehatan saat bayi lahir.'],
+      ['sipil', 'Pelaporan kematian lewat RT/RW, desa, dan puskesmas', 'pks', 'Alur lapor kematian yang lebih cepat supaya data penduduk tidak tertinggal.'],
+      ['sipil', 'Layanan terpadu isbat nikah dan akta', 'pks', 'Kolaborasi dengan pengadilan agama dan kantor urusan agama untuk dokumen perkawinan.'],
+      ['sipil', 'Sosialisasi pentingnya akta bagi calon pengantin dan orang tua baru', 'sosialisasi', 'Edukasi pencatatan peristiwa penting lewat KUA, posyandu, dan kelompok PKK.'],
+      ['piak', 'Rekonsiliasi data kependudukan semester', 'rakor', 'Cocokkan data daerah dengan data pusat dan siapkan perbaikan yang diperlukan.'],
+      ['piak', 'Rekonsiliasi data pemilih dengan KPU', 'rakor', 'Samakan data penduduk potensial pemilih sebelum tahapan pemilihan.'],
+      ['piak', 'PKS pemanfaatan data dengan perbankan, BPJS, dan instansi lain', 'pks', 'Perluas pemanfaatan data kependudukan untuk verifikasi identitas layanan publik.'],
+      ['piak', 'Pemeliharaan jaringan dan pencadangan data SIAK', 'pengadaan', 'Pastikan perangkat, jaringan, dan cadangan data siap agar layanan tidak terhenti.'],
+      ['piak', 'Sosialisasi perlindungan data pribadi bagi operator', 'sosialisasi', 'Aturan akses, hak pengguna, dan pengamanan data penduduk untuk petugas dan mitra.'],
+      ['pdip', 'Mobil layanan dukcapil keliling', 'jb-keliling', 'Jadwal rutin layanan keliling ke kecamatan jauh dan wilayah kepulauan.'],
+      ['pdip', 'Aplikasi antrean dan pengaduan online', 'inovasi', 'Daftar antrean dari rumah dan pantau status pengaduan secara terbuka.'],
+      ['pdip', 'Infografis data agregat kependudukan per semester', 'inovasi', 'Publikasi jumlah penduduk dan cakupan dokumen agar mudah dipakai perencanaan daerah.'],
+      ['pdip', 'Konten edukasi di media sosial dan video layanan', 'inovasi', 'Seri video singkat soal syarat dan alur layanan agar warga tidak bolak-balik ke kantor.'],
+      ['pdip', 'Penghargaan desa/kelurahan tertib administrasi kependudukan', 'monev', 'Penilaian dan apresiasi wilayah dengan cakupan dokumen dan pelaporan peristiwa terbaik.']
+    ];
+    return {
+      instansi: 'Dinas Kependudukan dan Pencatatan Sipil',
+      judul: 'Dashboard Kegiatan Dukcapil',
+      bidang: [
+        { id: 'sekr', n: 'Sekretariat', s: 'Umum, kepegawaian, keuangan, perencanaan', c: 1 },
+        { id: 'daftar', n: 'Pendaftaran Penduduk', s: 'KTP-el, KK, KIA, pindah datang, IKD', c: 2 },
+        { id: 'sipil', n: 'Pencatatan Sipil', s: 'Akta kelahiran, kematian, perkawinan, perceraian', c: 3 },
+        { id: 'piak', n: 'Informasi Adminduk (PIAK)', s: 'SIAK, data, jaringan, kerja sama data', c: 4 },
+        { id: 'pdip', n: 'Pemanfaatan Data & Inovasi', s: 'Inovasi layanan, data agregat, publikasi', c: 5 }
+      ],
+      tipe: [
+        dpaT('sosialisasi', 'Sosialisasi / bimtek', ['Surat tugas atau SK panitia', 'KAK (kerangka acuan kerja)', 'RAB', 'Surat undangan atau permohonan lokasi', 'Materi paparan', 'Daftar hadir peserta', 'Notulen atau berita acara', 'Foto dokumentasi', 'Laporan kegiatan', 'SPJ (kwitansi, bukti pembayaran)']),
+        dpaT('rakor', 'Rapat koordinasi / rekonsiliasi', ['Surat undangan rapat', 'Agenda dan bahan rapat', 'Daftar hadir', 'Notulen', 'Rencana tindak lanjut', 'Foto dokumentasi', 'Laporan hasil rapat']),
+        dpaT('pks', 'Kerja sama (PKS / MoU)', ['Surat permohonan atau penawaran kerja sama', 'Draf PKS atau MoU', 'Telaah bagian hukum', 'Persetujuan pimpinan', 'PKS bertanda tangan', 'Rencana kerja bersama', 'Laporan pelaksanaan kerja sama']),
+        dpaT('inovasi', 'Inovasi / pengembangan layanan', ['Proposal inovasi', 'SK tim inovasi', 'SOP layanan baru', 'Petunjuk teknis atau manual', 'Hasil uji coba', 'Bahan publikasi (brosur, pengumuman)', 'Laporan pelaksanaan', 'Bukti dukung penilaian inovasi']),
+        dpaT('monev', 'Monitoring, evaluasi, survei', ['Surat tugas tim', 'Instrumen atau format monev', 'Data hasil pengumpulan', 'Analisis dan rekomendasi', 'Laporan hasil monev', 'Tindak lanjut rekomendasi']),
+        dpaT('pengadaan', 'Pengadaan barang / jasa', ['Usulan kebutuhan', 'Spesifikasi teknis dan HPS', 'Dokumen pemilihan penyedia', 'Kontrak atau SPK', 'Berita acara serah terima', 'Foto bukti barang atau jasa', 'SPJ pembayaran']),
+        dpaT('admin', 'Pelaporan & administrasi', ['Data dukung', 'Draf dokumen', 'Reviu atasan', 'Dokumen final bertanda tangan', 'Pengiriman dan pengarsipan']),
+        jbT('jemput', 'Jemput bola di desa / kelurahan / kecamatan', ['Surat tugas petugas', 'Surat pemberitahuan ke desa, kelurahan, atau kecamatan lokasi', 'Daftar sasaran (nama dan NIK)', 'Berita acara pelayanan', 'Rekap dokumen terbit (KTP-el, KIA, akta, IKD)', 'Foto dokumentasi', 'Laporan kegiatan', 'SPJ perjalanan dinas dan transport']),
+        jbT('jb-sekolah', 'Jemput bola di sekolah / kampus', ['Surat tugas petugas', 'Surat pemberitahuan atau izin dari sekolah/kampus', 'Daftar siswa/mahasiswa sasaran (nama dan NIK)', 'Berita acara pelayanan', 'Rekap dokumen terbit (KTP-el, KIA, IKD)', 'Foto dokumentasi', 'Laporan kegiatan', 'SPJ perjalanan dinas dan transport']),
+        jbT('jb-khusus', 'Layanan khusus (lansia, disabilitas, panti, rumah sakit)', ['Surat tugas petugas', 'Surat pengantar dari panti, rumah sakit, atau desa', 'Daftar penerima layanan (nama dan NIK)', 'Berita acara pelayanan', 'Rekap dokumen terbit', 'Foto dokumentasi (dengan persetujuan penerima layanan)', 'Laporan kegiatan', 'SPJ perjalanan dinas dan transport']),
+        jbT('jb-keliling', 'Layanan keliling (mobil dukcapil)', ['Jadwal dan rute layanan keliling', 'Surat tugas petugas dan pengemudi', 'Surat pemberitahuan ke kecamatan dan desa', 'Daftar antrean atau sasaran', 'Berita acara pelayanan', 'Rekap dokumen terbit', 'Foto dokumentasi', 'Laporan kegiatan', 'SPJ BBM dan perjalanan dinas'])
+      ],
+      tags: DEF_TAGS.map(function (t) { return { id: t[0], n: t[1], c: t[2] }; }),
+      ideas: ideas.map(function (x, i) { return { id: 'i' + (i + 1), b: x[0], t: x[1], k: x[2], d: x[3], tg: (IDEA_TAGS[x[1]] || []).slice() }; })
+    };
+  }
+
+  function normCfg(x) {
+    var d = defCfg();
+    if (!x || typeof x !== 'object') return d;
+    var o = { instansi: str(x.instansi || d.instansi, 120), judul: str(x.judul || d.judul, 80) };
+    o.bidang = (Array.isArray(x.bidang) ? x.bidang : []).map(function (b) {
+      return { id: str(b.id, 40) || uid('b'), n: str(b.n, 80).trim(), s: str(b.s, 160), c: (+b.c >= 1 && +b.c <= 8) ? +b.c : 1 };
+    }).filter(function (b) { return b.n; });
+    if (!o.bidang.length) o.bidang = d.bidang;
+    o.tipe = (Array.isArray(x.tipe) ? x.tipe : []).map(function (t) {
+      var id = str(t.id, 40) || uid('t');
+      return { id: id, n: str(t.n, 80).trim(), kat: (t.kat === 'jb' || t.kat === 'dpa') ? t.kat : (id === 'jemput' ? 'jb' : 'dpa'), docs: (Array.isArray(t.docs) ? t.docs : []).map(function (s) { return str(s, 160).trim(); }).filter(Boolean) };
+    }).filter(function (t) { return t.n; });
+    ['dpa', 'jb'].forEach(function (kt) {
+      if (!o.tipe.some(function (t) { return t.kat === kt; })) o.tipe = o.tipe.concat(d.tipe.filter(function (t) { return t.kat === kt; }));
+    });
+    var bid = o.bidang.map(function (b) { return b.id; }), tid = o.tipe.map(function (t) { return t.id; });
+    o.tags = Array.isArray(x.tags) ? x.tags.map(function (t) {
+      return { id: str(t.id, 40) || uid('g'), n: str(t.n, 60).trim(), c: (+t.c >= 0 && +t.c <= 8) ? +t.c : 0 };
+    }).filter(function (t) { return t.n; }) : d.tags;
+    var tgid = o.tags.map(function (t) { return t.id; });
+    o.ideas = (Array.isArray(x.ideas) ? x.ideas : []).map(function (i) {
+      return { id: str(i.id, 40) || uid('i'), b: bid.indexOf(i.b) > -1 ? i.b : bid[0], t: str(i.t, 160).trim(), k: tid.indexOf(i.k) > -1 ? i.k : tid[0], d: str(i.d, 400),
+               tg: (Array.isArray(i.tg) ? i.tg : []).filter(function (v, n, arr) { return arr.indexOf(v) === n && tgid.indexOf(v) > -1; }) };
+    }).filter(function (i) { return i.t; });
+    return o;
+  }
+
+  var cfg;
+  (function () { var raw = lsGet('dukcapil-cfg'), p = null; try { p = raw ? JSON.parse(raw) : null; } catch (e) {} cfg = normCfg(p); })();
+  function saveCfgLocal() { lsSet('dukcapil-cfg', JSON.stringify(cfg)); }
+  function BD(id) { for (var i = 0; i < cfg.bidang.length; i++) if (cfg.bidang[i].id === id) return cfg.bidang[i]; return { id: id, n: '(bidang dihapus)', s: '', c: 0 }; }
+  function TP(id) { for (var i = 0; i < cfg.tipe.length; i++) if (cfg.tipe[i].id === id) return cfg.tipe[i]; return { id: id, n: '(jenis dihapus)', docs: [] }; }
+  function mkDocs(tipe, done) { return TP(tipe).docs.map(function (t, i) { return { t: t, d: i < done, f: null }; }); }
+
+  /* ---------- data kegiatan ---------- */
+  var KEY = 'dukcapil-kegiatan-v1';
+  var DS = { usulan: 'Usulan', masuk: 'Masuk DPA', laksana: 'Dilaksanakan', real: 'Terealisasi', batal: 'Dibatalkan' };
+  var KATN = { dpa: 'Kegiatan DPA', jb: 'Jemput bola' };
   function seed() {
-    function a(name, b, k, off, done) { return { id: uid(), name: name, b: b, k: k, date: iso(off), docs: mkDocs(k, done), sample: true }; }
+    function a(name, j, b, k, off, done, x) {
+      var o = { id: uid(), name: name, j: j, b: b, k: k, date: iso(off), docs: mkDocs(k, done), sample: true };
+      for (var p in x) o[p] = x[p];
+      return o;
+    }
+    var Y = T0.getFullYear();
     return { acts: [
-      a('Perekaman KTP-el pemilih pemula di SMA/SMK', 'daftar', 'jemput', 6, 5),
-      a('Percepatan akta kelahiran anak di tiga kecamatan', 'sipil', 'jemput', 20, 2),
-      a('Rekonsiliasi data kependudukan semester II', 'piak', 'rakor', -3, 4),
-      a('Penyusunan LKjIP dan Perjanjian Kinerja', 'sekr', 'admin', 14, 1),
-      a('Survei Kepuasan Masyarakat layanan dukcapil', 'pdip', 'monev', 9, 3),
-      a('PKS pemanfaatan data dengan BPJS', 'piak', 'pks', 30, 0),
-      a('Bimtek petugas layanan front office', 'sekr', 'sosialisasi', -12, 10)
-    ] };
+      a('Perekaman KTP-el pemilih pemula di SMA/SMK', 'jb', 'daftar', 'jb-sekolah', 6, 5, { loc: 'SMAN 1 dan SMKN 2', ptg: 'Tim perekaman 4 orang', sas: 180, ter: 0, tags: ['perekaman-ktp-el', 'pemilih-pemula'] }),
+      a('Percepatan akta kelahiran anak di tiga kecamatan', 'jb', 'sipil', 'jemput', 20, 2, { loc: 'Kecamatan Utara, Timur, Selatan', ptg: 'Tim pencatatan sipil', sas: 250, ter: 0, tags: ['akta-kelahiran'] }),
+      a('Pelayanan dokumen untuk lansia dan disabilitas di panti', 'jb', 'daftar', 'jb-khusus', -20, 8, { loc: 'Panti Wreda Kasih', ptg: 'Tim layanan khusus', sas: 40, ter: 37, cat: 'Tiga penghuni menunggu data pendukung.', tags: ['penduduk-rentan', 'disabilitas-lansia'] }),
+      a('Rekonsiliasi data kependudukan semester II', 'dpa', 'piak', 'rakor', -3, 6, { th: Y, sub: 'Pengelolaan informasi administrasi kependudukan', pagu: 18000000, real: 6500000, pptk: 'Kabid PIAK', ds: 'laksana', tags: ['penertiban-data'] }),
+      a('Penyusunan LKjIP dan Perjanjian Kinerja', 'dpa', 'sekr', 'admin', 14, 2, { th: Y, sub: 'Perencanaan, penganggaran, dan evaluasi kinerja', pagu: 12000000, pptk: 'Sekretaris', ds: 'masuk' }),
+      a('Survei Kepuasan Masyarakat layanan dukcapil', 'dpa', 'pdip', 'monev', 9, 4, { th: Y, sub: 'Peningkatan mutu pelayanan', pagu: 25000000, pptk: 'Kabid Pemanfaatan Data', ds: 'laksana', tags: ['inovasi-layanan'] }),
+      a('PKS pemanfaatan data dengan BPJS', 'dpa', 'piak', 'pks', 30, 0, { th: Y + 1, sub: 'Pemanfaatan data kependudukan', pptk: 'Kabid PIAK', ds: 'usulan', tags: ['kerja-sama'] }),
+      a('Bimtek petugas layanan front office', 'dpa', 'sekr', 'sosialisasi', -12, 12, { th: Y, sub: 'Peningkatan kapasitas aparatur', pagu: 30000000, real: 28750000, pptk: 'Kasubag Umum dan Kepegawaian', ds: 'real', tags: ['sosialisasi'] })
+    ].map(normAct) };
   }
   function load() {
-    try { var r = localStorage.getItem(KEY); if (r) { var s = JSON.parse(r); if (s && Array.isArray(s.acts)) return s; } } catch (e) {}
+    try { var r = lsGet(KEY); if (r) { var s = JSON.parse(r); if (s && Array.isArray(s.acts)) { s.acts = s.acts.map(normAct); return s; } } } catch (e) {}
     return seed();
   }
-  var REMOTE = !!API_URL;
   var state = REMOTE ? { acts: [] } : load();
-  function save() { if (REMOTE) return; try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  function save() { if (REMOTE) return; lsSet(KEY, JSON.stringify(state)); }
 
-  var ui = { tab: 'keg', fb: 'all', fs: 'all', q: '', ib: 'all', open: {}, confirm: null, busy: {}, loadErr: REMOTE ? 'Memuat data…' : '' };
-  var $ = function (id) { return document.getElementById(id); };
+  /* ---------- data inovasi ---------- */
+  var KEYI = 'dukcapil-inovasi-v1';
+  var IST = { jalan: 'Sedang berjalan', rencana: 'Direncanakan', selesai: 'Sudah berjalan', tunda: 'Ditunda' };
+  var ORDI = { jalan: 0, rencana: 1, tunda: 2, selesai: 3 };
+  function normInov(v) {
+    return {
+      id: String(v.id), name: str(v.name, 160), st: IST[v.st] ? v.st : 'rencana', b: String(v.b || ''),
+      start: str(v.start, 10), end: str(v.end, 10), pic: str(v.pic, 120), sas: str(v.sas, 160),
+      desc: str(v.desc, 600), man: str(v.man, 600), lnk: str(v.lnk, 300), cat: str(v.cat, 400), sample: !!v.sample,
+      tags: (Array.isArray(v.tags) ? v.tags : []).map(String).filter(function (x, n, arr) { return arr.indexOf(x) === n && cfg.tags.some(function (t) { return t.id === x; }); })
+    };
+  }
+  function seedInov() {
+    return [
+      { id: uid('v'), name: 'Aplikasi antrean dan pengaduan online', st: 'jalan', b: 'pdip', start: iso(-60), end: iso(30), pic: 'Kabid Pemanfaatan Data', sas: 'Pemohon layanan dan warga', desc: 'Warga mengambil nomor antrean dari rumah dan memantau status pengaduan lewat ponsel.', man: 'Waktu tunggu di kantor berkurang dan keluhan tertangani lebih cepat.', tags: ['inovasi-layanan'], sample: true },
+      { id: uid('v'), name: 'Pengajuan akta kelahiran langsung dari rumah sakit', st: 'rencana', b: 'sipil', start: iso(45), end: iso(200), pic: 'Kabid Pencatatan Sipil', sas: 'Orang tua bayi yang baru lahir', desc: 'Rumah sakit mengirim data kelahiran ke dinas sehingga akta terbit tanpa orang tua datang ke kantor.', man: 'Cakupan akta kelahiran naik dan orang tua tidak perlu mengantre.', tags: ['akta-kelahiran', 'kerja-sama'], sample: true },
+      { id: uid('v'), name: 'Aktivasi IKD di titik layanan desa', st: 'selesai', b: 'daftar', start: iso(-200), end: iso(-30), pic: 'Kabid Pendaftaran Penduduk', sas: 'Warga desa dan perangkat desa', desc: 'Meja aktivasi IKD di kantor desa pada hari layanan.', man: 'Jumlah warga yang memiliki IKD bertambah.', tags: ['ikd'], sample: true }
+    ].map(normInov);
+  }
+  function loadInov() {
+    try { var r = lsGet(KEYI); if (r) { var o = JSON.parse(r); if (o && Array.isArray(o.items)) return o.items.map(normInov); } } catch (e) {}
+    return seedInov();
+  }
+  /* ---------- data pelaksanaan jemput bola ---------- */
+  var KEYJ = 'dukcapil-jemputbola-v1';
+  var HSL = [['rek', 'Perekaman KTP-el'], ['kia', 'KIA'], ['akta', 'Akta kelahiran'], ['kk', 'Kartu Keluarga'], ['ikd', 'Aktivasi IKD'], ['lain', 'Layanan lain']];
+  function normJb(v) {
+    var o = {
+      id: String(v.id), name: str(v.name, 160), date: /^\d{4}-\d{2}-\d{2}$/.test(v.date || '') ? v.date : iso(0), b: String(v.b || ''), k: String(v.k || ''), kid: String(v.kid || ''),
+      kec: str(v.kec, 80), desa: str(v.desa, 80), loc: str(v.loc, 200), ptg: str(v.ptg, 160), sas: num0(v.sas), ter: num0(v.ter),
+      kend: str(v.kend, 600), tl: str(v.tl, 600), cat: str(v.cat, 400), sample: !!v.sample,
+      tags: (Array.isArray(v.tags) ? v.tags : []).map(String).filter(function (x, n, arr) { return arr.indexOf(x) === n && cfg.tags.some(function (t) { return t.id === x; }); }),
+      files: (Array.isArray(v.files) ? v.files : []).filter(function (f) { return f && /^https?:\/\//i.test(String(f.u || '')); }).map(function (f) {
+        return { n: str(f.n, 120), u: str(f.u, 500), i: str(f.i, 80), k: f.k === 'link' ? 'link' : (f.k === 'foto' ? 'foto' : 'dok'), at: str(f.at, 30) };
+      })
+    };
+    HSL.forEach(function (h) { o[h[0]] = num0(v[h[0]]); });
+    return o;
+  }
+  function seedJb() {
+    return [
+      { id: uid('j'), name: 'Jemput bola perekaman KTP-el di Desa Sukamaju', date: iso(-20), b: 'daftar', kec: 'Sukamaju', desa: 'Sukamaju', loc: 'Balai Desa Sukamaju', ptg: 'Tim perekaman Bidang Pendaftaran', sas: 120, ter: 96, rek: 84, kia: 0, akta: 0, kk: 12, ikd: 0, lain: 0, kend: 'Jaringan di balai desa sempat terputus dua kali.', tl: 'Warga yang belum terlayani dijadwalkan di kantor kecamatan.', tags: ['perekaman-ktp-el', 'penduduk-rentan'], sample: true },
+      { id: uid('j'), name: 'Layanan akta kelahiran dan KIA di Posyandu Melati', date: iso(-9), b: 'sipil', kec: 'Cibening', desa: 'Mekarsari', loc: 'Posyandu Melati', ptg: 'Petugas Pencatatan Sipil', sas: 60, ter: 52, rek: 0, kia: 31, akta: 21, kk: 0, ikd: 0, lain: 0, kend: '', tl: '', tags: ['akta-kelahiran', 'kia'], sample: true },
+      { id: uid('j'), name: 'Aktivasi IKD bagi lansia dan penyandang disabilitas', date: iso(-3), b: 'pdip', kec: 'Sukamaju', desa: 'Sukamulya', loc: 'Rumah warga dan balai RW 03', ptg: 'Tim IKD', sas: 40, ter: 35, rek: 0, kia: 0, akta: 0, kk: 0, ikd: 35, lain: 0, kend: 'Sebagian lansia tidak membawa ponsel pintar.', tl: 'Dijadwalkan kunjungan ulang bersama kader.', tags: ['ikd', 'disabilitas-lansia'], sample: true }
+    ].map(normJb);
+  }
+  function loadJb() {
+    try { var r = lsGet(KEYJ); if (r) { var o = JSON.parse(r); if (o && Array.isArray(o.items)) return o.items.map(normJb); } } catch (e) {}
+    return seedJb();
+  }
+  var jbp = REMOTE ? [] : loadJb();
+  function saveJb() { if (REMOTE) return; lsSet(KEYJ, JSON.stringify({ items: jbp })); }
+  function findJb(id) { return jbp.filter(function (v) { return v.id === id; })[0]; }
+  var inov = REMOTE ? [] : loadInov();
+  function saveInov() { if (REMOTE) return; lsSet(KEYI, JSON.stringify({ items: inov })); }
+  function findInov(id) { return inov.filter(function (v) { return v.id === id; })[0]; }
+
+  var ui = { tab: 'dpa', kat: 'dpa', fb: 'all', fs: 'all', ft: 'all', ftags: [], tconfirm: null, q: '', ib: 'all', ik: 'all', bk: { kat: 'all', th: 'all', b: 'all', tg: 'all', q: '' }, open: {}, confirm: null, busy: {}, loadErr: REMOTE ? 'Memuat data…' : '', jy: 'all', jb: 'all', jk: 'all', jt: 'all', jq: '', jopen: {}, jtags: [], jdel: null, jup: {}, jfiles: [], vs: 'all', vb: 'all', vt: 'all', vq: '', vopen: {}, vtags: [], vdel: null, sset: 'conn', sib: 'all', dirty: false };
 
   function info(a) {
     var t = a.docs.length, d = a.docs.filter(function (x) { return x.d; }).length, days = dayDiff(a.date), st;
@@ -380,8 +840,489 @@ var MAKS_MB = 10;   // batas ukuran satu file (samakan dengan CONFIG.MAKS_MB di 
   var ST = { terlambat: 'Terlambat', berjalan: 'Berjalan', belum: 'Belum mulai', selesai: 'Selesai' };
   var ORD = { terlambat: 0, berjalan: 1, belum: 2, selesai: 3 };
 
+  /* ---------- tampilan ringkasan, daftar, ide ---------- */
+  function rp(n) { return 'Rp ' + Math.round(n || 0).toLocaleString('id-ID'); }
+  function rpS(n) {
+    n = n || 0;
+    if (n >= 1e9) return 'Rp ' + (n / 1e9).toLocaleString('id-ID', { maximumFractionDigits: 2 }) + ' M';
+    if (n >= 1e6) return 'Rp ' + (n / 1e6).toLocaleString('id-ID', { maximumFractionDigits: 1 }) + ' jt';
+    return rp(n);
+  }
+  function yr(a) { return (a.j === 'dpa' && a.th) ? a.th : (parseInt(String(a.date).slice(0, 4), 10) || T0.getFullYear()); }
+  function scoped() { return (ui.tab === 'dpa' || ui.tab === 'jb') ? state.acts.filter(function (a) { return a.j === ui.tab; }) : state.acts; }
+  function TG(id) { for (var i = 0; i < cfg.tags.length; i++) if (cfg.tags[i].id === id) return cfg.tags[i]; return { id: id, n: '(tag dihapus)', c: 0 }; }
+  function tagsHtml(ids) {
+    if (!ids || !ids.length) return '';
+    return '<div class="tgrow">' + ids.map(function (id) { var t = TG(id); return '<span class="tg" style="--c:' + cv(t.c) + '"><i class="dot"></i>' + esc(t.n) + '</span>'; }).join('') + '</div>';
+  }
+  function tagNames(a) { return a.tags.map(function (id) { return TG(id).n; }).join('; '); }
+  function tog(arr, v) { var i = arr.indexOf(v); if (i > -1) arr.splice(i, 1); else arr.push(v); }
+  function tagPicker(sel, ctx, id) {
+    if (!cfg.tags.length) return '<span class="note">Belum ada tag. Tambahkan di menu Tagging.</span>';
+    return cfg.tags.map(function (t) {
+      return '<button class="chip tgchip" type="button" data-act="tagtog" data-ctx="' + ctx + '" data-id="' + esc(id) + '" data-t="' + esc(t.id) + '" aria-pressed="' + (sel.indexOf(t.id) > -1) + '" style="--c:' + cv(t.c) + '"><i class="dot"></i>' + esc(t.n) + '</button>';
+    }).join('');
+  }
+  function colorOpts0(sel) { var h = ''; for (var c = 0; c <= 8; c++) h += '<option value="' + c + '"' + (c === sel ? ' selected' : '') + '>' + PALN[c] + '</option>'; return h; }
+  function slug(n) {
+    var b = String(n).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'tag', id = b, k = 2;
+    while (cfg.tags.some(function (t) { return t.id === id; })) id = b + '-' + (k++);
+    return id;
+  }
+  function commitCfg() {
+    saveCfgLocal();
+    if (REMOTE) {
+      failed = false; inflight++; refreshSync();
+      api({ action: 'setcfg', cfg: cfg }).catch(onFail).then(function () { inflight--; refreshSync(); });
+    }
+  }
+  function addTag(name, c) {
+    name = String(name || '').trim().slice(0, 60);
+    if (!name) return 'Isi nama tag.';
+    if (cfg.tags.some(function (t) { return t.n.toLowerCase() === name.toLowerCase(); })) return 'Tag "' + name + '" sudah ada.';
+    cfg.tags.push({ id: slug(name), n: name, c: c >= 0 && c <= 8 ? c : 0 });
+    commitCfg();
+    return '';
+  }
+  function delTag(id) {
+    cfg.tags = cfg.tags.filter(function (t) { return t.id !== id; });
+    var off = function (arr) { return (arr || []).filter(function (v) { return v !== id; }); };
+    cfg.ideas.forEach(function (x) { x.tg = off(x.tg); });
+    if (draft) draft.ideas.forEach(function (x) { x.tg = off(x.tg); });
+    state.acts.forEach(function (a) { if (a.tags.indexOf(id) > -1) { a.tags = off(a.tags); push(a); } });
+    inov.forEach(function (v) { if (v.tags.indexOf(id) > -1) { v.tags = off(v.tags); pushInov(v); } });
+    jbp.forEach(function (v) { if (v.tags.indexOf(id) > -1) { v.tags = off(v.tags); pushJb(v); } });
+    ui.jtags = off(ui.jtags);
+    if (ui.jt === id) ui.jt = 'all';
+    ui.vtags = off(ui.vtags);
+    if (ui.vt === id) ui.vt = 'all';
+    if (ui.ft === id) ui.ft = 'all';
+    if (ui.bk.tg === id) ui.bk.tg = 'all';
+    save(); saveInov(); saveJb(); commitCfg();
+  }
+  function afterTagChange() { buildSelects(); renderAll(); }
+  function renderTags() {
+    $('n-tag').textContent = cfg.tags.length;
+    var h = cfg.tags.map(function (t) {
+      var na = state.acts.filter(function (a) { return a.tags.indexOf(t.id) > -1; }).length;
+      var nv = inov.filter(function (v) { return v.tags.indexOf(t.id) > -1; }).length, nj = jbp.filter(function (v) { return v.tags.indexOf(t.id) > -1; }).length;
+      var ni = cfg.ideas.filter(function (x) { return (x.tg || []).indexOf(t.id) > -1; }).length;
+      var del = ui.tconfirm === t.id
+        ? '<span class="row-btns"><button class="btn danger small" type="button" data-act="tg-del-yes" data-id="' + esc(t.id) + '">Ya, hapus' + (na + nv + nj ? ' dan lepas dari ' + (na + nv + nj) + ' item' : '') + '</button><button class="btn ghost small" type="button" data-act="tg-del-no">Batal</button></span>'
+        : '<button class="btn ghost small" type="button" data-act="tg-del" data-id="' + esc(t.id) + '">Hapus</button>';
+      return '<div class="trow" style="--c:' + cv(t.c) + '"><i class="dot"></i>' +
+        '<input type="text" data-act="tgname" data-id="' + esc(t.id) + '" value="' + esc(t.n) + '" maxlength="60" aria-label="Nama tag">' +
+        '<select data-act="tgcol" data-id="' + esc(t.id) + '" aria-label="Warna tag">' + colorOpts0(t.c) + '</select>' +
+        '<div class="cnt"><span>' + na + ' kegiatan · ' + nj + ' jemput bola · ' + nv + ' inovasi · ' + ni + ' ide</span>' + (na ? '<button class="btn ghost small" type="button" data-act="tg-view" data-id="' + esc(t.id) + '">Lihat di Bank data</button>' : '') + (nj ? '<button class="btn ghost small" type="button" data-act="tg-viewj" data-id="' + esc(t.id) + '">Lihat jemput bola</button>' : '') + (nv ? '<button class="btn ghost small" type="button" data-act="tg-viewi" data-id="' + esc(t.id) + '">Lihat inovasi</button>' : '') + '</div>' + del + '</div>';
+    }).join('');
+    $('tag-list').innerHTML = h || '<div class="empty">Belum ada tag. Tambahkan tag pertama di atas.</div>';
+  }
+
+  /* ---------- jemput bola: dashboard, form, dokumentasi ---------- */
+  function nf(n) { return Number(n || 0).toLocaleString('id-ID'); }
+  function jbSumHasil(v) { return HSL.reduce(function (t, h) { return t + v[h[0]]; }, 0); }
+  function jbRows() {
+    var q = ui.jq.trim().toLowerCase();
+    return jbp.filter(function (v) {
+      return (ui.jy === 'all' || v.date.slice(0, 4) === ui.jy) && (ui.jb === 'all' || v.b === ui.jb) && (ui.jk === 'all' || v.kec === ui.jk) && (ui.jt === 'all' || v.tags.indexOf(ui.jt) > -1) &&
+        (!q || [v.name, v.kec, v.desa, v.loc, v.ptg, v.kend, v.tl, v.cat, tagNames(v)].join(' ').toLowerCase().indexOf(q) > -1);
+    }).sort(function (a, b) { return b.date.localeCompare(a.date); });
+  }
+  function jbBuildSelects() {
+    var yrs = {}; yrs[String(T0.getFullYear())] = 1;
+    var kecs = {};
+    jbp.forEach(function (v) { yrs[v.date.slice(0, 4)] = 1; if (v.kec) kecs[v.kec] = 1; });
+    var yl = Object.keys(yrs).sort().reverse();
+    if (ui.jy !== 'all' && !yrs[ui.jy]) ui.jy = 'all';
+    $('jy').innerHTML = '<option value="all">Semua tahun</option>' + yl.map(function (y) { return '<option value="' + y + '"' + (y === ui.jy ? ' selected' : '') + '>' + y + '</option>'; }).join('');
+    if (ui.jb !== 'all' && !cfg.bidang.some(function (b) { return b.id === ui.jb; })) ui.jb = 'all';
+    $('jfb').innerHTML = '<option value="all">Semua bidang</option>' + opts(cfg.bidang, ui.jb);
+    $('jfb').value = ui.jb;
+    var kl = Object.keys(kecs).sort();
+    if (ui.jk !== 'all' && !kecs[ui.jk]) ui.jk = 'all';
+    $('jfk').innerHTML = '<option value="all">Semua kecamatan</option>' + kl.map(function (k) { return '<option value="' + esc(k) + '"' + (k === ui.jk ? ' selected' : '') + '>' + esc(k) + '</option>'; }).join('');
+    $('dl-kec').innerHTML = kl.map(function (k) { return '<option value="' + esc(k) + '">'; }).join('');
+    if (ui.jt !== 'all' && !cfg.tags.some(function (t) { return t.id === ui.jt; })) ui.jt = 'all';
+    $('jft').innerHTML = '<option value="all">Semua tag</option>' + opts(cfg.tags, ui.jt);
+    $('jft').value = ui.jt;
+    var bsel = $('jf-b').value;
+    $('jf-b').innerHTML = opts(cfg.bidang, bsel);
+    if (!cfg.bidang.some(function (b) { return b.id === bsel; })) $('jf-b').value = cfg.bidang[0].id;
+    var ksel = $('jf-k').value;
+    $('jf-k').innerHTML = '<option value="">(tidak ditentukan)</option>' + opts(cfg.tipe.filter(function (t) { return t.kat === 'jb'; }), ksel);
+    $('jf-k').value = ksel;
+    var rsel = $('jf-kid').value;
+    $('jf-kid').innerHTML = '<option value="">(tidak terkait)</option>' + state.acts.filter(function (a) { return a.j === 'jb'; }).map(function (a) { return '<option value="' + esc(a.id) + '">' + esc(a.name) + '</option>'; }).join('');
+    $('jf-kid').value = rsel;
+  }
+  function barRows(items, color) {
+    var mx = items.reduce(function (m, x) { return Math.max(m, x.v); }, 0);
+    if (!items.length || !mx) return '<p class="note" style="margin:0">Belum ada data.</p>';
+    return items.map(function (x) {
+      return '<div class="brow" style="--c:' + cv(color) + '"><div class="l"><span>' + esc(x.l) + '</span><span class="mono">' + esc(x.s) + '</span></div><div class="track"><i style="width:' + Math.round(x.v / mx * 100) + '%"></i></div></div>';
+    }).join('');
+  }
+  function jbMetaHtml(v) {
+    var bd = BD(v.b), rc = v.kid ? findAct(v.kid) : null;
+    var wil = [v.desa, v.kec].filter(Boolean).join(', ');
+    return '<span class="b" style="--c:' + cv(bd.c) + '"><i class="dot"></i>' + esc(bd.n) + '</span><span class="mono">' + fmtDate(v.date) + '</span>' + (wil ? '<span>' + esc(wil) + '</span>' : '') +
+      '<span>' + nf(v.ter) + (v.sas ? ' / ' + nf(v.sas) : '') + ' warga</span>' + (rc ? '<span>Rencana: ' + esc(rc.name) + '</span>' : '');
+  }
+  function jfi(v, k, label, type, full) {
+    var id = 'jr-' + v.id + '-' + k, val = v[k] == null ? '' : v[k], h;
+    var at = ' id="' + id + '" data-act="jfld" data-id="' + v.id + '" data-k="' + k + '"';
+    if (k === 'b') h = '<select' + at + '>' + opts(cfg.bidang, v.b) + '</select>';
+    else if (k === 'k') h = '<select' + at + '><option value="">(tidak ditentukan)</option>' + opts(cfg.tipe.filter(function (t) { return t.kat === 'jb'; }), v.k) + '</select>';
+    else if (k === 'kid') h = '<select' + at + '><option value="">(tidak terkait)</option>' + state.acts.filter(function (a) { return a.j === 'jb'; }).map(function (a) { return '<option value="' + esc(a.id) + '"' + (a.id === v.kid ? ' selected' : '') + '>' + esc(a.name) + '</option>'; }).join('') + '</select>';
+    else if (type === 'date') h = '<input type="date"' + at + ' value="' + esc(val) + '">';
+    else if (type === 'num') h = '<input type="number" min="0" inputmode="numeric"' + at + ' value="' + esc(val) + '">';
+    else if (type === 'area') h = '<textarea rows="2" maxlength="600"' + at + '>' + esc(val) + '</textarea>';
+    else h = '<input type="text" maxlength="200"' + (k === 'kec' ? ' list="dl-kec"' : '') + at + ' value="' + esc(val) + '">';
+    return '<label class="f' + (full ? ' full' : '') + '" for="' + id + '">' + label + h + '</label>';
+  }
+  function jbGallery(v) {
+    if (!v.files.length) return '<p class="note" style="margin:0">Belum ada dokumentasi.</p>';
+    return '<div class="gal">' + v.files.map(function (f, n) {
+      var thumb = f.k === 'foto' && f.i ? '<img class="jbth" loading="lazy" referrerpolicy="no-referrer" alt="" src="https://drive.google.com/thumbnail?id=' + encodeURIComponent(f.i) + '&sz=w320">' : '';
+      var ico = '<div class="ico">' + (f.k === 'link' ? 'Tautan' : f.k === 'foto' ? 'Foto' : 'Berkas') + '</div>';
+      return '<div class="gwrap"><a class="gth" href="' + esc(f.u) + '" target="_blank" rel="noopener">' + (thumb || ico) + '<div class="cap">' + esc(f.n || 'Berkas') + '</div></a>' +
+        '<button class="lepas" type="button" data-act="jb-rmf" data-id="' + v.id + '" data-n="' + n + '">Lepas dari daftar</button></div>';
+    }).join('') + '</div>';
+  }
+  function renderJb() {
+    $('n-jbl').textContent = jbp.length;
+    jbBuildSelects0();
+    var rows = jbRows();
+    var ter = 0, sas = 0, nd = 0, nf0 = 0, wil = {}, kec = {}, mon = {}, hs = {};
+    HSL.forEach(function (h) { hs[h[0]] = 0; });
+    rows.forEach(function (v) {
+      ter += v.ter; sas += v.sas;
+      var fc = v.files.length; nf0 += fc; if (fc) nd++;
+      if (v.kec) kec[v.kec] = (kec[v.kec] || 0) + v.ter;
+      wil[(v.kec || '') + '|' + (v.desa || '')] = 1;
+      var m = v.date.slice(0, 7); mon[m] = mon[m] || { n: 0, t: 0 }; mon[m].n++; mon[m].t += v.ter;
+      HSL.forEach(function (h) { hs[h[0]] += v[h[0]]; });
+    });
+    var nkec = Object.keys(kec).length, ndesa = Object.keys(wil).filter(function (k) { return k.split('|')[1]; }).length;
+    var miss = rows.length - nd, pct = rows.length ? Math.round(nd / rows.length * 100) : 0;
+    $('jb-banner').hidden = REMOTE || !jbp.some(function (v) { return v.sample; });
+    $('jb-tiles').innerHTML =
+      '<div class="tile"><span class="k">Pelaksanaan</span><span class="v">' + rows.length + '</span><span class="s">' + (ui.jy === 'all' ? 'semua periode' : 'tahun ' + ui.jy) + '</span></div>' +
+      '<div class="tile"><span class="k">Warga terlayani</span><span class="v">' + nf(ter) + '</span><span class="s">' + (sas ? 'dari sasaran ' + nf(sas) + ' (' + Math.round(ter / sas * 100) + '%)' : 'sasaran belum diisi') + '</span></div>' +
+      '<div class="tile"><span class="k">Wilayah terjangkau</span><span class="v">' + nkec + '</span><span class="s">kecamatan · ' + ndesa + ' desa/kelurahan</span></div>' +
+      '<div class="tile' + (miss ? ' alert' : '') + '"><span class="k">Dokumentasi</span><span class="v">' + pct + '%</span><span class="s">' + nf0 + ' berkas · ' + (miss ? miss + ' kegiatan belum ada' : 'semua kegiatan terdokumentasi') + '</span></div>';
+    var ml = Object.keys(mon).sort().slice(-12).map(function (m) {
+      var d = new Date(+m.slice(0, 4), +m.slice(5, 7) - 1, 1);
+      return { l: d.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' }), v: mon[m].t, s: mon[m].n + ' kegiatan · ' + nf(mon[m].t) };
+    });
+    $('jb-bm').innerHTML = '<h2>Warga terlayani per bulan</h2>' + barRows(ml, 2);
+    var kl = Object.keys(kec).sort(function (a, b) { return kec[b] - kec[a]; }).slice(0, 8).map(function (k) { return { l: k, v: kec[k], s: nf(kec[k]) }; });
+    $('jb-bw').innerHTML = '<h2>Warga terlayani per kecamatan</h2>' + barRows(kl, 5);
+    var hl = HSL.map(function (h) { return { l: h[1], v: hs[h[0]], s: nf(hs[h[0]]) }; }).filter(function (x) { return x.v > 0; });
+    $('jb-bh').innerHTML = '<h2>Hasil layanan</h2>' + barRows(hl, 3);
+    if (!rows.length) {
+      $('jb-list').innerHTML = '<div class="empty">' + (jbp.length ? 'Tidak ada data yang cocok dengan saringan.' : 'Belum ada catatan. Klik "Catat jemput bola" untuk mencatat pelaksanaan pertama.') + '</div>';
+      return;
+    }
+    $('jb-list').innerHTML = rows.map(function (v) {
+      var open = !!ui.jopen[v.id], up = ui.jup[v.id];
+      var del = ui.jdel === v.id
+        ? '<span class="row-btns"><button class="btn danger small" type="button" data-act="jb-del-yes" data-id="' + v.id + '">Ya, hapus</button><button class="btn ghost small" type="button" data-act="jb-del-no">Batal</button></span>'
+        : '<button class="btn ghost small" type="button" data-act="jb-del" data-id="' + v.id + '">Hapus catatan</button>';
+      var upl = REMOTE
+        ? '<label class="upl' + (up ? ' off' : '') + '" for="jbu-' + v.id + '">' + (up ? 'Mengunggah ' + up.i + ' dari ' + up.n + '…' : 'Unggah foto atau berkas') + '<input type="file" id="jbu-' + v.id + '" multiple accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx" data-act="jbfile" data-id="' + v.id + '"' + (up ? ' disabled' : '') + '></label>'
+        : '<span class="note">Hubungkan ke Google Drive di tab Pengaturan untuk mengunggah berkas. Sementara itu Anda bisa menambahkan tautan.</span>';
+      var body = open ? '<div class="act-body"><div class="subh">Rincian pelaksanaan</div><div class="fgrid rin">' +
+        jfi(v, 'name', 'Nama kegiatan', 'text', true) + jfi(v, 'date', 'Tanggal pelaksanaan', 'date') + jfi(v, 'b', 'Bidang') + jfi(v, 'k', 'Jenis layanan') + jfi(v, 'kid', 'Rencana terkait') +
+        jfi(v, 'kec', 'Kecamatan', 'text') + jfi(v, 'desa', 'Desa / kelurahan', 'text') + jfi(v, 'loc', 'Lokasi pelaksanaan', 'text', true) + jfi(v, 'ptg', 'Petugas', 'text', true) +
+        jfi(v, 'sas', 'Sasaran (orang)', 'num') + jfi(v, 'ter', 'Warga terlayani (orang)', 'num') + '</div>' +
+        '<div class="subh">Hasil layanan</div><div class="fgrid rin">' + HSL.map(function (h) { return jfi(v, h[0], h[1], 'num'); }).join('') + '</div>' +
+        '<div class="fgrid rin">' + jfi(v, 'kend', 'Kendala di lapangan', 'area', true) + jfi(v, 'tl', 'Tindak lanjut', 'area', true) + jfi(v, 'cat', 'Catatan', 'text', true) + '</div>' +
+        '<div class="subh">Dokumentasi</div>' + jbGallery(v) +
+        '<div class="row-btns">' + upl + '</div>' +
+        '<div class="fgrid rin"><label class="f full" for="jl-' + v.id + '">Tambah tautan dokumentasi (misalnya folder Google Drive atau berita)<input type="text" id="jl-' + v.id + '" maxlength="500" placeholder="https://"></label></div>' +
+        '<div><button class="btn ghost small" type="button" data-act="jb-addlink" data-id="' + v.id + '">Tambah tautan</button></div>' +
+        '<div class="subh">Tagging</div><div class="chips">' + tagPicker(v.tags, 'jbp', v.id) + '</div>' +
+        '<div><button class="btn ghost small" type="button" data-act="goto-tag">Kelola tag</button></div>' +
+        '<div class="body-tools"><span class="note">Menghapus catatan tidak menghapus berkas di Google Drive.</span>' + del + '</div></div>' : '';
+      var nfile = v.files.length;
+      return '<article class="act" id="jb-' + v.id + '">' +
+        '<button class="act-head" type="button" data-act="jb-open" data-id="' + v.id + '" aria-expanded="' + open + '">' +
+        '<div><div class="act-title" id="jbtitle-' + v.id + '">' + esc(v.name) + '</div><div class="meta" id="jbmeta-' + v.id + '">' + jbMetaHtml(v) + '</div><div>' + tagsHtml(v.tags) + '</div></div>' +
+        '<div class="right"><span class="pill ' + (nfile ? 'selesai' : 'belum') + '">' + (nfile ? nfile + ' berkas' : 'Belum ada dokumentasi') + '</span><span class="chev">▸</span></div>' +
+        '</button>' + body + '</article>';
+    }).join('');
+  }
+  function jbBuildSelects0() { jbBuildSelects(); }
+  function pushJb(v) {
+    if (!REMOTE) return;
+    failed = false; pending[v.id] = true; refreshSync();
+    clearTimeout(timers[v.id]);
+    timers[v.id] = setTimeout(function () {
+      var cur = findJb(v.id);
+      delete pending[v.id];
+      if (!cur) { refreshSync(); return; }
+      inflight++;
+      api({ action: 'upsertjb', item: cur }).catch(onFail).then(function () { inflight--; refreshSync(); });
+    }, 600);
+  }
+  function pushDelJb(id) {
+    if (!REMOTE) return;
+    clearTimeout(timers[id]); delete pending[id]; inflight++; refreshSync();
+    api({ action: 'deljb', id: id }).catch(onFail).then(function () { inflight--; refreshSync(); });
+  }
+  function jfldChange(el) {
+    var v = findJb(el.getAttribute('data-id')), k = el.getAttribute('data-k');
+    if (!v) return;
+    var val = el.value;
+    if (k === 'name' && !String(val).trim()) { toast('Nama kegiatan tidak boleh kosong'); renderJb(); return; }
+    if (k === 'date') { if (/^\d{4}-\d{2}-\d{2}$/.test(val)) v.date = val; else { renderJb(); return; } }
+    else if (k === 'sas' || k === 'ter' || HSL.some(function (h) { return h[0] === k; })) v[k] = num0(val);
+    else if (k === 'b' || k === 'k' || k === 'kid') v[k] = String(val);
+    else v[k] = str(val, k === 'kend' || k === 'tl' ? 600 : k === 'loc' ? 200 : k === 'cat' ? 400 : k === 'ptg' ? 160 : k === 'name' ? 160 : 80).trim();
+    saveJb(); pushJb(v);
+    renderAll();
+  }
+  /* mengecilkan foto sebelum diunggah supaya cepat dan hemat kuota */
+  function shrink(file) {
+    return new Promise(function (resolve) {
+      var plain = function () { var fr = new FileReader(); fr.onerror = function () { resolve(null); }; fr.onload = function () { resolve({ data: String(fr.result).split(',')[1] || '', mime: file.type || 'application/octet-stream', name: file.name, size: file.size }); }; fr.readAsDataURL(file); };
+      if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size < 700 * 1024) { plain(); return; }
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onerror = function () { URL.revokeObjectURL(url); plain(); };
+      img.onload = function () {
+        try {
+          var r = Math.min(1, 1600 / Math.max(img.width, img.height)), c = document.createElement('canvas');
+          c.width = Math.round(img.width * r); c.height = Math.round(img.height * r);
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          URL.revokeObjectURL(url);
+          var du = c.toDataURL('image/jpeg', 0.82);
+          resolve({ data: du.split(',')[1] || '', mime: 'image/jpeg', name: file.name.replace(/\.[^.]+$/, '') + '.jpg', size: Math.round(du.length * 0.75) });
+        } catch (e) { URL.revokeObjectURL(url); plain(); }
+      };
+      img.src = url;
+    });
+  }
+  function uploadJbFiles(id, list) {
+    var files = Array.prototype.slice.call(list || []);
+    if (!files.length) return;
+    if (!REMOTE) { toast('Hubungkan ke Google Drive dulu di tab Pengaturan'); return; }
+    var v = findJb(id); if (!v) return;
+    var okN = 0, i = 0, limit = maxMb() * 1024 * 1024;
+    ui.jup[id] = { i: 1, n: files.length }; renderJb();
+    (function next() {
+      if (i >= files.length) { delete ui.jup[id]; renderJb(); toast(okN ? okN + ' berkas tersimpan di Google Drive' : 'Tidak ada berkas yang terunggah'); return; }
+      var f = files[i]; i++;
+      ui.jup[id] = { i: i, n: files.length }; renderJb();
+      shrink(f).then(function (x) {
+        if (!x || !x.data) { toast('Berkas tidak bisa dibaca: ' + f.name); return null; }
+        if (x.size > limit) { toast('Berkas terlalu besar (maks ' + maxMb() + ' MB): ' + f.name); return null; }
+        var cur = findJb(id); if (!cur) return null;
+        return api({ action: 'uploadjb', jbId: id, jbName: cur.name, jbDate: cur.date, name: x.name, mime: x.mime, data: x.data }).then(function (j) {
+          var c2 = findJb(id); if (!c2) return;
+          c2.files.push({ n: j.file.name, u: j.file.url, i: j.file.id || '', k: /^image\//.test(x.mime) ? 'foto' : 'dok', at: j.file.at || '' });
+          saveJb(); pushJb(c2); okN++;
+        });
+      }).catch(function (e) { if (e.message !== 'unauthorized') toast('Gagal mengunggah ' + f.name + ': ' + e.message); }).then(next);
+    })();
+  }
+  function openJbForm() {
+    ['name', 'kec', 'desa', 'loc', 'ptg', 'sas', 'ter', 'kend', 'tl'].forEach(function (k) { $('jf-' + k).value = ''; });
+    $('jf-date').value = iso(0); jbBuildSelects();
+    $('jf-k').value = ''; $('jf-kid').value = '';
+    HSL.forEach(function (h) { $('jf-h-' + h[0]).value = ''; });
+    ui.jtags = []; ui.jfiles = []; $('jf-files').value = '';
+    $('jf-tags').innerHTML = tagPicker(ui.jtags, 'jform', '');
+    jfNote();
+    $('jb-form').hidden = false;
+    $('jb-form').scrollIntoView({ block: 'start', behavior: 'smooth' });
+    $('jf-name').focus({ preventScroll: true });
+  }
+  function jfNote() {
+    $('jf-fnote').textContent = !REMOTE ? 'Belum terhubung ke Google Drive. Berkas bisa diunggah setelah koneksi diatur di tab Pengaturan, atau tambahkan tautan di rincian kegiatan.' :
+      ui.jfiles.length ? ui.jfiles.length + ' berkas dipilih: ' + ui.jfiles.map(function (f) { return f.name; }).join(', ') : 'Foto akan dikecilkan otomatis sebelum diunggah. Bisa memilih beberapa berkas sekaligus.';
+    $('jf-uplw').classList.toggle('off', !REMOTE);
+  }
+  function jbCsvText() {
+    var head = ['Kegiatan', 'Tanggal', 'Bidang', 'Jenis layanan', 'Kecamatan', 'Desa/Kelurahan', 'Lokasi', 'Petugas', 'Sasaran', 'Terlayani'].concat(HSL.map(function (h) { return h[1]; })).concat(['Kendala', 'Tindak lanjut', 'Catatan', 'Tagging', 'Jumlah dokumentasi', 'Tautan dokumentasi']);
+    var lines = [head].concat(jbRows().map(function (v) {
+      return [v.name, v.date, BD(v.b).n, v.k ? TP(v.k).n : '', v.kec, v.desa, v.loc, v.ptg, v.sas, v.ter].concat(HSL.map(function (h) { return v[h[0]]; })).concat([v.kend, v.tl, v.cat, tagNames(v), v.files.length, v.files.map(function (f) { return f.u; }).join(' ')]);
+    }));
+    return '﻿' + lines.map(function (r) { return r.map(csvCell).join(';'); }).join('\r\n');
+  }
+
+  /* ---------- inovasi ---------- */
+  function periodeText(v) {
+    var t = v.start && v.end ? fmtDate(v.start) + ' – ' + fmtDate(v.end) : v.start ? 'Mulai ' + fmtDate(v.start) : v.end ? 'Target ' + fmtDate(v.end) : 'Jadwal belum diisi';
+    if (v.end && (v.st === 'jalan' || v.st === 'rencana')) {
+      var d = dayDiff(v.end);
+      t += ' · ' + (d < 0 ? 'lewat ' + (-d) + ' hari dari target' : d === 0 ? 'target hari ini' : 'H-' + d);
+    }
+    return t;
+  }
+  function ivMetaHtml(v) {
+    var bd = BD(v.b);
+    return '<span class="b" style="--c:' + cv(bd.c) + '"><i class="dot"></i>' + esc(bd.n) + '</span><span class="mono">' + periodeText(v) + '</span>' + (v.pic ? '<span>' + esc(v.pic) + '</span>' : '');
+  }
+  function ifi(v, k, label, type, full) {
+    var id = 'ir-' + v.id + '-' + k, val = v[k] || '', h;
+    var at = ' id="' + id + '" data-act="ifld" data-id="' + v.id + '" data-k="' + k + '"';
+    if (k === 'st') h = '<select' + at + '>' + Object.keys(IST).map(function (x) { return '<option value="' + x + '"' + (x === v.st ? ' selected' : '') + '>' + esc(IST[x]) + '</option>'; }).join('') + '</select>';
+    else if (k === 'b') h = '<select' + at + '>' + opts(cfg.bidang, v.b) + '</select>';
+    else if (type === 'date') h = '<input type="date"' + at + ' value="' + esc(val) + '">';
+    else if (type === 'area') h = '<textarea rows="3" maxlength="600"' + at + '>' + esc(val) + '</textarea>';
+    else h = '<input type="text" maxlength="' + (k === 'lnk' ? 300 : 160) + '"' + at + ' value="' + esc(val) + '">';
+    return '<label class="f' + (full ? ' full' : '') + '" for="' + id + '">' + label + h + '</label>';
+  }
+  function inovRows() {
+    var q = ui.vq.trim().toLowerCase();
+    return inov.filter(function (v) {
+      return (ui.vs === 'all' || v.st === ui.vs) && (ui.vb === 'all' || v.b === ui.vb) && (ui.vt === 'all' || v.tags.indexOf(ui.vt) > -1) &&
+        (!q || [v.name, v.desc, v.man, v.pic, v.sas, v.cat, tagNames(v)].join(' ').toLowerCase().indexOf(q) > -1);
+    }).sort(function (p, r) {
+      var kp = p.end || p.start || '9999-12-31', kr = r.end || r.start || '9999-12-31';
+      return ORDI[p.st] - ORDI[r.st] || (p.st === 'selesai' ? kr.localeCompare(kp) : kp.localeCompare(kr));
+    });
+  }
+  function renderInov() {
+    var n = { rencana: 0, jalan: 0, selesai: 0, tunda: 0 };
+    inov.forEach(function (v) { n[v.st]++; });
+    $('n-inov').textContent = inov.length;
+    $('inov-banner').hidden = REMOTE || !inov.some(function (v) { return v.sample; });
+    $('inov-tiles').innerHTML =
+      '<div class="tile"><span class="k">Total inovasi</span><span class="v">' + inov.length + '</span><span class="s">' + (n.tunda ? n.tunda + ' ditunda' : 'semua tercatat') + '</span></div>' +
+      '<div class="tile"><span class="k">Direncanakan</span><span class="v">' + n.rencana + '</span><span class="s">akan dilakukan</span></div>' +
+      '<div class="tile"><span class="k">Sedang berjalan</span><span class="v">' + n.jalan + '</span><span class="s">dalam pelaksanaan</span></div>' +
+      '<div class="tile"><span class="k">Sudah berjalan</span><span class="v">' + n.selesai + '</span><span class="s">selesai dilaksanakan</span></div>';
+    $('inov-chips').innerHTML = [['all', 'Semua', inov.length], ['rencana', IST.rencana, n.rencana], ['jalan', IST.jalan, n.jalan], ['selesai', IST.selesai, n.selesai], ['tunda', IST.tunda, n.tunda]].map(function (c) {
+      return '<button class="chip" type="button" data-act="ivs" data-s="' + c[0] + '" aria-pressed="' + (ui.vs === c[0]) + '">' + esc(c[1]) + ' <span class="mono">' + c[2] + '</span></button>';
+    }).join('');
+    var rows = inovRows();
+    if (!rows.length) {
+      $('inov-list').innerHTML = '<div class="empty">' + (inov.length ? 'Tidak ada inovasi yang cocok dengan saringan.' : 'Belum ada inovasi. Klik "Tambah inovasi" untuk mencatat inovasi pertama.') + '</div>';
+      return;
+    }
+    $('inov-list').innerHTML = rows.map(function (v) {
+      var open = !!ui.vopen[v.id];
+      var link = /^https?:\/\//i.test(v.lnk) ? '<div class="ivlink note">Tautan: <a href="' + esc(v.lnk) + '" target="_blank" rel="noopener">' + esc(v.lnk) + '</a></div>' : '';
+      var del = ui.vdel === v.id
+        ? '<span class="row-btns"><button class="btn danger small" type="button" data-act="iv-del-yes" data-id="' + v.id + '">Ya, hapus</button><button class="btn ghost small" type="button" data-act="iv-del-no">Batal</button></span>'
+        : '<button class="btn ghost small" type="button" data-act="iv-del" data-id="' + v.id + '">Hapus inovasi</button>';
+      var body = open ? '<div class="act-body"><div class="subh">Rincian inovasi</div><div class="fgrid rin">' +
+        ifi(v, 'name', 'Nama inovasi', 'text', true) + ifi(v, 'st', 'Status') + ifi(v, 'b', 'Bidang') +
+        ifi(v, 'start', 'Tanggal mulai', 'date') + ifi(v, 'end', 'Target selesai / tanggal selesai', 'date') +
+        ifi(v, 'pic', 'Penanggung jawab', 'text') + ifi(v, 'sas', 'Sasaran / pengguna', 'text') +
+        ifi(v, 'desc', 'Deskripsi inovasi', 'area', true) + ifi(v, 'man', 'Manfaat atau hasil yang diharapkan', 'area', true) +
+        ifi(v, 'lnk', 'Tautan (aplikasi, SK, atau bukti)', 'text', true) + ifi(v, 'cat', 'Catatan', 'text', true) + '</div>' + link +
+        '<div class="subh">Tagging</div><div class="chips">' + tagPicker(v.tags, 'inov', v.id) + '</div>' +
+        '<div><button class="btn ghost small" type="button" data-act="goto-tag">Kelola tag</button></div>' +
+        '<div class="body-tools"><span></span>' + del + '</div></div>' : '';
+      return '<article class="act" id="iv-' + v.id + '">' +
+        '<button class="act-head" type="button" data-act="iv-open" data-id="' + v.id + '" aria-expanded="' + open + '">' +
+        '<div><div class="act-title" id="ivtitle-' + v.id + '">' + esc(v.name) + '</div><div class="meta" id="ivmeta-' + v.id + '">' + ivMetaHtml(v) + '</div><div id="ivtags-' + v.id + '">' + tagsHtml(v.tags) + '</div></div>' +
+        '<div class="right"><span class="pill ' + ({ jalan: 'berjalan', rencana: 'belum', selesai: 'selesai', tunda: 'tunda' }[v.st]) + '">' + esc(IST[v.st]) + '</span><span class="chev">▸</span></div>' +
+        '</button>' + body + '</article>';
+    }).join('');
+  }
+  function pushInov(v) {
+    if (!REMOTE) return;
+    failed = false; pending[v.id] = true; refreshSync();
+    clearTimeout(timers[v.id]);
+    timers[v.id] = setTimeout(function () {
+      var cur = findInov(v.id);
+      delete pending[v.id];
+      if (!cur) { refreshSync(); return; }
+      inflight++;
+      api({ action: 'upsertinov', item: cur }).catch(onFail).then(function () { inflight--; refreshSync(); });
+    }, 600);
+  }
+  function pushDelInov(id) {
+    if (!REMOTE) return;
+    clearTimeout(timers[id]); delete pending[id]; inflight++; refreshSync();
+    api({ action: 'delinov', id: id }).catch(onFail).then(function () { inflight--; refreshSync(); });
+  }
+  function ifldChange(el) {
+    var v = findInov(el.getAttribute('data-id')), k = el.getAttribute('data-k');
+    if (!v) return;
+    var val = el.value;
+    if (k === 'name' && !String(val).trim()) { toast('Nama inovasi tidak boleh kosong'); renderInov(); return; }
+    if (k === 'st') { if (IST[val]) v.st = val; }
+    else if (k === 'b') v.b = val;
+    else v[k] = str(val, k === 'desc' || k === 'man' ? 600 : (k === 'lnk' ? 300 : (k === 'start' || k === 'end' ? 10 : 160))).trim();
+    saveInov(); pushInov(v);
+    if (k === 'st' || k === 'b') { renderAll(); return; }
+    var m = $('ivmeta-' + v.id); if (m) m.innerHTML = ivMetaHtml(v);
+    var t = $('ivtitle-' + v.id); if (t) t.textContent = v.name;
+  }
+  function openInovForm() {
+    $('iv-name').value = ''; $('iv-st').value = 'rencana'; $('iv-b').value = cfg.bidang[0].id;
+    $('iv-start').value = ''; $('iv-end').value = ''; $('iv-pic').value = ''; $('iv-sas').value = '';
+    $('iv-desc').value = ''; $('iv-man').value = ''; $('iv-lnk').value = '';
+    ui.vtags = [];
+    $('iv-tags').innerHTML = tagPicker(ui.vtags, 'iform', '');
+    $('inov-form').hidden = false;
+    $('inov-form').scrollIntoView({ block: 'start', behavior: 'smooth' });
+    $('iv-name').focus({ preventScroll: true });
+  }
+  function saveCsv(text, name) {
+    try {
+      var blob = new Blob([text], { type: 'text/csv;charset=utf-8' });
+      var url = URL.createObjectURL(blob), el = document.createElement('a');
+      el.href = url; el.download = name;
+      document.body.appendChild(el); el.click();
+      setTimeout(function () { document.body.removeChild(el); URL.revokeObjectURL(url); }, 500);
+    } catch (e) { toast('Unduhan tidak didukung di browser ini'); }
+  }
+  function inovCsvText() {
+    var head = ['Inovasi', 'Status', 'Bidang', 'Mulai', 'Target selesai', 'Penanggung jawab', 'Sasaran', 'Deskripsi', 'Manfaat', 'Tautan', 'Catatan', 'Tagging'];
+    var lines = [head].concat(inovRows().map(function (v) { return [v.name, IST[v.st], BD(v.b).n, v.start, v.end, v.pic, v.sas, v.desc, v.man, v.lnk, v.cat, tagNames(v)]; }));
+    return '﻿' + lines.map(function (r) { return r.map(csvCell).join(';'); }).join('\r\n');
+  }
+  function exportInovCsv() { saveCsv(inovCsvText(), 'inovasi-' + iso(0) + '.csv'); }
+
+  function ideaKat(x) { return TP(x.k).kat === 'jb' ? 'jb' : 'dpa'; }
+
+  function extraMeta(a) {
+    var h = '';
+    if (a.j === 'dpa') {
+      h += '<span class="tag dpa">' + esc(DS[a.ds] || DS.usulan) + '</span>';
+      if (a.pagu > 0) h += '<span class="mono">' + rp(a.pagu) + (a.real > 0 ? ' · realisasi ' + Math.round(a.real / a.pagu * 100) + '%' : '') + '</span>';
+    } else {
+      if (a.loc) h += '<span>' + esc(a.loc) + '</span>';
+      if (a.sas > 0 || a.ter > 0) h += '<span class="mono">Terlayani ' + a.ter + (a.sas > 0 ? '/' + a.sas : '') + '</span>';
+    }
+    return h;
+  }
+  function metaHtml(a) {
+    var i = info(a), bd = BD(a.b);
+    return '<span class="b" style="--c:' + cv(bd.c) + '"><i class="dot"></i>' + esc(bd.n) + '</span>' +
+      '<span>' + esc(TP(a.k).n) + '</span>' +
+      '<span class="mono">' + fmtDate(a.date) + (i.st === 'selesai' ? '' : ' · ' + when(i.days)) + '</span>' + extraMeta(a);
+  }
+  function fi(a, k, label, type, full) {
+    var id = 'r-' + a.id + '-' + k, v = a[k], h;
+    var at = ' id="' + id + '" data-act="fld" data-id="' + a.id + '" data-k="' + k + '"';
+    if (k === 'ds') h = '<select' + at + '>' + Object.keys(DS).map(function (x) { return '<option value="' + x + '"' + (x === a.ds ? ' selected' : '') + '>' + esc(DS[x]) + '</option>'; }).join('') + '</select>';
+    else if (type === 'number') h = '<input type="number" min="0" step="1"' + at + ' value="' + (v ? v : '') + '" placeholder="0">';
+    else h = '<input type="text" maxlength="' + (k === 'cat' ? 400 : 160) + '"' + at + ' value="' + esc(v || '') + '">';
+    return '<label class="f' + (full ? ' full' : '') + '" for="' + id + '">' + label + h + '</label>';
+  }
+  function rincian(a) {
+    var h = a.j === 'dpa'
+      ? fi(a, 'ds', 'Status DPA') + fi(a, 'th', 'Tahun anggaran', 'number') + fi(a, 'sub', 'Program / sub kegiatan', 'text', true) + fi(a, 'pagu', 'Pagu anggaran (Rp)', 'number') + fi(a, 'real', 'Realisasi (Rp)', 'number') + fi(a, 'pptk', 'PPTK / penanggung jawab', 'text', true)
+      : fi(a, 'loc', 'Lokasi', 'text') + fi(a, 'ptg', 'Petugas / tim', 'text') + fi(a, 'sas', 'Target sasaran (orang)', 'number') + fi(a, 'ter', 'Terlayani (orang)', 'number') + fi(a, 'cat', 'Catatan', 'text', true);
+    return '<div class="fgrid rin">' + h + '</div>';
+  }
+  function renderKegHead() {
+    $('keg-title').textContent = ui.kat === 'jb' ? 'Jemput bola' : 'Kegiatan DPA';
+    $('keg-desc').textContent = ui.kat === 'jb'
+      ? 'Pelayanan ke lokasi sasaran. Catat lokasi, target sasaran, jumlah warga terlayani, dan dokumen pelaksanaannya.'
+      : 'Kegiatan yang diusulkan atau sudah masuk DPA. Pantau status, pagu, realisasi, dan kelengkapan dokumen dari usulan sampai SPJ.';
+  }
+
   function renderSummary() {
-    var all = state.acts.map(function (a) { return { a: a, i: info(a) }; });
+    var sc = scoped(), lbl = ui.tab === 'dpa' ? ' kegiatan DPA' : ui.tab === 'jb' ? ' kegiatan jemput bola' : ' kegiatan';
+    var all = sc.map(function (a) { return { a: a, i: info(a) }; });
     var td = 0, tt = 0, late = 0, soon = 0, done = 0;
     all.forEach(function (x) {
       td += x.i.d; tt += x.i.t;
@@ -391,29 +1332,36 @@ var MAKS_MB = 10;   // batas ukuran satu file (samakan dengan CONFIG.MAKS_MB di 
     });
     var attn = late + soon, pct = tt ? Math.round(td / tt * 100) : 0;
     $('tiles').innerHTML =
-      '<div class="tile"><span class="k">Kegiatan aktif</span><span class="v">' + (all.length - done) + '</span><span class="s">dari ' + all.length + ' kegiatan</span></div>' +
+      '<div class="tile"><span class="k">Kegiatan aktif</span><span class="v">' + (all.length - done) + '</span><span class="s">dari ' + all.length + lbl + '</span></div>' +
       '<div class="tile"><span class="k">Dokumen lengkap</span><span class="v">' + pct + '%</span><span class="s">' + td + ' dari ' + tt + ' dokumen</span></div>' +
       '<div class="tile' + (attn ? ' alert' : '') + '"><span class="k">Perlu perhatian</span><span class="v">' + attn + '</span><span class="s">' + late + ' terlambat, ' + soon + ' jatuh tempo ≤ 7 hari</span></div>' +
       '<div class="tile"><span class="k">Selesai</span><span class="v">' + done + '</span><span class="s">semua dokumen lengkap</span></div>';
-    var rows = Object.keys(BIDANG).map(function (k) {
+    var rows = cfg.bidang.map(function (b) {
       var d = 0, t = 0;
-      all.forEach(function (x) { if (x.a.b === k) { d += x.i.d; t += x.i.t; } });
+      all.forEach(function (x) { if (x.a.b === b.id) { d += x.i.d; t += x.i.t; } });
       var p = t ? Math.round(d / t * 100) : 0;
-      return '<div class="brow" style="--c:var(--b-' + k + ')"><div class="l"><span><i class="dot"></i>' + esc(BIDANG[k].n) + '</span><span class="mono">' + (t ? d + '/' + t + ' · ' + p + '%' : 'belum ada') + '</span></div><div class="track"><i style="width:' + p + '%"></i></div></div>';
+      return '<div class="brow" style="--c:' + cv(b.c) + '" title="' + esc(b.s) + '"><div class="l"><span><i class="dot"></i>' + esc(b.n) + '</span><span class="mono">' + (t ? d + '/' + t + ' · ' + p + '%' : 'belum ada') + '</span></div><div class="track"><i style="width:' + p + '%"></i></div></div>';
     }).join('');
     $('bars').innerHTML = '<h2>Kelengkapan dokumen per bidang</h2>' + rows;
-    $('n-keg').textContent = all.length;
-    $('banner').hidden = !state.acts.some(function (a) { return a.sample; });
+    $('n-dpa').textContent = state.acts.filter(function (a) { return a.j === 'dpa'; }).length;
+    $('n-jb').textContent = state.acts.filter(function (a) { return a.j === 'jb'; }).length;
+    $('n-bank').textContent = state.acts.length;
+    $('n-tag').textContent = cfg.tags.length;
+    $('n-inov').textContent = inov.length;
+    $('n-jbl').textContent = jbp.length;
+    $('banner').hidden = REMOTE || ui.tab === 'jbl' || ui.tab === 'inov' || !state.acts.some(function (a) { return a.sample; });
   }
 
   function renderList() {
+    renderKegHead();
     if (ui.loadErr) { $('list').innerHTML = '<div class="empty">' + esc(ui.loadErr) + '</div>'; return; }
     var q = ui.q.trim().toLowerCase();
     var items = state.acts.map(function (a) { return { a: a, i: info(a) }; }).filter(function (x) {
-      return (ui.fb === 'all' || x.a.b === ui.fb) && (ui.fs === 'all' || x.i.st === ui.fs) && (!q || x.a.name.toLowerCase().indexOf(q) > -1);
+      return x.a.j === ui.kat && (ui.fb === 'all' || x.a.b === ui.fb) && (ui.ft === 'all' || x.a.tags.indexOf(ui.ft) > -1) && (ui.fs === 'all' || x.i.st === ui.fs) && (!q || x.a.name.toLowerCase().indexOf(q) > -1);
     }).sort(function (p, r) { return ORD[p.i.st] - ORD[r.i.st] || p.a.date.localeCompare(r.a.date); });
     if (!items.length) {
-      $('list').innerHTML = '<div class="empty">' + (state.acts.length ? 'Tidak ada kegiatan yang cocok dengan filter.' : 'Belum ada kegiatan. Tambahkan kegiatan baru atau ambil dari tab Bank ide.') + '</div>';
+      var has = state.acts.some(function (a) { return a.j === ui.kat; });
+      $('list').innerHTML = '<div class="empty">' + (has ? 'Tidak ada kegiatan yang cocok dengan filter.' : 'Belum ada ' + (ui.kat === 'jb' ? 'kegiatan jemput bola' : 'kegiatan DPA') + '. Tambahkan kegiatan baru atau ambil dari tab Bank ide.') + '</div>';
       return;
     }
     $('list').innerHTML = items.map(function (x) {
@@ -433,44 +1381,216 @@ var MAKS_MB = 10;   // batas ukuran satu file (samakan dengan CONFIG.MAKS_MB di 
         ? '<span class="row-btns"><button class="btn danger small" type="button" data-act="del-yes" data-id="' + a.id + '">Ya, hapus</button><button class="btn ghost small" type="button" data-act="del-no">Batal</button></span>'
         : '<button class="btn ghost small" type="button" data-act="del" data-id="' + a.id + '">Hapus kegiatan</button>';
       var body = open ? '<div class="act-body">' +
+        '<div class="subh">Rincian kegiatan</div>' + rincian(a) +
+        '<div class="subh">Tagging</div><div class="chips">' + tagPicker(a.tags, 'act', a.id) + '</div>' +
+        '<div><button class="btn ghost small" type="button" data-act="goto-tag">Kelola tag</button></div>' +
+        '<div class="subh">Dokumen yang perlu dilengkapi</div>' +
         '<div class="docs">' + (docs || '<span class="note">Belum ada dokumen. Tambahkan di bawah.</span>') + '</div>' +
         '<div class="body-tools"><form class="adddoc" data-id="' + a.id + '"><input type="text" placeholder="Tambah dokumen lain" aria-label="Tambah dokumen lain" maxlength="120"><button class="btn ghost small" type="submit">Tambah</button></form>' +
         '<label class="dateedit">Tanggal <input type="date" data-act="date" data-id="' + a.id + '" value="' + esc(a.date) + '"></label>' + del + '</div></div>' : '';
-      return '<article class="act ' + i.st + '">' +
+      return '<article class="act ' + i.st + '" id="act-' + a.id + '">' +
         '<button class="act-head" type="button" data-act="open" data-id="' + a.id + '" aria-expanded="' + open + '">' +
-        '<div><div class="act-title">' + esc(a.name) + '</div><div class="meta">' +
-        '<span class="b" style="--c:var(--b-' + a.b + ')"><i class="dot"></i>' + esc(BIDANG[a.b].n) + '</span>' +
-        '<span>' + esc(TIPE[a.k].n) + '</span>' +
-        '<span class="mono">' + fmtDate(a.date) + (i.st === 'selesai' ? '' : ' · ' + when(i.days)) + '</span></div></div>' +
+        '<div><div class="act-title">' + esc(a.name) + '</div><div class="meta" id="meta-' + a.id + '">' + metaHtml(a) + '</div>' + tagsHtml(a.tags) + '</div>' +
         '<div class="right"><span class="pill ' + i.st + '">' + ST[i.st] + '</span><div class="track" aria-hidden="true"><i style="width:' + i.pct + '%"></i></div><span class="mono">' + i.d + '/' + i.t + ' <span class="chev">▸</span></span></div>' +
         '</button>' + body + '</article>';
     }).join('');
   }
 
   function renderIdeas() {
-    $('n-ide').textContent = IDEAS.length;
-    var chips = [['all', 'Semua bidang', IDEAS.length]].concat(Object.keys(BIDANG).map(function (k) {
-      return [k, BIDANG[k].n, IDEAS.filter(function (x) { return x.b === k; }).length];
+    $('n-ide').textContent = cfg.ideas.length;
+    if (ui.ib !== 'all' && !cfg.bidang.some(function (b) { return b.id === ui.ib; })) ui.ib = 'all';
+    var base = cfg.ideas.filter(function (x) { return ui.ik === 'all' || ideaKat(x) === ui.ik; });
+    var chips = [{ id: 'all', n: 'Semua bidang', c: 0, cnt: base.length }].concat(cfg.bidang.map(function (b) {
+      return { id: b.id, n: b.n, c: b.c, cnt: base.filter(function (x) { return x.b === b.id; }).length };
     }));
     $('chips').innerHTML = chips.map(function (c) {
-      var st = c[0] === 'all' ? '' : ' style="--c:var(--b-' + c[0] + ')"';
-      return '<button class="chip" type="button" data-act="ichip" data-b="' + c[0] + '" aria-pressed="' + (ui.ib === c[0]) + '"' + st + '>' + (c[0] === 'all' ? '' : '<i class="dot"></i>') + esc(c[1]) + ' <span class="mono">' + c[2] + '</span></button>';
+      return '<button class="chip" type="button" data-act="ichip" data-b="' + esc(c.id) + '" aria-pressed="' + (ui.ib === c.id) + '" style="--c:' + cv(c.c) + '">' + (c.id === 'all' ? '' : '<i class="dot"></i>') + esc(c.n) + ' <span class="mono">' + c.cnt + '</span></button>';
     }).join('');
-    $('ideas').innerHTML = IDEAS.map(function (x, n) { return { x: x, n: n }; }).filter(function (o) { return ui.ib === 'all' || o.x.b === ui.ib; }).map(function (o) {
-      var x = o.x;
-      return '<div class="idea"><span class="meta" style="margin:0;--c:var(--b-' + x.b + ')"><span class="b"><i class="dot"></i>' + esc(BIDANG[x.b].n) + '</span></span>' +
-        '<h3>' + esc(x.t) + '</h3><p>' + esc(x.d) + '</p>' +
-        '<div class="foot"><span class="cnt">' + esc(TIPE[x.k].n) + ' · ' + TIPE[x.k].docs.length + ' dokumen</span>' +
+    $('chips2').innerHTML = [['all', 'Semua kategori'], ['dpa', 'Kegiatan DPA'], ['jb', 'Jemput bola']].map(function (c) {
+      return '<button class="chip" type="button" data-act="ikat" data-k="' + c[0] + '" aria-pressed="' + (ui.ik === c[0]) + '">' + c[1] + '</button>';
+    }).join('');
+    var shown = cfg.ideas.map(function (x, n) { return { x: x, n: n }; }).filter(function (o) {
+      return (ui.ib === 'all' || o.x.b === ui.ib) && (ui.ik === 'all' || ideaKat(o.x) === ui.ik);
+    });
+    $('ideas').innerHTML = shown.length ? shown.map(function (o) {
+      var x = o.x, bd = BD(x.b), tp = TP(x.k), kt = ideaKat(x);
+      return '<div class="idea"><span class="meta" style="margin:0;--c:' + cv(bd.c) + '"><span class="b"><i class="dot"></i>' + esc(bd.n) + '</span><span class="tag' + (kt === 'dpa' ? ' dpa' : '') + '">' + KATN[kt] + '</span></span>' +
+        '<h3>' + esc(x.t) + '</h3><p>' + esc(x.d) + '</p>' + tagsHtml(x.tg) +
+        '<div class="foot"><span class="cnt">' + esc(tp.n) + ' · ' + tp.docs.length + ' dokumen</span>' +
         '<button class="btn small" type="button" data-act="idea" data-n="' + o.n + '">Jadikan kegiatan</button></div></div>';
-    }).join('');
+    }).join('') : '<div class="empty">Belum ada ide untuk pilihan ini. Tambahkan di tab Pengaturan.</div>';
   }
 
-  function renderAll() { renderSummary(); renderList(); renderIdeas(); }
+  function renderAll() {
+    renderSummary(); renderList(); renderIdeas();
+    if (ui.tab === 'bank') renderBank();
+    if (ui.tab === 'tag') renderTags();
+    if (ui.tab === 'inov') renderInov();
+    if (ui.tab === 'jbl') renderJb();
+    if (!$('jb-form').hidden) $('jf-tags').innerHTML = tagPicker(ui.jtags, 'jform', '');
+    if (!$('inov-form').hidden) $('iv-tags').innerHTML = tagPicker(ui.vtags, 'iform', '');
+  }
+
+  function toast(m) {
+    var t = $('toast'); t.textContent = m; t.hidden = false;
+    clearTimeout(toast.h); toast.h = setTimeout(function () { t.hidden = true; }, 2800);
+  }
+
+  /* ---------- header, pilihan (select) ---------- */
+  function applyHeader() {
+    $('h1').textContent = cfg.judul;
+    document.title = cfg.judul;
+    $('today').textContent = cfg.instansi + ' · ' + T0.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  }
+  function opts(list, sel) { return list.map(function (x) { return '<option value="' + esc(x.id) + '"' + (x.id === sel ? ' selected' : '') + '>' + esc(x.n) + '</option>'; }).join(''); }
+  function optsT(list, sel) {
+    return list.map(function (t) { return '<option value="' + esc(t.id) + '"' + (t.id === sel ? ' selected' : '') + '>' + (t.kat === 'jb' ? 'Jemput bola · ' : 'DPA · ') + esc(t.n) + '</option>'; }).join('');
+  }
+  function showX(kat) {
+    ['th', 'sub', 'pagu', 'pptk', 'ds'].forEach(function (k) { $('w-' + k).hidden = kat !== 'dpa'; });
+    ['loc', 'ptg', 'sas'].forEach(function (k) { $('w-' + k).hidden = kat !== 'jb'; });
+  }
+  function fillTipe(kat, sel) {
+    var list = cfg.tipe.filter(function (t) { return t.kat === kat; });
+    $('f-tipe').innerHTML = opts(list, sel);
+    if (!list.some(function (t) { return t.id === sel; })) $('f-tipe').value = list[0].id;
+    showX(kat);
+    preview();
+  }
+  function fillBankSelects() {
+    var ys = {};
+    state.acts.forEach(function (a) { ys[yr(a)] = 1; });
+    var years = Object.keys(ys).sort().reverse();
+    if (ui.bk.th !== 'all' && !ys[ui.bk.th]) ui.bk.th = 'all';
+    if (ui.bk.b !== 'all' && !cfg.bidang.some(function (b) { return b.id === ui.bk.b; })) ui.bk.b = 'all';
+    $('bk-th').innerHTML = '<option value="all">Semua tahun</option>' + years.map(function (y) { return '<option value="' + y + '"' + (String(ui.bk.th) === y ? ' selected' : '') + '>' + y + '</option>'; }).join('');
+    $('bk-b').innerHTML = '<option value="all">Semua bidang</option>' + opts(cfg.bidang, ui.bk.b);
+    if (ui.bk.tg !== 'all' && !cfg.tags.some(function (t) { return t.id === ui.bk.tg; })) ui.bk.tg = 'all';
+    $('bk-tg').innerHTML = '<option value="all">Semua tag</option>' + opts(cfg.tags, ui.bk.tg);
+    $('bk-kat').value = ui.bk.kat; $('bk-th').value = ui.bk.th; $('bk-b').value = ui.bk.b; $('bk-tg').value = ui.bk.tg;
+  }
+  function buildSelects() {
+    if (ui.fb !== 'all' && !cfg.bidang.some(function (b) { return b.id === ui.fb; })) ui.fb = 'all';
+    $('fb').innerHTML = '<option value="all">Semua bidang</option>' + opts(cfg.bidang, ui.fb);
+    $('fb').value = ui.fb;
+    if (ui.ft !== 'all' && !cfg.tags.some(function (t) { return t.id === ui.ft; })) ui.ft = 'all';
+    $('ft').innerHTML = '<option value="all">Semua tag</option>' + opts(cfg.tags, ui.ft);
+    $('ft').value = ui.ft;
+    var vb0 = $('iv-b').value;
+    $('iv-b').innerHTML = opts(cfg.bidang, vb0);
+    if (!cfg.bidang.some(function (b) { return b.id === vb0; })) $('iv-b').value = cfg.bidang[0].id;
+    if (ui.vb !== 'all' && !cfg.bidang.some(function (b) { return b.id === ui.vb; })) ui.vb = 'all';
+    $('ivf-b').innerHTML = '<option value="all">Semua bidang</option>' + opts(cfg.bidang, ui.vb);
+    $('ivf-b').value = ui.vb;
+    if (ui.vt !== 'all' && !cfg.tags.some(function (t) { return t.id === ui.vt; })) ui.vt = 'all';
+    $('ivf-t').innerHTML = '<option value="all">Semua tag</option>' + opts(cfg.tags, ui.vt);
+    $('ivf-t').value = ui.vt;
+    jbBuildSelects();
+    var b0 = $('f-bidang').value, t0 = $('f-tipe').value, k0 = $('f-kat').value === 'jb' ? 'jb' : 'dpa';
+    $('f-bidang').innerHTML = opts(cfg.bidang, b0);
+    if (!cfg.bidang.some(function (b) { return b.id === b0; })) $('f-bidang').value = cfg.bidang[0].id;
+    fillTipe(k0, t0);
+    fillBankSelects();
+  }
+  function rebuildAll() { applyHeader(); buildSelects(); renderAll(); }
+
+  function setTab(t) {
+    ui.tab = t;
+    if (t === 'dpa' || t === 'jb') ui.kat = t;
+    $('view-keg').hidden = !(t === 'dpa' || t === 'jb');
+    $('view-inov').hidden = t !== 'inov';
+    $('view-jbl').hidden = t !== 'jbl';
+    document.querySelector('.summary').hidden = t === 'jbl';
+    $('view-bank').hidden = t !== 'bank';
+    $('view-tag').hidden = t !== 'tag';
+    $('view-ide').hidden = t !== 'ide';
+    $('view-set').hidden = t !== 'set';
+    ['dpa', 'jbl', 'jb', 'inov', 'bank', 'tag', 'ide', 'set'].forEach(function (k) { $('tab-' + k).setAttribute('aria-selected', t === k); });
+    if (t === 'bank') fillBankSelects();
+    renderAll();
+    if (t === 'set') renderSettings();
+  }
+  function preview() {
+    var tp = TP($('f-tipe').value);
+    $('f-preview').innerHTML = '<strong>Dokumen yang perlu dilengkapi (' + tp.docs.length + ')</strong><ul>' + tp.docs.map(function (d) { return '<li>' + esc(d) + '</li>'; }).join('') + '</ul>';
+  }
+  function openForm(pre) {
+    pre = pre || {};
+    var j = pre.j || (ui.kat === 'jb' ? 'jb' : 'dpa');
+    $('f-kat').value = j;
+    fillTipe(j, pre.k);
+    $('form-title').textContent = pre.name ? 'Jadikan kegiatan' : (j === 'jb' ? 'Jemput bola baru' : 'Kegiatan DPA baru');
+    $('f-name').value = pre.name || '';
+    $('f-bidang').value = pre.b || cfg.bidang[0].id;
+    $('f-date').value = iso(14);
+    $('f-th').value = iso(14).slice(0, 4);
+    $('f-ds').value = 'usulan';
+    ['f-sub', 'f-pagu', 'f-pptk', 'f-loc', 'f-sas', 'f-ptg'].forEach(function (id) { $(id).value = ''; });
+    ui.ftags = (pre.tg || []).filter(function (v) { return cfg.tags.some(function (t) { return t.id === v; }); });
+    $('f-tags').innerHTML = tagPicker(ui.ftags, 'form', '');
+    setTab(j);
+    $('form').hidden = false;
+    $('form').scrollIntoView({ block: 'start', behavior: 'smooth' });
+    $('f-name').focus({ preventScroll: true });
+  }
+
+  /* ---------- bank data ---------- */
+  function bankRows() {
+    var q = ui.bk.q.trim().toLowerCase();
+    return state.acts.filter(function (a) {
+      return (ui.bk.kat === 'all' || a.j === ui.bk.kat) && (ui.bk.th === 'all' || String(yr(a)) === String(ui.bk.th)) && (ui.bk.b === 'all' || a.b === ui.bk.b) &&
+        (ui.bk.tg === 'all' || a.tags.indexOf(ui.bk.tg) > -1) &&
+        (!q || [a.name, a.sub, a.loc, a.pptk, a.ptg, a.cat, tagNames(a)].join(' ').toLowerCase().indexOf(q) > -1);
+    }).sort(function (p, r) { return r.date.localeCompare(p.date); });
+  }
+  function rinText(a) {
+    if (a.j === 'dpa') return esc(DS[a.ds] || '') + (a.pagu > 0 ? '<br><span class="mono">' + rp(a.pagu) + (a.real > 0 ? ' · real. ' + rp(a.real) : '') + '</span>' : '') + (a.sub ? '<br><span class="note">' + esc(a.sub) + '</span>' : '');
+    return esc(a.loc || '-') + ((a.sas > 0 || a.ter > 0) ? '<br><span class="mono">Terlayani ' + a.ter + (a.sas > 0 ? '/' + a.sas : '') + '</span>' : '');
+  }
+  function renderBank() {
+    var rows = bankRows(), nd = 0, nj = 0, pagu = 0, real = 0, sas = 0, ter = 0, td = 0, tt = 0;
+    rows.forEach(function (a) {
+      var i = info(a); td += i.d; tt += i.t;
+      if (a.j === 'dpa') { nd++; pagu += a.pagu; real += a.real; } else { nj++; sas += a.sas; ter += a.ter; }
+    });
+    $('bank-tiles').innerHTML =
+      '<div class="tile"><span class="k">Kegiatan tercatat</span><span class="v">' + rows.length + '</span><span class="s">' + nd + ' DPA · ' + nj + ' jemput bola</span></div>' +
+      '<div class="tile"><span class="k">Total pagu DPA</span><span class="v sm">' + rpS(pagu) + '</span><span class="s">realisasi ' + rpS(real) + (pagu > 0 ? ' (' + Math.round(real / pagu * 100) + '%)' : '') + '</span></div>' +
+      '<div class="tile"><span class="k">Warga terlayani</span><span class="v">' + ter.toLocaleString('id-ID') + '</span><span class="s">' + (sas > 0 ? 'dari target ' + sas.toLocaleString('id-ID') + ' (' + Math.round(ter / sas * 100) + '%)' : 'jemput bola') + '</span></div>' +
+      '<div class="tile"><span class="k">Dokumen lengkap</span><span class="v">' + (tt ? Math.round(td / tt * 100) : 0) + '%</span><span class="s">' + td + ' dari ' + tt + ' dokumen</span></div>';
+    if (!rows.length) { $('bank-table').innerHTML = '<div class="empty" style="border:0">Tidak ada kegiatan yang cocok dengan saringan.</div>'; return; }
+    $('bank-table').innerHTML = '<table class="bank"><thead><tr><th>Tanggal</th><th>Kegiatan</th><th>Kategori</th><th>Bidang</th><th>Dokumen</th><th>Rincian</th><th></th></tr></thead><tbody>' +
+      rows.map(function (a) {
+        var i = info(a), bd = BD(a.b);
+        return '<tr><td class="mono">' + fmtDate(a.date) + '</td>' +
+          '<td><div class="kegtop"><strong>' + esc(a.name) + '</strong><span class="note">' + esc(TP(a.k).n) + '</span>' + tagsHtml(a.tags) + '</div></td>' +
+          '<td><span class="tag' + (a.j === 'dpa' ? ' dpa' : '') + '">' + KATN[a.j] + '</span></td>' +
+          '<td><span class="dotl" style="--c:' + cv(bd.c) + '"><i class="dot"></i>' + esc(bd.n) + '</span></td>' +
+          '<td class="mono">' + i.d + '/' + i.t + ' · ' + i.pct + '%</td>' +
+          '<td>' + rinText(a) + '</td>' +
+          '<td><button class="btn ghost small" type="button" data-act="bank-open" data-id="' + a.id + '">Buka</button></td></tr>';
+      }).join('') + '</tbody></table>';
+  }
+  function csvCell(v) { var t = String(v == null ? '' : v); if (/^[=+\-@\t\r]/.test(t)) t = "'" + t; return '"' + t.replace(/"/g, '""') + '"'; }
+  function csvText() {
+    var head = ['Kategori', 'Kegiatan', 'Bidang', 'Jenis kegiatan', 'Tanggal', 'Tahun', 'Status dokumen', 'Dokumen lengkap', 'Total dokumen', 'Status DPA', 'Program/sub kegiatan', 'Pagu (Rp)', 'Realisasi (Rp)', 'PPTK', 'Lokasi', 'Petugas/tim', 'Target sasaran', 'Terlayani', 'Catatan', 'Tagging'];
+    var lines = [head].concat(bankRows().map(function (a) {
+      var i = info(a), d = a.j === 'dpa';
+      return [KATN[a.j], a.name, BD(a.b).n, TP(a.k).n, a.date, yr(a), ST[i.st], i.d, i.t, d ? DS[a.ds] : '', a.sub, d ? a.pagu : '', d ? a.real : '', a.pptk, a.loc, a.ptg, d ? '' : a.sas, d ? '' : a.ter, a.cat, tagNames(a)];
+    }));
+    return '﻿' + lines.map(function (r) { return r.map(csvCell).join(';'); }).join('\r\n');
+  }
+  function exportCsv() {
+    try {
+      var blob = new Blob([csvText()], { type: 'text/csv;charset=utf-8' });
+      var url = URL.createObjectURL(blob), el = document.createElement('a');
+      el.href = url; el.download = 'bank-data-kegiatan-' + iso(0) + '.csv';
+      document.body.appendChild(el); el.click();
+      setTimeout(function () { document.body.removeChild(el); URL.revokeObjectURL(url); }, 500);
+    } catch (e) { toast('Unduhan tidak didukung di browser ini'); }
+  }
 
   /* ---------- sambungan ke Google Sheets & Drive ---------- */
-  var KEYC = 'dukcapil-pin';
-  function getKey() { try { return localStorage.getItem(KEYC) || ''; } catch (e) { return ''; } }
-  function setKey(v) { try { localStorage.setItem(KEYC, v); } catch (e) {} }
   var pending = {}, timers = {}, inflight = 0, failed = false;
   function setSync(cls, txt) { $('sync').className = 'sync ' + cls; $('sync-t').textContent = txt; }
   function refreshSync() {
@@ -482,7 +1602,7 @@ var MAKS_MB = 10;   // batas ukuran satu file (samakan dengan CONFIG.MAKS_MB di 
   function showGate(msg) { $('gate').hidden = false; $('gate-msg').textContent = msg; setSync('err', 'Perlu PIN'); }
   function api(payload) {
     payload.key = getKey();
-    return fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) })
+    return fetch(apiUrl(), { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) })
       .then(function (r) { return r.json(); })
       .then(function (j) {
         if (j && j.error === 'unauthorized') { showGate('PIN salah atau belum diisi.'); throw new Error('unauthorized'); }
@@ -492,22 +1612,31 @@ var MAKS_MB = 10;   // batas ukuran satu file (samakan dengan CONFIG.MAKS_MB di 
   }
   function onFail(e) { if (e.message !== 'unauthorized') { failed = true; toast('Gagal menyimpan ke Google Sheets'); } }
   function findAct(id) { return state.acts.filter(function (x) { return x.id === id; })[0]; }
+  function num0(v) { return Math.max(0, Math.round(+v || 0)); }
   function normAct(a) {
+    var tp = TP(String(a.k || '')), j = (a.j === 'jb' || a.j === 'dpa') ? a.j : (tp.kat === 'jb' ? 'jb' : 'dpa');
     return {
-      id: String(a.id), name: String(a.name || ''), b: BIDANG[a.b] ? a.b : 'sekr', k: TIPE[a.k] ? a.k : 'admin', date: a.date || iso(0),
+      id: String(a.id), name: String(a.name || ''), j: j, b: String(a.b || ''), k: String(a.k || ''), date: a.date || iso(0), sample: !!a.sample,
+      th: num0(a.th), sub: str(a.sub, 160), pagu: num0(a.pagu), real: num0(a.real), pptk: str(a.pptk, 100), ds: DS[a.ds] ? a.ds : (j === 'dpa' ? 'usulan' : ''),
+      loc: str(a.loc, 160), sas: num0(a.sas), ter: num0(a.ter), ptg: str(a.ptg, 120), cat: str(a.cat, 400),
+      tags: (Array.isArray(a.tags) ? a.tags : []).map(String).filter(function (v, n, arr) { return arr.indexOf(v) === n && cfg.tags.some(function (t) { return t.id === v; }); }),
       docs: (a.docs || []).map(function (d) { return { t: String(d.t || ''), d: !!d.d, f: d.f && d.f.url ? d.f : null }; })
     };
   }
   function pull() {
     setSync('busy', 'Memuat dari Google Sheets…');
     return api({ action: 'list' }).then(function (j) {
+      if (j.cfg) { cfg = normCfg(j.cfg); saveCfgLocal(); if (!ui.dirty) newDraft(); }
       state.acts = j.acts.map(normAct);
+      inov = (j.inov || []).map(normInov);
+      jbp = (j.jbl || []).map(normJb);
       ui.loadErr = ''; failed = false;
       $('gate').hidden = true;
       if (!Object.keys(ui.open).length && state.acts.length) ui.open[state.acts[0].id] = true;
-      refreshSync(); renderAll();
+      refreshSync(); rebuildAll();
+      if (ui.tab === 'set' && !ui.dirty) renderSettings();
     }).catch(function (e) {
-      if (e.message !== 'unauthorized') { ui.loadErr = 'Tidak bisa memuat data (' + e.message + '). Periksa URL Apps Script dan koneksi, lalu klik Muat ulang.'; setSync('err', 'Gagal memuat'); renderAll(); }
+      if (e.message !== 'unauthorized') { ui.loadErr = 'Tidak bisa memuat data (' + e.message + '). Periksa koneksi di tab Pengaturan, lalu klik Muat ulang.'; setSync('err', 'Gagal memuat'); renderAll(); }
     });
   }
   function push(a) {
@@ -530,7 +1659,7 @@ var MAKS_MB = 10;   // batas ukuran satu file (samakan dengan CONFIG.MAKS_MB di 
   function idle() { return !inflight && !Object.keys(pending).length && !Object.keys(ui.busy).length; }
   function uploadFile(a, n, file) {
     if (!file) return;
-    if (file.size > MAKS_MB * 1024 * 1024) { toast('File terlalu besar (maks ' + MAKS_MB + ' MB)'); return; }
+    if (file.size > maxMb() * 1024 * 1024) { toast('File terlalu besar (maks ' + maxMb() + ' MB)'); return; }
     var k = a.id + ':' + n;
     ui.busy[k] = true; renderList();
     var fr = new FileReader();
@@ -549,44 +1678,254 @@ var MAKS_MB = 10;   // batas ukuran satu file (samakan dengan CONFIG.MAKS_MB di 
     fr.readAsDataURL(file);
   }
 
+  /* ---------- menu Pengaturan ---------- */
+  var draft = null;
+  function newDraft() {
+    draft = JSON.parse(JSON.stringify(cfg));
+    draft.tipe.forEach(function (t) { t.docsText = t.docs.join('\n'); });
+    ui.dirty = false;
+  }
+  function setMsg(text, cls) { var m = $('s-msg2'); if (m) { m.className = 'note ' + (cls || ''); m.textContent = text; } }
 
-  function toast(m) {
-    var t = $('toast'); t.textContent = m; t.hidden = false;
-    clearTimeout(toast.h); toast.h = setTimeout(function () { t.hidden = true; }, 2600);
-  }
-  function setTab(t) {
-    ui.tab = t;
-    $('view-keg').hidden = t !== 'keg'; $('view-ide').hidden = t !== 'ide';
-    $('tab-keg').setAttribute('aria-selected', t === 'keg'); $('tab-ide').setAttribute('aria-selected', t === 'ide');
-  }
-  function preview() {
-    var k = $('f-tipe').value;
-    $('f-preview').innerHTML = '<strong>Dokumen yang perlu dilengkapi (' + TIPE[k].docs.length + ')</strong><ul>' + TIPE[k].docs.map(function (d) { return '<li>' + esc(d) + '</li>'; }).join('') + '</ul>';
-  }
-  function openForm(pre) {
-    pre = pre || {};
-    $('form-title').textContent = pre.name ? 'Jadikan kegiatan' : 'Kegiatan baru';
-    $('f-name').value = pre.name || '';
-    $('f-bidang').value = pre.b || 'daftar';
-    $('f-tipe').value = pre.k || 'sosialisasi';
-    $('f-date').value = iso(14);
-    preview();
-    setTab('keg');
-    $('form').hidden = false;
-    $('form').scrollIntoView({ block: 'start', behavior: 'smooth' });
-    $('f-name').focus({ preventScroll: true });
+  function setNavHtml() {
+    var items = [['conn', 'Koneksi'], ['ident', 'Identitas'], ['bidang', 'Bidang'], ['tipe', 'Jenis &amp; dokumen'], ['ideas', 'Bank ide']];
+    $('set-nav').innerHTML = items.map(function (x) {
+      return '<button class="chip" type="button" data-act="sset" data-s="' + x[0] + '" aria-pressed="' + (ui.sset === x[0]) + '">' + x[1] + '</button>';
+    }).join('');
   }
 
-  /* init static controls */
-  $('today').textContent = 'Dukcapil · ' + T0.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-  $('f-bidang').innerHTML = Object.keys(BIDANG).map(function (k) { return '<option value="' + k + '">' + esc(BIDANG[k].n) + '</option>'; }).join('');
-  $('f-tipe').innerHTML = Object.keys(TIPE).map(function (k) { return '<option value="' + k + '">' + esc(TIPE[k].n) + '</option>'; }).join('');
-  $('fb').innerHTML = '<option value="all">Semua bidang</option>' + Object.keys(BIDANG).map(function (k) { return '<option value="' + k + '">' + esc(BIDANG[k].n) + '</option>'; }).join('');
+  function secConn() {
+    return '<div class="panel"><h2>Koneksi Google Sheets dan Drive</h2>' +
+      '<p class="note" style="margin:0">' + (REMOTE ? 'Terhubung. Kegiatan tersimpan di Google Sheets dan dokumen di Google Drive.' : 'Belum terhubung. Data hanya tersimpan di browser ini. Isi URL dan PIN dari Apps Script untuk menyimpan ke Google Sheets dan Drive.') + '</p>' +
+      '<div class="fgrid"><label class="f full" for="s-url">URL Web App Apps Script (berakhiran /exec)<input type="text" id="s-url" value="' + esc(apiUrl()) + '" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off"></label>' +
+      '<label class="f" for="s-pin">PIN<input type="password" id="s-pin" autocomplete="off" placeholder="' + (getKey() ? 'tersimpan, isi untuk mengganti' : 'PIN yang diatur di Code.gs') + '"></label>' +
+      '<label class="f" for="s-max">Batas ukuran file (MB)<input type="number" id="s-max" min="1" max="30" value="' + maxMb() + '"></label></div>' +
+      '<div class="row-btns"><button class="btn" type="button" data-act="s-conn">Simpan dan uji koneksi</button>' +
+      (REMOTE ? '<button class="btn ghost" type="button" data-act="s-invite">Buat tautan undangan</button><button class="btn ghost" type="button" data-act="s-disc">Putuskan koneksi</button>' : '') + '</div>' +
+      '<div id="s-msg" class="note" role="status"></div><div id="s-invite"></div>' +
+      '<p class="note" style="margin:0">Pengaturan koneksi disimpan per browser. Rekan kerja cukup membuka tautan undangan (tanpa PIN) lalu mengisi PIN satu kali. Batas ukuran file di server diatur di Code.gs (MAKS_MB).</p></div>';
+  }
+  function secIdent() {
+    return '<div class="panel"><h2>Identitas</h2><div class="fgrid">' +
+      '<label class="f full" for="d-instansi">Nama instansi<input type="text" id="d-instansi" data-s="top" data-k="instansi" value="' + esc(draft.instansi) + '" maxlength="120"></label>' +
+      '<label class="f full" for="d-judul">Judul dashboard<input type="text" id="d-judul" data-s="top" data-k="judul" value="' + esc(draft.judul) + '" maxlength="80"></label></div></div>';
+  }
+  function colorOpts(sel) { var h = ''; for (var c = 1; c <= 8; c++) h += '<option value="' + c + '"' + (c === sel ? ' selected' : '') + '>' + PALN[c] + '</option>'; return h; }
+  function secBidang() {
+    return '<div class="panel"><h2>Bidang</h2><p class="note" style="margin:0">Sesuaikan dengan struktur organisasi di daerah Anda. Bidang yang masih dipakai kegiatan atau ide tidak bisa dihapus.</p>' +
+      draft.bidang.map(function (b, i) {
+        return '<div class="srow"><span class="cwrap" style="--c:' + cv(b.c) + '"><i class="dot"></i><select data-s="bidang" data-i="' + i + '" data-k="c" aria-label="Warna">' + colorOpts(b.c) + '</select></span>' +
+          '<input type="text" data-s="bidang" data-i="' + i + '" data-k="n" value="' + esc(b.n) + '" placeholder="Nama bidang" aria-label="Nama bidang" maxlength="80">' +
+          '<input type="text" data-s="bidang" data-i="' + i + '" data-k="s" value="' + esc(b.s) + '" placeholder="Tugas pokok singkat" aria-label="Tugas pokok singkat" maxlength="160">' +
+          '<button class="btn danger small" type="button" data-act="s-del" data-s="bidang" data-i="' + i + '">Hapus</button></div>';
+      }).join('') +
+      '<div><button class="btn ghost small" type="button" data-act="s-add" data-s="bidang">+ Tambah bidang</button></div></div>';
+  }
+  function tipeBlock(t, i) {
+    return '<div class="panel"><div class="srow2"><input type="text" data-s="tipe" data-i="' + i + '" data-k="n" value="' + esc(t.n) + '" placeholder="Nama jenis kegiatan" aria-label="Nama jenis kegiatan" maxlength="80">' +
+      '<select data-s="tipe" data-i="' + i + '" data-k="kat" aria-label="Kategori"><option value="dpa"' + (t.kat === 'dpa' ? ' selected' : '') + '>Kegiatan DPA</option><option value="jb"' + (t.kat === 'jb' ? ' selected' : '') + '>Jemput bola</option></select>' +
+      '<button class="btn danger small" type="button" data-act="s-del" data-s="tipe" data-i="' + i + '">Hapus</button></div>' +
+      '<label class="f">Dokumen yang perlu dilengkapi (satu dokumen per baris)<textarea rows="7" data-s="tipe" data-i="' + i + '" data-k="docsText">' + esc(t.docsText) + '</textarea></label></div>';
+  }
+  function secTipe() {
+    var h = '<p class="note" style="margin:0">Jenis kegiatan dikelompokkan menurut kategori, dan tiap jenis punya daftar dokumen sendiri. Perubahan hanya berlaku untuk kegiatan yang dibuat sesudahnya. Kegiatan yang sudah ada tetap memakai daftar lamanya.</p>';
+    [['dpa', 'Kegiatan DPA'], ['jb', 'Jemput bola']].forEach(function (g) {
+      h += '<h3 style="font-size:1.05rem;margin-top:4px">' + g[1] + '</h3>';
+      draft.tipe.forEach(function (t, i) { if (t.kat === g[0]) h += tipeBlock(t, i); });
+      h += '<div><button class="btn ghost small" type="button" data-act="s-add" data-s="tipe" data-kat="' + g[0] + '">+ Tambah jenis untuk ' + g[1] + '</button></div>';
+    });
+    return h;
+  }
+  function secIdeas() {
+    var filt = '<label class="f" style="max-width:320px">Tampilkan bidang<select data-s="filt"><option value="all">Semua bidang</option>' + opts(draft.bidang, ui.sib) + '</select></label>';
+    var cards = draft.ideas.map(function (x, i) { return { x: x, i: i }; }).filter(function (o) { return ui.sib === 'all' || o.x.b === ui.sib; }).map(function (o) {
+      var x = o.x, i = o.i;
+      return '<div class="panel"><div class="srow2"><input type="text" data-s="ideas" data-i="' + i + '" data-k="t" value="' + esc(x.t) + '" placeholder="Judul ide kegiatan" aria-label="Judul ide" maxlength="160">' +
+        '<button class="btn danger small" type="button" data-act="s-del" data-s="ideas" data-i="' + i + '">Hapus</button></div>' +
+        '<div class="fgrid"><label class="f">Bidang<select data-s="ideas" data-i="' + i + '" data-k="b">' + opts(draft.bidang, x.b) + '</select></label>' +
+        '<label class="f">Jenis kegiatan<select data-s="ideas" data-i="' + i + '" data-k="k">' + optsT(draft.tipe, x.k) + '</select></label></div>' +
+        '<label class="f">Penjelasan singkat<textarea rows="2" data-s="ideas" data-i="' + i + '" data-k="d" maxlength="400">' + esc(x.d) + '</textarea></label>' +
+        '<div class="f"><span>Tagging</span><div class="chips">' + tagPicker(x.tg || [], 'idea', i) + '</div></div></div>';
+    }).join('');
+    return '<div class="row-btns" style="align-items:flex-end;justify-content:space-between">' + filt +
+      '<button class="btn ghost small" type="button" data-act="s-add" data-s="ideas">+ Tambah ide</button></div>' +
+      (cards || '<div class="empty">Belum ada ide untuk bidang ini.</div>');
+  }
+  function renderSettings() {
+    if (!draft) newDraft();
+    setNavHtml();
+    var h;
+    if (ui.sset === 'conn') h = secConn();
+    else {
+      h = ui.sset === 'ident' ? secIdent() : ui.sset === 'bidang' ? secBidang() : ui.sset === 'tipe' ? secTipe() : secIdeas();
+      h += '<div class="setbar"><button class="btn" type="button" data-act="s-save">Simpan pengaturan</button>' +
+        '<button class="btn ghost" type="button" data-act="s-cancel">Batalkan perubahan</button>' +
+        '<button class="btn ghost" type="button" data-act="s-reset">Muat isi bawaan</button></div>' +
+        '<div id="s-msg2" class="note" role="status"></div>';
+    }
+    $('set-body').innerHTML = h;
+  }
 
-  /* events */
+  function onSetInput(e) {
+    var el = e.target, s = el.getAttribute && el.getAttribute('data-s');
+    if (!s) return;
+    var k = el.getAttribute('data-k'), v = el.value;
+    if (s === 'filt') { ui.sib = v; renderSettings(); return; }
+    ui.dirty = true;
+    if (s === 'top') { draft[k] = v; return; }
+    var item = draft[s][+el.getAttribute('data-i')];
+    if (!item) return;
+    item[k] = k === 'c' ? +v : v;
+    if (k === 'c' && el.parentNode) el.parentNode.style.setProperty('--c', cv(+v));
+    if (s === 'tipe' && k === 'kat') renderSettings();
+  }
+
+  function usedBy(kind, id) {
+    var f = kind === 'bidang' ? 'b' : 'k';
+    return [state.acts.filter(function (a) { return a[f] === id; }).length, draft.ideas.filter(function (x) { return x[f] === id; }).length, kind === 'bidang' ? inov.filter(function (v) { return v.b === id; }).length : 0, jbp.filter(function (v) { return v[f] === id; }).length];
+  }
+  function setAdd(s, kat) {
+    ui.dirty = true;
+    if (s === 'bidang') draft.bidang.push({ id: uid('b'), n: '', s: '', c: (draft.bidang.length % 8) + 1 });
+    else if (s === 'tipe') draft.tipe.push({ id: uid('t'), n: '', kat: kat === 'jb' ? 'jb' : 'dpa', docs: [], docsText: '' });
+    else { ui.sib = 'all'; draft.ideas.unshift({ id: uid('i'), b: draft.bidang[0].id, t: '', k: draft.tipe[0].id, d: '', tg: [] }); }
+    renderSettings();
+    var sel = s === 'ideas' ? '[data-s="ideas"][data-i="0"][data-k="t"]' : '[data-s="' + s + '"][data-i="' + (draft[s].length - 1) + '"][data-k="n"]';
+    var f = document.querySelector(sel);
+    if (f) f.focus();
+  }
+  function setDel(s, i) {
+    if (s === 'ideas') { draft.ideas.splice(i, 1); ui.dirty = true; renderSettings(); return; }
+    var it = draft[s][i];
+    if (s === 'bidang' && draft.bidang.length <= 1) { setMsg('Minimal harus ada satu bidang.', 'err'); return; }
+    if (s === 'tipe' && draft.tipe.filter(function (t) { return t.kat === it.kat; }).length <= 1) { setMsg('Setiap kategori minimal punya satu jenis kegiatan.', 'err'); return; }
+    var u = usedBy(s, it.id);
+    if (u[0] || u[1] || u[2] || u[3]) { setMsg('Masih dipakai ' + u[0] + ' kegiatan, ' + u[1] + ' ide, ' + u[2] + ' inovasi, dan ' + u[3] + ' catatan jemput bola. Pindahkan dulu ke yang lain.', 'err'); return; }
+    draft[s].splice(i, 1); ui.dirty = true; renderSettings();
+  }
+
+  function saveSettings() {
+    var o = { instansi: draft.instansi.trim(), judul: draft.judul.trim() };
+    if (!o.judul) { setMsg('Judul dashboard tidak boleh kosong.', 'err'); return; }
+    if (!o.instansi) { setMsg('Nama instansi tidak boleh kosong.', 'err'); return; }
+    var i;
+    for (i = 0; i < draft.bidang.length; i++) if (!draft.bidang[i].n.trim()) { ui.sset = 'bidang'; renderSettings(); setMsg('Ada bidang tanpa nama. Isi atau hapus.', 'err'); return; }
+    for (i = 0; i < draft.tipe.length; i++) if (!draft.tipe[i].n.trim()) { ui.sset = 'tipe'; renderSettings(); setMsg('Ada jenis kegiatan tanpa nama. Isi atau hapus.', 'err'); return; }
+    o.bidang = draft.bidang.map(function (b) { return { id: b.id, n: b.n.trim(), s: b.s.trim(), c: b.c }; });
+    o.tipe = draft.tipe.map(function (t) {
+      return { id: t.id, n: t.n.trim(), kat: t.kat === 'jb' ? 'jb' : 'dpa', docs: String(t.docsText || '').split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean) };
+    });
+    if (!o.tipe.some(function (t) { return t.kat === 'dpa'; }) || !o.tipe.some(function (t) { return t.kat === 'jb'; })) {
+      ui.sset = 'tipe'; renderSettings(); setMsg('Setiap kategori (Kegiatan DPA dan Jemput bola) minimal punya satu jenis kegiatan.', 'err'); return;
+    }
+    o.tags = cfg.tags.map(function (t) { return { id: t.id, n: t.n, c: t.c }; });
+    o.ideas = draft.ideas.filter(function (x) { return x.t.trim(); }).map(function (x) { return { id: x.id, b: x.b, t: x.t.trim(), k: x.k, d: x.d.trim(), tg: (x.tg || []).slice() }; });
+    var bid = o.bidang.map(function (b) { return b.id; }), tid = o.tipe.map(function (t) { return t.id; });
+    var bad = state.acts.filter(function (a) { return bid.indexOf(a.b) < 0 || tid.indexOf(a.k) < 0; });
+    if (bad.length) { setMsg(bad.length + ' kegiatan masih memakai bidang atau jenis yang tidak ada lagi (contoh: "' + bad[0].name + '"). Pertahankan bidang dan jenis itu.', 'err'); return; }
+    var badJ = jbp.filter(function (v) { return bid.indexOf(v.b) < 0; });
+    if (badJ.length) { setMsg(badJ.length + ' catatan jemput bola masih memakai bidang yang tidak ada lagi (contoh: "' + badJ[0].name + '"). Pertahankan bidang itu.', 'err'); return; }
+    var badI = inov.filter(function (v) { return bid.indexOf(v.b) < 0; });
+    if (badI.length) { setMsg(badI.length + ' inovasi masih memakai bidang yang tidak ada lagi (contoh: "' + badI[0].name + '"). Pertahankan bidang itu.', 'err'); return; }
+    cfg = normCfg(o);
+    saveCfgLocal();
+    newDraft();
+    rebuildAll();
+    renderSettings();
+    if (REMOTE) {
+      failed = false; inflight++; refreshSync();
+      api({ action: 'setcfg', cfg: cfg }).then(function () { toast('Pengaturan disimpan di Google Sheets'); })
+        .catch(function (e) { onFail(e); toast('Tersimpan di browser ini, tetapi gagal ke Google Sheets'); })
+        .then(function () { inflight--; refreshSync(); });
+    } else toast('Pengaturan disimpan');
+  }
+
+  function connSave() {
+    var url = $('s-url').value.trim(), pin = $('s-pin').value.trim() || getKey(), mx = parseInt($('s-max').value, 10) || 10, msg = $('s-msg');
+    if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(url)) { msg.className = 'note err'; msg.textContent = 'URL tidak valid. Harus diawali https://script.google.com dan berakhiran /exec.'; return; }
+    if (!pin) { msg.className = 'note err'; msg.textContent = 'Isi PIN.'; return; }
+    msg.className = 'note'; msg.textContent = 'Menguji koneksi…';
+    fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'list', key: pin }) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (j && j.error === 'unauthorized') { msg.className = 'note err'; msg.textContent = 'PIN salah.'; return; }
+        if (!j || !j.ok) { msg.className = 'note err'; msg.textContent = 'Server menjawab: ' + ((j && j.error) || 'tidak dikenal'); return; }
+        lsSet('dukcapil-api', url); setKey(pin); lsSet('dukcapil-max', String(Math.min(30, Math.max(1, mx))));
+        msg.className = 'note good'; msg.textContent = 'Terhubung. Memuat ulang…';
+        setTimeout(function () { location.reload(); }, 700);
+      })
+      .catch(function () { msg.className = 'note err'; msg.textContent = 'Tidak bisa terhubung. Periksa URL dan pastikan deployment memberi akses "Anyone".'; });
+  }
+  function makeInvite() {
+    var link = location.origin + location.pathname + '#setup=' + btoa(apiUrl()).replace(/\+/g, '-').replace(/\//g, '_');
+    $('s-invite').innerHTML = '<label class="f" for="s-link">Tautan undangan (tanpa PIN)<input type="text" id="s-link" readonly value="' + esc(link) + '"></label>';
+    var inp = $('s-link'); inp.focus(); inp.select();
+    try { navigator.clipboard.writeText(link).then(function () { toast('Tautan disalin'); }, function () {}); } catch (e) {}
+  }
+
+  /* ---------- pemasangan event ---------- */
   $('btn-new').addEventListener('click', function () { openForm(); });
   $('btn-cancel').addEventListener('click', function () { $('form').hidden = true; });
   $('f-tipe').addEventListener('change', preview);
+  $('f-kat').addEventListener('change', function () {
+    var j = $('f-kat').value === 'jb' ? 'jb' : 'dpa';
+    $('form-title').textContent = j === 'jb' ? 'Jemput bola baru' : 'Kegiatan DPA baru';
+    fillTipe(j, '');
+  });
+  $('bk-kat').addEventListener('change', function (e) { ui.bk.kat = e.target.value; renderBank(); });
+  $('bk-th').addEventListener('change', function (e) { ui.bk.th = e.target.value; renderBank(); });
+  $('bk-b').addEventListener('change', function (e) { ui.bk.b = e.target.value; renderBank(); });
+  $('bk-tg').addEventListener('change', function (e) { ui.bk.tg = e.target.value; renderBank(); });
+  $('ft').addEventListener('change', function (e) { ui.ft = e.target.value; renderList(); });
+  $('tag-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var m = $('t-msg'), err = addTag($('t-name').value, +$('t-c').value || 0);
+    if (err) { m.className = 'note err'; m.textContent = err; return; }
+    $('t-name').value = ''; m.className = 'note good'; m.textContent = 'Tag ditambahkan.';
+    afterTagChange();
+  });
+  $('bk-q').addEventListener('input', function (e) { ui.bk.q = e.target.value; renderBank(); });
+  $('btn-csv').addEventListener('click', exportCsv);
+  $('btn-new-jbl').addEventListener('click', function () { openJbForm(); });
+  $('btn-jf-cancel').addEventListener('click', function () { $('jb-form').hidden = true; });
+  $('jy').addEventListener('change', function (e) { ui.jy = e.target.value; renderJb(); });
+  $('jfb').addEventListener('change', function (e) { ui.jb = e.target.value; renderJb(); });
+  $('jfk').addEventListener('change', function (e) { ui.jk = e.target.value; renderJb(); });
+  $('jft').addEventListener('change', function (e) { ui.jt = e.target.value; renderJb(); });
+  $('jq').addEventListener('input', function (e) { ui.jq = e.target.value; renderJb(); });
+  $('btn-csv-jb').addEventListener('click', function () { saveCsv(jbCsvText(), 'jemput-bola-' + iso(0) + '.csv'); });
+  $('jf-files').addEventListener('change', function (e) { ui.jfiles = Array.prototype.slice.call(e.target.files || []); jfNote(); });
+  $('jb-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = $('jf-name').value.trim();
+    if (!name) return;
+    var o = { id: uid('j'), name: name, date: $('jf-date').value, b: $('jf-b').value, k: $('jf-k').value, kid: $('jf-kid').value, kec: $('jf-kec').value.trim(), desa: $('jf-desa').value.trim(), loc: $('jf-loc').value.trim(), ptg: $('jf-ptg').value.trim(), sas: $('jf-sas').value, ter: $('jf-ter').value, kend: $('jf-kend').value.trim(), tl: $('jf-tl').value.trim(), tags: ui.jtags, files: [] };
+    HSL.forEach(function (h) { o[h[0]] = $('jf-h-' + h[0]).value; });
+    var v = normJb(o), pend = ui.jfiles.slice();
+    jbp.push(v); saveJb(); pushJb(v);
+    ui.jopen[v.id] = true; ui.jy = 'all'; ui.jb = 'all'; ui.jk = 'all'; ui.jt = 'all'; ui.jq = ''; $('jq').value = '';
+    ui.jfiles = []; $('jf-files').value = '';
+    $('jb-form').hidden = true;
+    buildSelects(); renderAll(); toast('Catatan jemput bola disimpan');
+    if (pend.length) uploadJbFiles(v.id, pend);
+  });
+  $('btn-new-inov').addEventListener('click', function () { openInovForm(); });
+  $('btn-iv-cancel').addEventListener('click', function () { $('inov-form').hidden = true; });
+  $('ivf-b').addEventListener('change', function (e) { ui.vb = e.target.value; renderInov(); });
+  $('ivf-t').addEventListener('change', function (e) { ui.vt = e.target.value; renderInov(); });
+  $('ivf-q').addEventListener('input', function (e) { ui.vq = e.target.value; renderInov(); });
+  $('btn-csv-inov').addEventListener('click', exportInovCsv);
+  $('inov-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = $('iv-name').value.trim();
+    if (!name) return;
+    var v = normInov({ id: uid('v'), name: name, st: $('iv-st').value, b: $('iv-b').value, start: $('iv-start').value, end: $('iv-end').value, pic: $('iv-pic').value, sas: $('iv-sas').value, desc: $('iv-desc').value, man: $('iv-man').value, lnk: $('iv-lnk').value, tags: ui.vtags });
+    inov.push(v); saveInov(); pushInov(v);
+    ui.vopen[v.id] = true; ui.vs = 'all'; ui.vb = 'all'; ui.vt = 'all'; ui.vq = '';
+    $('ivf-q').value = '';
+    $('inov-form').hidden = true;
+    buildSelects(); renderAll(); toast('Inovasi disimpan');
+  });
   $('fb').addEventListener('change', function (e) { ui.fb = e.target.value; renderList(); });
   $('fs').addEventListener('change', function (e) { ui.fs = e.target.value; renderList(); });
   $('fq').addEventListener('input', function (e) { ui.q = e.target.value; renderList(); });
@@ -594,35 +1933,71 @@ var MAKS_MB = 10;   // batas ukuran satu file (samakan dengan CONFIG.MAKS_MB di 
     state.acts = state.acts.filter(function (a) { return !a.sample; });
     save(); renderAll(); toast('Contoh kegiatan dihapus');
   });
-  document.querySelectorAll('[data-tab]').forEach(function (b) { b.addEventListener('click', function () { setTab(b.getAttribute('data-tab')); }); });
+  document.querySelectorAll('[data-tab]').forEach(function (b) { b.addEventListener('click', function () { $('form').hidden = true; $('inov-form').hidden = true; $('jb-form').hidden = true; setTab(b.getAttribute('data-tab')); }); });
+  $('set-body').addEventListener('input', onSetInput);
+  $('set-body').addEventListener('change', onSetInput);
 
   $('form').addEventListener('submit', function (e) {
     e.preventDefault();
-    var name = $('f-name').value.trim(), k = $('f-tipe').value;
+    var name = $('f-name').value.trim(), k = $('f-tipe').value, j = $('f-kat').value === 'jb' ? 'jb' : 'dpa';
     if (!name || !$('f-date').value) return;
-    var a = { id: uid(), name: name, b: $('f-bidang').value, k: k, date: $('f-date').value, docs: mkDocs(k, 0) };
+    var o = { id: uid(), name: name, j: j, b: $('f-bidang').value, k: k, date: $('f-date').value, docs: mkDocs(k, 0), tags: ui.ftags.slice() };
+    if (j === 'dpa') { o.th = $('f-th').value; o.sub = $('f-sub').value.trim(); o.pagu = $('f-pagu').value; o.pptk = $('f-pptk').value.trim(); o.ds = $('f-ds').value; }
+    else { o.loc = $('f-loc').value.trim(); o.sas = $('f-sas').value; o.ptg = $('f-ptg').value.trim(); }
+    var a = normAct(o);
     state.acts.push(a); push(a);
     ui.open[a.id] = true; ui.fb = 'all'; ui.fs = 'all'; ui.q = '';
     $('fb').value = 'all'; $('fs').value = 'all'; $('fq').value = '';
-    save(); $('form').hidden = true; renderAll(); toast('Kegiatan disimpan');
+    ui.ft = 'all'; $('ft').value = 'all';
+    save(); $('form').hidden = true; setTab(j); toast('Kegiatan disimpan');
   });
 
+  document.addEventListener('error', function (e) {
+    var t = e.target;
+    if (t && t.classList && t.classList.contains('jbth')) { var d = document.createElement('div'); d.className = 'ico'; d.textContent = 'Foto'; t.parentNode.replaceChild(d, t); }
+  }, true);
+
   document.addEventListener('submit', function (e) {
-    var f = e.target.closest('.adddoc');
+    var f = e.target.closest && e.target.closest('.adddoc');
     if (!f) return;
     e.preventDefault();
     var inp = f.querySelector('input'), v = inp.value.trim();
     if (!v) return;
-    var a = state.acts.filter(function (x) { return x.id === f.getAttribute('data-id'); })[0];
+    var a = findAct(f.getAttribute('data-id'));
     if (a) { a.docs.push({ t: v, d: false, f: null }); save(); push(a); renderAll(); }
   });
 
   document.addEventListener('change', function (e) {
     var el = e.target, act = el.getAttribute && el.getAttribute('data-act');
-    if (act !== 'toggle' && act !== 'date' && act !== 'file') return;
-    var a = state.acts.filter(function (x) { return x.id === el.getAttribute('data-id'); })[0];
+    if (act === 'ifld') { ifldChange(el); return; }
+    if (act === 'jfld') { jfldChange(el); return; }
+    if (act === 'jbfile') { var jid = el.getAttribute('data-id'), jl = el.files; uploadJbFiles(jid, jl); return; }
+    if (act === 'tgname' || act === 'tgcol') {
+      var tt = cfg.tags.filter(function (x) { return x.id === el.getAttribute('data-id'); })[0];
+      if (!tt) return;
+      if (act === 'tgcol') { tt.c = +el.value || 0; }
+      else {
+        var nv = String(el.value || '').trim().slice(0, 60);
+        if (!nv) { toast('Nama tag tidak boleh kosong'); renderTags(); return; }
+        if (cfg.tags.some(function (x) { return x.id !== tt.id && x.n.toLowerCase() === nv.toLowerCase(); })) { toast('Nama tag sudah ada'); renderTags(); return; }
+        tt.n = nv;
+      }
+      commitCfg(); afterTagChange();
+      return;
+    }
+    if (act !== 'toggle' && act !== 'date' && act !== 'file' && act !== 'fld') return;
+    var a = findAct(el.getAttribute('data-id'));
     if (!a) return;
     if (act === 'file') { uploadFile(a, +el.getAttribute('data-n'), el.files && el.files[0]); return; }
+    if (act === 'fld') {
+      var fk = el.getAttribute('data-k'), fv = el.value;
+      if (fk === 'ds') { if (DS[fv]) a.ds = fv; }
+      else if (fk === 'th' || fk === 'pagu' || fk === 'real' || fk === 'sas' || fk === 'ter') a[fk] = num0(fv);
+      else a[fk] = str(fv, fk === 'cat' ? 400 : 160).trim();
+      save(); push(a); renderSummary();
+      var mm = $('meta-' + a.id); if (mm) mm.innerHTML = metaHtml(a);
+      return;
+    }
     if (act === 'toggle') a.docs[+el.getAttribute('data-n')].d = el.checked;
     else if (el.value) a.date = el.value;
     save(); push(a); renderAll();
@@ -638,16 +2013,81 @@ var MAKS_MB = 10;   // batas ukuran satu file (samakan dengan CONFIG.MAKS_MB di 
     else if (act === 'del-yes') { state.acts = state.acts.filter(function (a) { return a.id !== id; }); ui.confirm = null; save(); pushDel(id); renderAll(); toast('Kegiatan dihapus'); }
     else if (act === 'pick') { var fi = document.getElementById('file-' + id + '-' + el.getAttribute('data-n')); if (fi) fi.click(); }
     else if (act === 'ichip') { ui.ib = el.getAttribute('data-b'); renderIdeas(); }
-    else if (act === 'idea') { var x = IDEAS[+el.getAttribute('data-n')]; openForm({ name: x.t, b: x.b, k: x.k }); }
+    else if (act === 'ikat') { ui.ik = el.getAttribute('data-k'); renderIdeas(); }
+    else if (act === 'tagtog') {
+      var cx = el.getAttribute('data-ctx'), tid = el.getAttribute('data-t');
+      if (cx === 'form') { tog(ui.ftags, tid); $('f-tags').innerHTML = tagPicker(ui.ftags, 'form', ''); }
+      else if (cx === 'act') { var ta = findAct(id); if (ta) { tog(ta.tags, tid); save(); push(ta); renderList(); renderSummary(); } }
+      else if (cx === 'jbp') { var tj = findJb(id); if (tj) { tog(tj.tags, tid); saveJb(); pushJb(tj); renderJb(); } }
+      else if (cx === 'jform') { tog(ui.jtags, tid); $('jf-tags').innerHTML = tagPicker(ui.jtags, 'jform', ''); }
+      else if (cx === 'inov') { var tv = findInov(id); if (tv) { tog(tv.tags, tid); saveInov(); pushInov(tv); renderInov(); } }
+      else if (cx === 'iform') { tog(ui.vtags, tid); $('iv-tags').innerHTML = tagPicker(ui.vtags, 'iform', ''); }
+      else if (cx === 'idea') { var di = draft.ideas[+id]; if (di) { di.tg = di.tg || []; tog(di.tg, tid); ui.dirty = true; renderSettings(); } }
+    }
+    else if (act === 'goto-tag') { $('form').hidden = true; $('inov-form').hidden = true; $('jb-form').hidden = true; setTab('tag'); }
+    else if (act === 'jb-open') { ui.jopen[id] = !ui.jopen[id]; ui.jdel = null; renderJb(); }
+    else if (act === 'jb-del') { ui.jdel = id; renderJb(); }
+    else if (act === 'jb-del-no') { ui.jdel = null; renderJb(); }
+    else if (act === 'jb-del-yes') { jbp = jbp.filter(function (v) { return v.id !== id; }); ui.jdel = null; saveJb(); pushDelJb(id); renderAll(); toast('Catatan dihapus'); }
+    else if (act === 'jb-rmf') { var rv = findJb(id); if (rv) { rv.files.splice(+el.getAttribute('data-n'), 1); saveJb(); pushJb(rv); renderJb(); } }
+    else if (act === 'jb-addlink') {
+      var lv = findJb(id), li = $('jl-' + id), lu = li ? li.value.trim() : '';
+      if (!lv) return;
+      if (!/^https?:\/\/\S+$/i.test(lu)) { toast('Tautan harus diawali http:// atau https://'); return; }
+      lv.files.push({ n: lu.replace(/^https?:\/\//i, '').slice(0, 60), u: lu.slice(0, 500), i: '', k: 'link', at: '' });
+      saveJb(); pushJb(lv); renderJb(); toast('Tautan ditambahkan');
+    }
+    else if (act === 'jb-clear-sample') { jbp = jbp.filter(function (v) { return !v.sample; }); saveJb(); buildSelects(); renderAll(); toast('Contoh dihapus'); }
+    else if (act === 'tg-viewj') { ui.jt = id; ui.jy = 'all'; ui.jb = 'all'; ui.jk = 'all'; ui.jq = ''; $('jq').value = ''; buildSelects(); setTab('jbl'); }
+    else if (act === 'iv-open') { ui.vopen[id] = !ui.vopen[id]; ui.vdel = null; renderInov(); }
+    else if (act === 'iv-del') { ui.vdel = id; renderInov(); }
+    else if (act === 'iv-del-no') { ui.vdel = null; renderInov(); }
+    else if (act === 'iv-del-yes') { inov = inov.filter(function (v) { return v.id !== id; }); ui.vdel = null; saveInov(); pushDelInov(id); renderAll(); toast('Inovasi dihapus'); }
+    else if (act === 'ivs') { ui.vs = el.getAttribute('data-s'); renderInov(); }
+    else if (act === 'iv-clear-sample') { inov = inov.filter(function (v) { return !v.sample; }); saveInov(); renderAll(); toast('Contoh inovasi dihapus'); }
+    else if (act === 'tg-viewi') { ui.vt = id; ui.vs = 'all'; ui.vb = 'all'; ui.vq = ''; $('ivf-q').value = ''; buildSelects(); setTab('inov'); }
+    else if (act === 'tg-del') { ui.tconfirm = id; renderTags(); }
+    else if (act === 'tg-del-no') { ui.tconfirm = null; renderTags(); }
+    else if (act === 'tg-del-yes') { ui.tconfirm = null; delTag(id); afterTagChange(); toast('Tag dihapus'); }
+    else if (act === 'tg-view') { ui.bk = { kat: 'all', th: 'all', b: 'all', tg: id, q: '' }; $('bk-q').value = ''; setTab('bank'); }
+    else if (act === 'bank-open') {
+      var ba = findAct(id);
+      if (ba) {
+        ui.open[id] = true; ui.fb = 'all'; ui.fs = 'all'; ui.q = '';
+        $('fb').value = 'all'; $('fs').value = 'all'; $('fq').value = '';
+        ui.ft = 'all'; $('ft').value = 'all';
+        setTab(ba.j);
+        var card = document.getElementById('act-' + id);
+        if (card) card.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      }
+    }
+    else if (act === 'idea') { var x = cfg.ideas[+el.getAttribute('data-n')]; if (x) openForm({ name: x.t, b: x.b, k: x.k, j: ideaKat(x), tg: x.tg }); }
+    else if (act === 'sset') { ui.sset = el.getAttribute('data-s'); renderSettings(); }
+    else if (act === 's-add') setAdd(el.getAttribute('data-s'), el.getAttribute('data-kat'));
+    else if (act === 's-del') setDel(el.getAttribute('data-s'), +el.getAttribute('data-i'));
+    else if (act === 's-save') saveSettings();
+    else if (act === 's-cancel') { newDraft(); renderSettings(); setMsg('Perubahan dibatalkan.', ''); }
+    else if (act === 's-reset') { draft = defCfg(); draft.tipe.forEach(function (t) { t.docsText = t.docs.join('\n'); }); ui.dirty = true; renderSettings(); setMsg('Isi bawaan dimuat. Klik Simpan pengaturan untuk menerapkan.', ''); }
+    else if (act === 's-conn') connSave();
+    else if (act === 's-invite') makeInvite();
+    else if (act === 's-disc') { lsSet('dukcapil-api', ''); toast('Koneksi diputuskan. Memuat ulang…'); setTimeout(function () { location.reload(); }, 700); }
   });
 
-  setTab('keg');
-  var first = state.acts.map(function (a) { return { a: a, i: info(a) }; }).sort(function (p, r) { return ORD[p.i.st] - ORD[r.i.st] || p.a.date.localeCompare(r.a.date); })[0];
-  if (first) ui.open[first.a.id] = true;
-  renderAll();
+  /* ---------- mulai ---------- */
+  newDraft();
+  $('f-ds').innerHTML = Object.keys(DS).map(function (x) { return '<option value="' + x + '">' + esc(DS[x]) + '</option>'; }).join('');
+  $('t-c').innerHTML = colorOpts0(0);
+  $('jf-hasil').innerHTML = HSL.map(function (h) { return '<label class="f" for="jf-h-' + h[0] + '">' + h[1] + '<input type="number" min="0" inputmode="numeric" id="jf-h-' + h[0] + '"></label>'; }).join('');
+  $('iv-st').innerHTML = Object.keys(IST).map(function (x) { return '<option value="' + x + '">' + esc(IST[x]) + '</option>'; }).join('');
+  applyHeader();
+  buildSelects();
+  ['dpa', 'jb'].forEach(function (kt) {
+    var f = state.acts.filter(function (a) { return a.j === kt; }).map(function (a) { return { a: a, i: info(a) }; }).sort(function (p, r) { return ORD[p.i.st] - ORD[r.i.st] || p.a.date.localeCompare(r.a.date); })[0];
+    if (f) ui.open[f.a.id] = true;
+  });
+  setTab('dpa');
   if (REMOTE) {
     $('btn-refresh').hidden = false;
-    $('banner').hidden = true;
     $('foot-note').textContent = $('foot-note').textContent.replace('Data tersimpan di browser ini saja.', 'Data tersimpan di Google Sheets dan dokumen di Google Drive.');
     $('gate').addEventListener('submit', function (e) { e.preventDefault(); var v = $('gate-key').value.trim(); if (!v) return; setKey(v); pull(); });
     $('btn-refresh').addEventListener('click', function () {
@@ -661,6 +2101,5 @@ var MAKS_MB = 10;   // batas ukuran satu file (samakan dengan CONFIG.MAKS_MB di 
   }
 })();
 </script>
-
 </body>
 </html>
