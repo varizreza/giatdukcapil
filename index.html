@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#F0F7F6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#F8FCFB" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0C1514" media="(prefers-color-scheme: dark)">
 <title>Dashboard Kegiatan Dukcapil</title>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://drive.google.com https://*.googleusercontent.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
@@ -17,15 +17,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Dukcapil">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<script src="theme.js"></script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,400..800&family=Roboto+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: ringkasan di atas, lalu tiga tab: Kegiatan (checklist dokumen), Bank ide, Pengaturan (semua isi bisa diubah dari halaman). */
 :root {
-  --bg: #F0F7F6; --surface: #FFFFFF; --surface-2: #E1EEEC; --ink: #0D1D1C; --muted: #41585A; --line: #CFE0DE;
+  --bg: #F8FCFB; --surface: #FFFFFF; --surface-2: #EBF4F3; --ink: #10201F; --muted: #475E60; --line: #DCEAE8;
   --accent: #00696B; --on-accent: #FFFFFF; --focus: #00696B;
-  --primary-c: #BEEBE9; --on-primary-c: #00201F;
-  --c1: #C3ECE9; --c2: #CDE5F4; --c3: #D5EBD6; --c4: #DDE1F8;
+  --primary-c: #D3F0EE; --on-primary-c: #00201F;
+  --c1: #DCF3F1; --c2: #E0EEF8; --c3: #E3F3E4; --c4: #E8EBFB;
   --ok: #1B6B45; --ok-bg: #CFEBDA; --warn: #7A5900; --warn-bg: #FBEBC2; --crit: #B3261E; --crit-bg: #F9DEDC;
   --p1: #566B70; --p2: #00797F; --p3: #B0602B; --p4: #5A56B8; --p5: #A0467A; --p6: #3F7D3A; --p7: #1F63B4; --p8: #7A5C3A;
   --elev1: 0 1px 2px rgba(0, 48, 46, .10), 0 1px 3px 1px rgba(0, 48, 46, .07);
@@ -433,12 +434,54 @@ input[type="checkbox"] { accent-color: var(--accent); }
 }
 
 /* ===== peran: tampilan baca-saja, login, akun ===== */
-body.ro #btn-new, body.ro #btn-new-jbl, body.ro #btn-new-inov, body.ro .upl, body.ro [data-act="idea"] { display: none !important; }
+body.ro #btn-new, body.ro #btn-new-jbl, body.ro #btn-new-inov, body.ro #btn-new-ikd, body.ro .upl, body.ro [data-act="idea"] { display: none !important; }
 #login-modal, #acct-modal { display: grid; align-content: center; z-index: 80; }
 #login-modal[hidden], #acct-modal[hidden] { display: none !important; }
 #login-modal .mbox, #acct-modal .mbox { width: 100%; }
 #btn-acct { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .top-r .row-btns { justify-content: flex-end; }
+
+/* v3: tab selalu di posisi sama, tiap menu punya pola yang sama (judul, kotak angka, grafik, isi) */
+.tabs { position: sticky; top: 8px; z-index: 20; box-shadow: var(--elev1); }
+.view > .vhead { align-items: center; }
+.chartgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 12px; }
+.chartgrid > .bars { box-shadow: var(--elev1); }
+.donut { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.donut svg { width: 150px; height: 150px; flex: none; }
+.donut .dn-v { font: 750 26px var(--f-display); fill: var(--ink); }
+.donut .dn-s { font: 500 11px var(--f-body); fill: var(--muted); }
+.legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; flex: 1 1 140px; min-width: 0; font-size: 13.5px; }
+.legend li { display: flex; align-items: center; gap: 8px; }
+.legend i { width: 11px; height: 11px; border-radius: 4px; flex: none; }
+.legend b { margin-left: auto; font-family: var(--f-mono); font-weight: 500; }
+.cols { width: 100%; height: auto; display: block; }
+.cols .ax { font: 500 10px var(--f-body); fill: var(--muted); }
+.cols .vl { font: 600 10px var(--f-mono); fill: var(--ink); }
+.cols .gl { stroke: var(--line); stroke-width: 1; }
+.cols rect { transition: opacity .2s; }
+.cols rect:hover { opacity: .8; }
+/* IKD */
+.sech { font-family: var(--f-display); font-size: 1.05rem; font-weight: 700; margin: 8px 0 -4px; }
+.ikdpad { padding: 20px 22px 26px; display: flex; flex-direction: column; gap: 14px; }
+.ikdsum { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; }
+.pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.pill.ok { background: var(--ok-bg); color: var(--ok); }
+.pill.no { background: var(--crit-bg); color: var(--crit); }
+.pill.na { background: var(--surface-2); color: var(--muted); }
+table.ikt td .stk { margin-bottom: 4px; }
+.ikdbar { display: flex; flex-wrap: wrap; gap: 10px; }
+.ikdbar input { flex: 1 1 200px; min-width: 0; }
+.ikdbar select { flex: 0 1 240px; min-width: 0; }
+.ikdprev { display: grid; gap: 10px; }
+.ikdrow { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 2fr); gap: 8px 16px; align-items: center; padding: 12px 14px; border-radius: 18px; background: var(--surface-2); }
+.ikdrow .fn { font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; }
+.ikdrow.err { background: var(--crit-bg); color: var(--crit); }
+.ikdrow input { width: 100%; }
+@media (max-width: 640px) { .ikdrow { grid-template-columns: minmax(0, 1fr); } }
+.stk { display: flex; height: 10px; border-radius: 999px; overflow: hidden; background: var(--surface-2); min-width: 90px; }
+.stk i { display: block; height: 100%; }
+table.bank td.num, table.bank th.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.ikt { min-width: 760px; }
 </style>
 </head>
 <body>
@@ -457,39 +500,54 @@ body.ro #btn-new, body.ro #btn-new-jbl, body.ro #btn-new-inov, body.ro .upl, bod
         <button class="btn ghost small" id="btn-refresh" type="button">Muat ulang</button>
         <button class="btn ghost small" id="btn-login" type="button" hidden>Masuk</button>
         <button class="btn ghost small" id="btn-acct" type="button" hidden></button>
-        <button class="btn" id="btn-new" type="button">+ Tambah kegiatan</button>
+        <button class="btn ghost small" id="btn-theme" type="button" aria-label="Ganti tema">Mode gelap</button>
       </div>
     </div>
   </header>
 
-  <section class="summary" aria-label="Ringkasan">
-    <div class="tiles" id="tiles"></div>
-    <div class="bars" id="bars"></div>
-  </section>
-
-
-  <div class="banner" id="banner" hidden>
-    <span>Kegiatan yang tampil saat ini adalah contoh. Hapus lalu isi dengan kegiatan Anda.</span>
-    <button class="btn ghost small" id="btn-clear-sample" type="button">Hapus contoh</button>
-  </div>
-
-  <div class="banner" id="offline" role="status" hidden><span id="off-t">Anda sedang offline. Data terakhir ditampilkan dan hanya bisa dibaca.</span></div>
   <nav class="tabs" role="tablist">
-    <button class="tab" role="tab" id="tab-dpa" data-tab="dpa" aria-selected="true">Kegiatan DPA<span class="n" id="n-dpa">0</span></button>
+    <button class="tab" role="tab" id="tab-dash" data-tab="dash" aria-selected="true">Ringkasan</button>
+    <button class="tab" role="tab" id="tab-dpa" data-tab="dpa" aria-selected="false">Kegiatan DPA<span class="n" id="n-dpa">0</span></button>
     <button class="tab" role="tab" id="tab-jbl" data-tab="jbl" aria-selected="false">Jemput Bola<span class="n" id="n-jbl">0</span></button>
     <button class="tab" role="tab" id="tab-jb" data-tab="jb" aria-selected="false">Rencana jemput bola<span class="n" id="n-jb">0</span></button>
     <button class="tab" role="tab" id="tab-inov" data-tab="inov" aria-selected="false">Inovasi<span class="n" id="n-inov">0</span></button>
+    <button class="tab" role="tab" id="tab-ikd" data-tab="ikd" aria-selected="false">Aktivasi IKD<span class="n" id="n-ikd">0</span></button>
     <button class="tab" role="tab" id="tab-bank" data-tab="bank" aria-selected="false">Bank data<span class="n" id="n-bank">0</span></button>
     <button class="tab" role="tab" id="tab-tag" data-tab="tag" aria-selected="false">Tagging<span class="n" id="n-tag">0</span></button>
     <button class="tab" role="tab" id="tab-ide" data-tab="ide" aria-selected="false">Bank ide<span class="n" id="n-ide">0</span></button>
     <button class="tab" role="tab" id="tab-set" data-tab="set" aria-selected="false">Pengaturan</button>
   </nav>
 
-  <section class="view" id="view-keg">
-    <div>
-      <h2 id="keg-title" style="font-size:1.25rem">Kegiatan DPA</h2>
-      <p class="note" id="keg-desc" style="margin:4px 0 0"></p>
+  <div class="banner" id="offline" role="status" hidden><span id="off-t">Anda sedang offline. Data terakhir ditampilkan dan hanya bisa dibaca.</span></div>
+  <div class="banner" id="banner" hidden>
+    <span>Kegiatan yang tampil saat ini adalah contoh. Hapus lalu isi dengan kegiatan Anda.</span>
+    <button class="btn ghost small" id="btn-clear-sample" type="button">Hapus contoh</button>
+  </div>
+
+  <section class="view" id="view-dash">
+    <div class="vhead"><div><h2 style="font-size:1.25rem">Ringkasan</h2><p class="note" style="margin:4px 0 0">Gambaran seluruh kegiatan, jemput bola, dan inovasi. Pilih tab di atas untuk melihat rinciannya.</p></div></div>
+    <div class="tiles t4" id="tiles"></div>
+    <div class="chartgrid">
+      <div class="bars" id="d-status"></div>
+      <div class="bars" id="d-bulan"></div>
+      <div class="bars" id="bars"></div>
+      <div class="bars" id="d-warga"></div>
+      <div class="bars" id="d-inov"></div>
+      <div class="bars" id="d-ikd"></div>
+      <div class="bars" id="d-myasn"></div>
     </div>
+  </section>
+
+  <section class="view" id="view-keg">
+    <div class="vhead">
+      <div>
+        <h2 id="keg-title" style="font-size:1.25rem">Kegiatan DPA</h2>
+        <p class="note" id="keg-desc" style="margin:4px 0 0"></p>
+      </div>
+      <button class="btn" id="btn-new" type="button">+ Tambah kegiatan</button>
+    </div>
+    <div class="tiles t4" id="keg-tiles"></div>
+    <div class="chartgrid" id="keg-charts"></div>
     <form class="panel" id="form" hidden>
       <h2 id="form-title">Kegiatan baru</h2>
       <div class="fgrid">
@@ -653,6 +711,7 @@ body.ro #btn-new, body.ro #btn-new-jbl, body.ro #btn-new-inov, body.ro .upl, bod
       <button class="btn" id="btn-new-inov" type="button">+ Tambah inovasi</button>
     </div>
     <div class="tiles t4" id="inov-tiles"></div>
+    <div class="chartgrid" id="inov-charts"></div>
     <div class="banner" id="inov-banner" hidden>
       <span>Inovasi yang tampil saat ini adalah contoh. Hapus lalu isi dengan inovasi Anda.</span>
       <button class="btn ghost small" type="button" data-act="iv-clear-sample">Hapus contoh</button>
@@ -707,9 +766,34 @@ body.ro #btn-new, body.ro #btn-new-jbl, body.ro #btn-new-inov, body.ro .upl, bod
     <div class="list" id="inov-list"></div>
   </section>
 
+  <section class="view" id="view-ikd" hidden>
+    <div class="vhead"><div><h2 style="font-size:1.25rem">Aktivasi IKD</h2><p class="note" style="margin:4px 0 0">Rekap aktivasi Identitas Kependudukan Digital (IKD) pegawai per OPD. Unggah berkas Excel (.xlsx) atau CSV berisi nama, NIP/NIPPPK, dan status IKD. Satu berkas untuk satu OPD; boleh pilih beberapa berkas sekaligus.</p></div><button class="btn" id="btn-new-ikd" type="button">+ Unggah Excel</button></div>
+    <input type="file" id="ikd-file" accept=".xlsx,.csv,text/csv" multiple hidden>
+    <div class="panel" id="ikd-import" hidden>
+      <h2>Periksa sebelum disimpan</h2>
+      <p class="note" style="margin:0">Nama, NIP, status IKD, dan status MyASN pegawai disimpan di Google Sheets (sheet IKDPegawai) dan hanya tampil bagi pengguna yang sudah masuk. Tamu hanya melihat jumlah per OPD. Mengunggah ulang OPD yang sama akan memperbarui datanya.</p>
+      <div id="ikd-prev" class="ikdprev"></div>
+      <div class="row-btns"><button class="btn" type="button" data-act="ikd-save">Simpan ke dashboard</button><button class="btn ghost" type="button" data-act="ikd-cancel">Batal</button></div>
+    </div>
+    <h3 class="sech">Status aktivasi IKD</h3>
+    <div class="tiles t4" id="ikd-tiles"></div>
+    <div class="chartgrid" id="ikd-charts"></div>
+    <h3 class="sech">Status verifikasi NIK di MyASN</h3>
+    <div class="tiles t4" id="ma-tiles"></div>
+    <div class="chartgrid" id="ma-charts"></div>
+    <h3 class="sech">Rincian per OPD</h3>
+    <div class="ikdbar">
+      <input type="search" id="ikd-q" placeholder="Cari nama OPD" aria-label="Cari OPD">
+      <select id="ikd-sort" aria-label="Urutkan"><option value="pct">% aktif terendah dulu</option><option value="belum">Belum aktif terbanyak</option><option value="nama">Nama OPD (A-Z)</option></select>
+      <button class="btn ghost" id="btn-csv-ikd" type="button">Unduh CSV</button>
+    </div>
+    <div class="tablewrap" id="ikd-table"></div>
+  </section>
+
   <section class="view" id="view-bank" hidden>
-    <p class="note" style="margin:0">Arsip semua kegiatan DPA dan jemput bola. Cari dan saring menurut tahun, lalu unduh sebagai CSV untuk Excel atau laporan.</p>
+    <div class="vhead"><div><h2 style="font-size:1.25rem">Bank data</h2><p class="note" style="margin:4px 0 0">Arsip semua kegiatan DPA dan jemput bola. Cari dan saring menurut tahun, lalu unduh sebagai CSV untuk Excel atau laporan.</p></div></div>
     <div class="tiles t4" id="bank-tiles"></div>
+    <div class="chartgrid" id="bank-charts"></div>
     <div class="toolbar t6">
       <select id="bk-kat" aria-label="Kategori"><option value="all">Semua kategori</option><option value="dpa">Kegiatan DPA</option><option value="jb">Jemput bola</option></select>
       <select id="bk-th" aria-label="Tahun"></select>
@@ -722,7 +806,8 @@ body.ro #btn-new, body.ro #btn-new-jbl, body.ro #btn-new-inov, body.ro .upl, bod
   </section>
 
   <section class="view" id="view-tag" hidden>
-    <p class="note" style="margin:0">Tag mengelompokkan kegiatan menurut sasaran atau topik, misalnya "Pendataan penduduk rentan". Tambahkan tag di sini, lalu pasang pada kegiatan lewat rincian kegiatan. Tag juga bisa dipakai untuk menyaring kegiatan dan Bank data.</p>
+    <div class="vhead"><div><h2 style="font-size:1.25rem">Tagging</h2><p class="note" style="margin:4px 0 0">Tag mengelompokkan kegiatan menurut sasaran atau topik, misalnya "Pendataan penduduk rentan". Tambahkan tag di sini, lalu pasang pada kegiatan lewat rincian kegiatan. Tag juga bisa dipakai untuk menyaring kegiatan dan Bank data.</p></div></div>
+    <div class="chartgrid" id="tag-chartgrid"><div class="bars" id="tag-chart"></div></div>
     <form class="panel" id="tag-form">
       <h2>Tambah tag</h2>
       <div class="fgrid">
@@ -740,13 +825,14 @@ body.ro #btn-new, body.ro #btn-new-jbl, body.ro #btn-new-inov, body.ro .upl, bod
   </section>
 
   <section class="view" id="view-ide" hidden>
-    <p class="note" style="margin:0">Ide disusun menurut tugas pokok tiap bidang. Pilih "Jadikan kegiatan" untuk menyalinnya ke daftar kegiatan lengkap dengan daftar dokumennya. Ide bisa diubah di tab Pengaturan.</p>
+    <div class="vhead"><div><h2 style="font-size:1.25rem">Bank ide</h2><p class="note" style="margin:4px 0 0">Ide disusun menurut tugas pokok tiap bidang. Pilih "Jadikan kegiatan" untuk menyalinnya ke daftar kegiatan lengkap dengan daftar dokumennya. Ide bisa diubah di tab Pengaturan.</p></div></div>
     <div class="chips" id="chips2"></div>
     <div class="chips" id="chips"></div>
     <div class="ideas" id="ideas"></div>
   </section>
 
   <section class="view" id="view-set" hidden>
+    <div class="vhead"><div><h2 style="font-size:1.25rem">Pengaturan</h2><p class="note" style="margin:4px 0 0">Ubah bidang, jenis kegiatan, daftar dokumen, ide, pengguna, dan log tanpa mengedit file.</p></div></div>
     <div class="chips" id="set-nav"></div>
     <div class="view" id="set-body"></div>
   </section>
@@ -792,6 +878,19 @@ body.ro #btn-new, body.ro #btn-new-jbl, body.ro #btn-new-inov, body.ro .upl, bod
   </div></div>
 </div>
 
+<div class="modal" id="ikd-modal" role="dialog" aria-modal="true" aria-labelledby="ikm-t" hidden>
+  <div class="mbox" style="max-width:1000px"><div class="ikdpad">
+    <div class="vhead"><div><h2 id="ikm-t" style="font-size:1.3rem">Daftar pegawai</h2><p class="note" id="ikm-s" style="margin:4px 0 0"></p></div><button class="btn ghost" type="button" data-act="ikd-pclose">Tutup</button></div>
+    <div class="ikdbar">
+      <input type="search" id="ikm-q" placeholder="Cari nama atau NIP" aria-label="Cari pegawai">
+      <select id="ikm-fi" aria-label="Status IKD"><option value="all">IKD: semua</option><option value="A">IKD: sudah aktif</option><option value="B">IKD: belum aktif</option><option value="?">IKD: tidak diketahui</option></select>
+      <select id="ikm-fn" aria-label="Status MyASN"><option value="all">MyASN: semua</option><option value="V">MyASN: terverifikasi</option><option value="B">MyASN: belum terverifikasi</option><option value="?">MyASN: tidak diketahui</option></select>
+      <button class="btn ghost" id="ikm-csv" type="button">Unduh CSV</button>
+    </div>
+    <div id="ikm-sum" class="ikdsum"></div>
+    <div class="tablewrap" id="ikm-table"></div>
+  </div></div>
+</div>
 <div class="modal" id="jb-modal" role="dialog" aria-modal="true" aria-label="Rincian jemput bola" hidden></div>
 
 <div class="toast" id="toast" hidden></div>

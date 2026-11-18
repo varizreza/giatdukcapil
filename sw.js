@@ -1,8 +1,8 @@
 /* Service worker Dashboard Kegiatan Dukcapil.
    Hanya menyimpan "cangkang" aplikasi (HTML, JS, ikon) agar bisa dibuka tanpa internet.
    Data dari Google Sheets/Drive TIDAK pernah disimpan di sini dan tidak dilewatkan lewat cache. */
-const VERSI = 'dukcapil-v1';
-const CANGKANG = ['./', 'index.html', 'app.js', 'config.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png'];
+const VERSI = 'dukcapil-v3';
+const CANGKANG = ['./', 'index.html', 'app.js', 'config.js','theme.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(VERSI).then((c) => c.addAll(CANGKANG)).then(() => self.skipWaiting()));

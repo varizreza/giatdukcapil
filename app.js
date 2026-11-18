@@ -267,11 +267,24 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
   var jbp = REMOTE ? [] : loadJb();
   function saveJb() { if (REMOTE) return; lsSet(KEYJ, JSON.stringify({ items: jbp })); }
   function findJb(id) { return jbp.filter(function (v) { return v.id === id; })[0]; }
+  var KEYK = 'dukcapil-ikd-v1';
+  function normIkd(v) {
+    var n = function (x) { x = Math.round(Number(x)); return x > 0 ? x : 0; }, al = v.al;
+    if (typeof al === 'string') { try { al = JSON.parse(al); } catch (e) { al = []; } }
+    return { id: String(v.id), opd: str(v.opd, 120), tgl: str(v.tgl, 10), total: n(v.total), aktif: n(v.aktif), belum: n(v.belum), lain: n(v.lain), nok: n(v.nok), nbl: n(v.nbl), nlain: n(v.nlain),
+      al: (Array.isArray(al) ? al : []).slice(0, 8).map(function (x) { return [str(x && x[0], 90), n(x && x[1])]; }) };
+  }
+  function loadIkd() {
+    try { var r = lsGet(KEYK); if (r) { var o = JSON.parse(r); if (o && Array.isArray(o.items)) return o.items.map(normIkd); } } catch (e) {}
+    return [];
+  }
   var inov = REMOTE ? [] : loadInov();
+  var ikd = REMOTE ? [] : loadIkd();
+  function saveIkd() { if (REMOTE) return; lsSet(KEYK, JSON.stringify({ items: ikd })); }
   function saveInov() { if (REMOTE) return; lsSet(KEYI, JSON.stringify({ items: inov })); }
   function findInov(id) { return inov.filter(function (v) { return v.id === id; })[0]; }
 
-  var ui = { tab: 'dpa', kat: 'dpa', fb: 'all', fs: 'all', ft: 'all', ftags: [], tconfirm: null, q: '', ib: 'all', ik: 'all', bk: { kat: 'all', th: 'all', b: 'all', tg: 'all', q: '' }, open: {}, confirm: null, busy: {}, loadErr: REMOTE ? 'Memuat data…' : '', jdoc: 'all', jsel: null, jy: 'all', jb: 'all', jk: 'all', jt: 'all', jq: '', jopen: {}, jtags: [], jdel: null, jup: {}, jfiles: [], vs: 'all', vb: 'all', vt: 'all', vq: '', vopen: {}, vtags: [], vdel: null, sset: 'conn', sib: 'all', dirty: false };
+  var ui = { ikdm: null, ikdq: [], ikdel: null, tab: 'dash', kat: 'dpa', fb: 'all', fs: 'all', ft: 'all', ftags: [], tconfirm: null, q: '', ib: 'all', ik: 'all', bk: { kat: 'all', th: 'all', b: 'all', tg: 'all', q: '' }, open: {}, confirm: null, busy: {}, loadErr: REMOTE ? 'Memuat data…' : '', jdoc: 'all', jsel: null, jy: 'all', jb: 'all', jk: 'all', jt: 'all', jq: '', jopen: {}, jtags: [], jdel: null, jup: {}, jfiles: [], vs: 'all', vb: 'all', vt: 'all', vq: '', vopen: {}, vtags: [], vdel: null, sset: 'conn', sib: 'all', dirty: false };
 
   function info(a) {
     var t = a.docs.length, d = a.docs.filter(function (x) { return x.d; }).length, days = dayDiff(a.date), st;
@@ -343,6 +356,9 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
   }
   function afterTagChange() { buildSelects(); renderAll(); }
   function renderTags() {
+    var tc = {};
+    [state.acts, jbp, inov].forEach(function (l) { l.forEach(function (x) { (x.tags || []).forEach(function (t) { tc[t] = (tc[t] || 0) + 1; }); }); });
+    $('tag-chart').innerHTML = card('Pemakaian tag (kegiatan, jemput bola, inovasi)', barRows(Object.keys(tc).sort(function (a, b) { return tc[b] - tc[a]; }).slice(0, 8).map(function (t) { return { l: TG(t).n, v: tc[t], s: String(tc[t]) }; }), 4));
     $('n-tag').textContent = cfg.tags.length;
     var h = cfg.tags.map(function (t) {
       var na = state.acts.filter(function (a) { return a.tags.indexOf(t.id) > -1; }).length;
@@ -396,6 +412,324 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
     $('jf-kid').innerHTML = '<option value="">(tidak terkait)</option>' + state.acts.filter(function (a) { return a.j === 'jb'; }).map(function (a) { return '<option value="' + esc(a.id) + '">' + esc(a.name) + '</option>'; }).join('');
     $('jf-kid').value = rsel;
   }
+  /* ---------- Aktivasi IKD ---------- */
+  function ikdSum() {
+    var s = { n: ikd.length, total: 0, aktif: 0, belum: 0, lain: 0, nok: 0, nbl: 0, nlain: 0, tuntas: 0, al: {} };
+    ikd.forEach(function (o) {
+      s.total += o.total; s.aktif += o.aktif; s.belum += o.belum; s.lain += o.lain; s.nok += o.nok; s.nbl += o.nbl; s.nlain += o.nlain;
+      if (o.total > 0 && o.belum === 0 && o.lain === 0) s.tuntas++;
+      o.al.forEach(function (x) { s.al[x[0]] = (s.al[x[0]] || 0) + x[1]; });
+    });
+    return s;
+  }
+  function ikdDonut(s) {
+    return donut([{ l: 'Sudah aktif', v: s.aktif, c: 'var(--ok)' }, { l: 'Belum aktif', v: s.belum, c: 'var(--crit)' }, { l: 'Tidak diketahui', v: s.lain, c: 'var(--p1)' }],
+      s.total ? Math.round(s.aktif / s.total * 100) + '%' : '0%', 'sudah aktif');
+  }
+  function pctOf(a, t) { return t ? Math.round(a / t * 100) : 0; }
+  function ikdRows() {
+    var q = ($('ikd-q').value || '').trim().toLowerCase(), so = $('ikd-sort').value;
+    var rows = ikd.filter(function (o) { return !q || o.opd.toLowerCase().indexOf(q) > -1; });
+    rows.sort(function (a, b) {
+      if (so === 'belum') return b.belum - a.belum || a.opd.localeCompare(b.opd, 'id');
+      if (so === 'nama') return a.opd.localeCompare(b.opd, 'id');
+      return pctOf(a.aktif, a.total) - pctOf(b.aktif, b.total) || b.belum - a.belum;
+    });
+    return rows;
+  }
+  function renderIkd() {
+    var s = ikdSum(), nikT = s.nok + s.nbl + s.nlain, nikOpd = ikd.filter(function (o) { return o.nok + o.nbl + o.nlain > 0; });
+    $('ikd-tiles').innerHTML =
+      '<div class="tile"><span class="k">Pegawai terdata</span><span class="v">' + nf(s.total) + '</span><span class="s">dari ' + s.n + ' OPD</span></div>' +
+      '<div class="tile"><span class="k">IKD sudah aktif</span><span class="v">' + nf(s.aktif) + '</span><span class="s">' + pctOf(s.aktif, s.total) + '% dari seluruh pegawai</span></div>' +
+      '<div class="tile' + (s.belum ? ' alert' : '') + '"><span class="k">IKD belum aktif</span><span class="v">' + nf(s.belum) + '</span><span class="s">' + pctOf(s.belum, s.total) + '%' + (s.lain ? ' · ' + s.lain + ' tidak diketahui' : '') + '</span></div>' +
+      '<div class="tile"><span class="k">OPD IKD tuntas</span><span class="v">' + s.tuntas + '</span><span class="s">semua pegawai sudah aktif, dari ' + s.n + ' OPD</span></div>';
+    var top = ikd.filter(function (o) { return o.belum > 0; }).sort(function (a, b) { return b.belum - a.belum; }).slice(0, 8).map(function (o) { return { l: o.opd, v: o.belum, s: o.belum + ' dari ' + o.total }; });
+    var al = Object.keys(s.al).sort(function (a, b) { return s.al[b] - s.al[a]; }).slice(0, 6).map(function (k) { return { l: k, v: s.al[k], s: nf(s.al[k]) }; });
+    $('ikd-charts').innerHTML =
+      '<div class="bars">' + card('Status aktivasi IKD', ikdDonut(s)) + '</div>' +
+      '<div class="bars">' + card('OPD dengan IKD belum aktif terbanyak', barRows(top, 3)) + '</div>' +
+      '<div class="bars">' + card('Alasan IKD belum aktif', barRows(al, 4)) + '</div>';
+    var tuntasN = nikOpd.filter(function (o) { return o.nbl === 0 && o.nlain === 0; }).length;
+    $('ma-tiles').innerHTML = !nikT ? '<div class="tile" style="grid-column:1/-1"><span class="k">Status MyASN</span><span class="s">Kolom status NIK di MyASN tidak ada pada berkas yang diunggah.</span></div>' :
+      '<div class="tile"><span class="k">Pegawai dengan data MyASN</span><span class="v">' + nf(nikT) + '</span><span class="s">dari ' + nikOpd.length + ' OPD</span></div>' +
+      '<div class="tile"><span class="k">NIK terverifikasi</span><span class="v">' + nf(s.nok) + '</span><span class="s">' + pctOf(s.nok, nikT) + '% dari data MyASN</span></div>' +
+      '<div class="tile' + (s.nbl ? ' alert' : '') + '"><span class="k">NIK belum terverifikasi</span><span class="v">' + nf(s.nbl) + '</span><span class="s">' + pctOf(s.nbl, nikT) + '%' + (s.nlain ? ' · ' + s.nlain + ' tidak diketahui' : '') + '</span></div>' +
+      '<div class="tile"><span class="k">OPD verifikasi tuntas</span><span class="v">' + tuntasN + '</span><span class="s">semua NIK terverifikasi, dari ' + nikOpd.length + ' OPD</span></div>';
+    var topN = nikOpd.filter(function (o) { return o.nbl > 0; }).sort(function (a, b) { return b.nbl - a.nbl; }).slice(0, 8).map(function (o) { return { l: o.opd, v: o.nbl, s: o.nbl + ' dari ' + (o.nok + o.nbl + o.nlain) }; });
+    $('ma-charts').innerHTML = nikT ?
+      '<div class="bars">' + card('Status verifikasi NIK di MyASN', maDonut(s)) + '</div><div class="bars">' + card('OPD dengan NIK belum terverifikasi terbanyak', barRows(topN, 1)) + '</div>' : '';
+    var rows = ikdRows();
+    if (!ikd.length) { $('ikd-table').innerHTML = '<div class="empty" style="border:0">Belum ada data. Klik "Unggah Excel" lalu pilih berkas rekap IKD per OPD.</div>'; return; }
+    if (!rows.length) { $('ikd-table').innerHTML = '<div class="empty" style="border:0">Tidak ada OPD yang cocok.</div>'; return; }
+    var canDel = canEdit() && !ui.offline, canSee = !!auth && !ui.offline;
+    $('ikd-table').innerHTML = '<table class="bank ikt"><thead><tr><th>OPD</th><th class="num">Pegawai</th><th class="num">IKD sudah aktif</th><th class="num">IKD belum aktif</th><th>% IKD aktif</th><th class="num">MyASN terverifikasi</th><th class="num">MyASN belum</th><th>% MyASN</th><th>Data per</th><th></th></tr></thead><tbody>' +
+      rows.map(function (o) {
+        var p = pctOf(o.aktif, o.total), pb = pctOf(o.belum, o.total), pl = Math.max(0, 100 - p - pb), nt = o.nok + o.nbl + o.nlain;
+        var q = pctOf(o.nok, nt), qb = pctOf(o.nbl, nt), ql = Math.max(0, 100 - q - qb), act = '';
+        if (canSee) act += '<button class="btn ghost small" type="button" data-act="ikd-peg" data-id="' + esc(o.id) + '">Lihat pegawai</button> ';
+        if (canDel) act += ui.ikdel === o.id
+          ? '<button class="btn danger small" type="button" data-act="ikd-del-yes" data-id="' + esc(o.id) + '">Ya, hapus</button> <button class="btn ghost small" type="button" data-act="ikd-del-no">Batal</button>'
+          : '<button class="btn ghost small" type="button" data-act="ikd-del" data-id="' + esc(o.id) + '">Hapus</button>';
+        return '<tr><td><strong>' + esc(o.opd) + '</strong></td><td class="num">' + nf(o.total) + '</td><td class="num">' + nf(o.aktif) + '</td><td class="num">' + nf(o.belum) + (o.lain ? ' <span class="note">(+' + o.lain + ' tak jelas)</span>' : '') + '</td>' +
+          '<td><div class="stk" title="' + p + '% aktif"><i style="width:' + p + '%;background:var(--ok)"></i><i style="width:' + pb + '%;background:var(--crit)"></i><i style="width:' + pl + '%;background:var(--p1)"></i></div><span class="mono">' + p + '%</span></td>' +
+          (nt ? '<td class="num">' + nf(o.nok) + '</td><td class="num">' + nf(o.nbl) + (o.nlain ? ' <span class="note">(+' + o.nlain + ' tak jelas)</span>' : '') + '</td>' +
+            '<td><div class="stk" title="' + q + '% terverifikasi"><i style="width:' + q + '%;background:var(--ok)"></i><i style="width:' + qb + '%;background:var(--crit)"></i><i style="width:' + ql + '%;background:var(--p1)"></i></div><span class="mono">' + q + '%</span></td>'
+            : '<td class="num">-</td><td class="num">-</td><td>-</td>') +
+          '<td>' + esc(o.tgl) + '</td><td>' + act + '</td></tr>';
+      }).join('') + '</tbody></table>' + (canSee ? '' : '<p class="note" style="margin:10px 14px">Masuk untuk melihat nama dan NIP pegawai.</p>');
+  }
+  function maDonut(s) {
+    var t = s.nok + s.nbl + s.nlain;
+    return donut([{ l: 'Terverifikasi', v: s.nok, c: 'var(--ok)' }, { l: 'Belum terverifikasi', v: s.nbl, c: 'var(--crit)' }, { l: 'Tidak diketahui', v: s.nlain, c: 'var(--p1)' }], pctOf(s.nok, t) + '%', 'terverifikasi');
+  }
+  /* daftar pegawai (hanya untuk pengguna yang sudah masuk; diambil dari server tiap dibuka, tidak disimpan di perangkat) */
+  function pill(v, kind) {
+    var m = kind === 'i' ? { A: ['ok', 'Sudah aktif'], B: ['no', 'Belum aktif'] } : { V: ['ok', 'Terverifikasi'], B: ['no', 'Belum terverifikasi'] };
+    var x = m[v] || ['na', '-'];
+    return '<span class="pill ' + x[0] + '">' + x[1] + '</span>';
+  }
+  function ikdmRows() {
+    var m = ui.ikdm, q = $('ikm-q').value.trim().toLowerCase(), fi = $('ikm-fi').value, fn = $('ikm-fn').value;
+    return m.rows.filter(function (r) {
+      return (!q || r[1].toLowerCase().indexOf(q) > -1 || r[0].indexOf(q) > -1) && (fi === 'all' || r[2] === fi) && (fn === 'all' || (fn === '?' ? (r[3] !== 'V' && r[3] !== 'B') : r[3] === fn));
+    });
+  }
+  function renderIkdm() {
+    var m = ui.ikdm; if (!m) return;
+    if (m.err) { $('ikm-sum').textContent = ''; $('ikm-table').innerHTML = '<div class="empty" style="border:0">' + esc(m.err) + '</div>'; return; }
+    if (!m.rows) { $('ikm-sum').textContent = ''; $('ikm-table').innerHTML = '<div class="empty" style="border:0">Memuat…</div>'; return; }
+    var c = { A: 0, B: 0, V: 0, N: 0 };
+    m.rows.forEach(function (r) { if (r[2] === 'A') c.A++; else if (r[2] === 'B') c.B++; if (r[3] === 'V') c.V++; else if (r[3] === 'B') c.N++; });
+    $('ikm-sum').innerHTML = '<span><strong>IKD:</strong> ' + c.A + ' sudah aktif · ' + c.B + ' belum aktif</span><span><strong>MyASN:</strong> ' + c.V + ' terverifikasi · ' + c.N + ' belum terverifikasi</span>';
+    if (!m.rows.length) { $('ikm-table').innerHTML = '<div class="empty" style="border:0">Daftar pegawai OPD ini belum tersimpan. Unggah ulang berkas Excel OPD ini untuk menyimpannya.</div>'; return; }
+    var rows = ikdmRows(), shown = rows.slice(0, 500);
+    $('ikm-table').innerHTML = '<table class="bank ikt"><thead><tr><th>No</th><th>Nama</th><th>NIP/NIPPPK</th><th>Status IKD</th><th>Status NIK di MyASN</th><th>Keterangan</th></tr></thead><tbody>' +
+      shown.map(function (r, n) { return '<tr><td>' + (n + 1) + '</td><td>' + esc(r[1]) + '</td><td class="mono">' + esc(r[0]) + '</td><td>' + pill(r[2], 'i') + '</td><td>' + pill(r[3], 'n') + '</td><td>' + esc(r[4]) + '</td></tr>'; }).join('') + '</tbody></table>' +
+      '<p class="note" style="margin:10px 14px">' + (rows.length > shown.length ? 'Menampilkan 500 dari ' + rows.length + ' pegawai. Persempit dengan pencarian atau saringan. ' : rows.length + ' pegawai. ') + '</p>';
+    if (!rows.length) $('ikm-table').innerHTML = '<div class="empty" style="border:0">Tidak ada pegawai yang cocok.</div>';
+  }
+  function openIkdm(id) {
+    var o = ikd.filter(function (v) { return v.id === id; })[0]; if (!o || !auth) return;
+    ui.ikdm = { id: id, opd: o.opd, rows: null, err: '' };
+    $('ikm-t').textContent = o.opd; $('ikm-s').textContent = 'Daftar nama dan NIP. Hanya terlihat setelah masuk.';
+    $('ikm-q').value = ''; $('ikm-fi').value = 'all'; $('ikm-fn').value = 'all';
+    $('ikd-modal').hidden = false; document.body.classList.add('noscroll'); renderIkdm();
+    api({ action: 'ikdpeg', id: id }).then(function (j) {
+      if (ui.ikdm && ui.ikdm.id === id) { ui.ikdm.rows = (j.p || []).map(function (r) { return [str(r[0], 30), str(r[1], 160), str(r[2], 1), str(r[3], 1), str(r[4], 160)]; }); renderIkdm(); }
+    }).catch(function (e) { if (ui.ikdm && ui.ikdm.id === id) { ui.ikdm.err = 'Daftar pegawai tidak bisa dimuat. Periksa koneksi lalu coba lagi.'; renderIkdm(); } });
+  }
+  function closeIkdm() { ui.ikdm = null; $('ikd-modal').hidden = true; document.body.classList.toggle('noscroll', !$('login-modal').hidden || !$('acct-modal').hidden || !$('jb-modal').hidden); }
+  function ikdmCsv() {
+    var m = ui.ikdm; if (!m || !m.rows) return;
+    var L = { A: 'Sudah aktif', B: 'Belum aktif' }, N = { V: 'Terverifikasi', B: 'Belum terverifikasi' };
+    var lines = [['No', 'Nama', 'NIP/NIPPPK', 'Status IKD', 'Status NIK di MyASN', 'Keterangan'].map(csvCell).join(',')];
+    ikdmRows().forEach(function (r, n) {
+      lines.push([csvCell(n + 1), csvCell(r[1]), /^\d{8,30}$/.test(r[0]) ? '="' + r[0] + '"' : csvCell(r[0]), csvCell(L[r[2]] || '-'), csvCell(N[r[3]] || '-'), csvCell(r[4])].join(','));
+    });
+    saveCsv(lines.join('\r\n'), 'pegawai-ikd-' + m.id + '-' + iso(0) + '.csv');
+  }
+  function ikdCsvText() {
+    var lines = [['OPD', 'Pegawai', 'Sudah aktif', 'Belum aktif', 'Tidak diketahui', '% aktif', 'NIK terverifikasi', 'NIK belum terverifikasi', 'Data per']];
+    ikdRows().forEach(function (o) { lines.push([o.opd, o.total, o.aktif, o.belum, o.lain, pctOf(o.aktif, o.total), o.nok, o.nbl, o.tgl]); });
+    return lines.map(function (r) { return r.map(csvCell).join(','); }).join('\r\n');
+  }
+
+  /* pembaca berkas: .xlsx dibaca langsung di browser (tanpa pustaka luar), .csv juga didukung */
+  function u16(d, o) { return d[o] | d[o + 1] << 8; }
+  function u32(d, o) { return (d[o] | d[o + 1] << 8 | d[o + 2] << 16 | d[o + 3] << 24) >>> 0; }
+  function unzip(buf) {
+    var d = new Uint8Array(buf), e = -1, i;
+    for (i = d.length - 22; i >= Math.max(0, d.length - 65557); i--) if (u32(d, i) === 0x06054b50) { e = i; break; }
+    if (e < 0) throw new Error('Bukan berkas .xlsx yang valid');
+    var n = u16(d, e + 10), off = u32(d, e + 16), files = {}, dec = new TextDecoder();
+    for (var k = 0; k < n; k++) {
+      if (u32(d, off) !== 0x02014b50) break;
+      var nl = u16(d, off + 28), el = u16(d, off + 30), cl = u16(d, off + 32);
+      files[dec.decode(d.subarray(off + 46, off + 46 + nl))] = { m: u16(d, off + 10), c: u32(d, off + 20), lo: u32(d, off + 42) };
+      off += 46 + nl + el + cl;
+    }
+    return { d: d, f: files };
+  }
+  function zipText(z, name) {
+    var f = z.f[name];
+    if (!f) return Promise.resolve(null);
+    var d = z.d, lo = f.lo, s = lo + 30 + u16(d, lo + 26) + u16(d, lo + 28), raw = d.subarray(s, s + f.c);
+    if (f.m === 0) return Promise.resolve(new TextDecoder().decode(raw));
+    if (typeof DecompressionStream === 'undefined') return Promise.reject(new Error('Browser ini belum bisa membaca .xlsx. Simpan berkas sebagai CSV lalu unggah lagi.'));
+    return new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer().then(function (b) { return new TextDecoder().decode(b); });
+  }
+  function siText(si) {
+    var s = '';
+    for (var c = si.firstChild; c; c = c.nextSibling) {
+      if (c.nodeType !== 1) continue;
+      if (c.localName === 't') s += c.textContent;
+      else if (c.localName === 'r') { var t = c.getElementsByTagName('t'); for (var q = 0; q < t.length; q++) s += t[q].textContent; }
+    }
+    return s;
+  }
+  function colIdx(ref) { var m = /^([A-Z]+)/.exec(ref || ''), n = 0; if (!m) return 0; for (var i = 0; i < m[1].length; i++) n = n * 26 + m[1].charCodeAt(i) - 64; return n - 1; }
+  function readXlsx(buf) {
+    var z = unzip(buf), P = new DOMParser();
+    return Promise.all([zipText(z, 'xl/workbook.xml'), zipText(z, 'xl/_rels/workbook.xml.rels'), zipText(z, 'xl/sharedStrings.xml')]).then(function (r) {
+      if (!r[0]) throw new Error('Isi berkas .xlsx tidak dikenali');
+      var wb = P.parseFromString(r[0], 'application/xml'), sh = wb.getElementsByTagName('sheet')[0], path = 'xl/worksheets/sheet1.xml';
+      if (sh && r[1]) {
+        var rid = ''; for (var a = 0; a < sh.attributes.length; a++) if (/(^|:)id$/.test(sh.attributes[a].name) && sh.attributes[a].name !== 'sheetId') rid = sh.attributes[a].value;
+        var rl = P.parseFromString(r[1], 'application/xml').getElementsByTagName('Relationship');
+        for (var q = 0; q < rl.length; q++) if (rl[q].getAttribute('Id') === rid) { var tg = rl[q].getAttribute('Target'); path = tg.charAt(0) === '/' ? tg.slice(1) : 'xl/' + tg; }
+      }
+      var ss = [];
+      if (r[2]) { var sis = P.parseFromString(r[2], 'application/xml').getElementsByTagName('si'); for (var i = 0; i < sis.length; i++) ss.push(siText(sis[i])); }
+      return zipText(z, path).then(function (x) {
+        if (!x) throw new Error('Lembar kerja pertama tidak ditemukan');
+        var rows = [], rs = P.parseFromString(x, 'application/xml').getElementsByTagName('row');
+        for (var i = 0; i < rs.length && i < 6000; i++) {
+          var cs = rs[i].getElementsByTagName('c'), line = [], rn = parseInt(rs[i].getAttribute('r'), 10);
+          for (var k = 0; k < cs.length; k++) {
+            var c = cs[k], t = c.getAttribute('t'), vEl = c.getElementsByTagName('v')[0], v = vEl ? vEl.textContent : '';
+            if (t === 's') v = ss[+v] || ''; else if (t === 'inlineStr') { var is = c.getElementsByTagName('is')[0]; v = is ? siText(is) : ''; }
+            line[colIdx(c.getAttribute('r'))] = v;
+          }
+          if (rn) rows[rn - 1] = line; else rows.push(line);
+        }
+        for (var j = 0; j < rows.length; j++) if (!rows[j]) rows[j] = [];
+        return rows;
+      });
+    });
+  }
+  function readCsv(text) {
+    text = text.replace(/^﻿/, '');
+    var first = text.split(/\r?\n/)[0] || '', del = [';', '\t', ','].sort(function (a, b) { return first.split(b).length - first.split(a).length; })[0];
+    var rows = [], row = [], cur = '', q = false;
+    for (var i = 0; i < text.length && rows.length < 6000; i++) {
+      var ch = text[i];
+      if (q) { if (ch === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += ch; }
+      else if (ch === '"') q = true;
+      else if (ch === del) { row.push(cur); cur = ''; }
+      else if (ch === '\n' || ch === '\r') { if (ch === '\r' && text[i + 1] === '\n') i++; row.push(cur); rows.push(row); row = []; cur = ''; }
+      else cur += ch;
+    }
+    if (cur || row.length) { row.push(cur); rows.push(row); }
+    return rows;
+  }
+  function nrm(s) { return String(s == null ? '' : s).replace(/\s+/g, ' ').trim().toUpperCase(); }
+  function analyzeIkd(rows, fname) {
+    var hi = -1, i, j;
+    for (i = 0; i < Math.min(rows.length, 30) && hi < 0; i++) {
+      var cells = (rows[i] || []).map(nrm);
+      if (cells.some(function (c) { return /^NIP/.test(c); }) && cells.some(function (c) { return /IKD|STATUS/.test(c); })) hi = i;
+    }
+    if (hi < 0) throw new Error('Baris judul kolom tidak ditemukan. Pastikan ada kolom NAMA, NIP/NIPPPK, dan STATUS IKD.');
+    var H = (rows[hi] || []).map(nrm), ci = -1, cn = -1, ck = -1, cm = -1, cp = -1;
+    H.forEach(function (h, k) {
+      if (ci < 0 && /IKD/.test(h)) ci = k;
+      else if (cn < 0 && /NIK|MY ?ASN/.test(h)) cn = k;
+      else if (ck < 0 && /KETERANGAN|ALASAN/.test(h)) ck = k;
+      if (cm < 0 && /^NAMA/.test(h)) cm = k;
+      if (cp < 0 && /^NIP/.test(h)) cp = k;
+    });
+    if (ci < 0) throw new Error('Kolom status IKD tidak ditemukan.');
+    var opd = '';
+    for (i = 0; i < hi && !opd; i++) for (j = 0; j < (rows[i] || []).length && !opd; j++) {
+      var t = nrm(rows[i][j]);
+      if (t.length > 4 && !/^(PROVINSI|PEMERINTAH|KABUPATEN|KOTA|REKAP|DATA|DAFTAR|LAMPIRAN|TAHUN)/.test(t)) opd = String(rows[i][j]).replace(/\s+/g, ' ').trim();
+    }
+    if (!opd) opd = String(fname || '').replace(/\.[a-z0-9]+$/i, '').replace(/[_-]+/g, ' ').trim();
+    var r = { p: [], opd: str(opd, 120), total: 0, aktif: 0, belum: 0, lain: 0, nok: 0, nbl: 0, nlain: 0, al: {}, hasNik: cn >= 0 };
+    for (i = hi + 1; i < rows.length; i++) {
+      var ro = rows[i] || [], nm = nrm(cm >= 0 ? ro[cm] : ro[1]);
+      if (!nm || /^\d+$/.test(nm) || /^(JUMLAH|TOTAL)\b/.test(nm)) continue;
+      r.total++;
+      var st = nrm(ro[ci]), cs, ns = '';
+      if (/BELUM|TIDAK/.test(st)) { r.belum++; cs = 'B'; } else if (/SUDAH|AKTIF|^YA$/.test(st)) { r.aktif++; cs = 'A'; } else { r.lain++; cs = '?'; }
+      if (cn >= 0) { var nk = nrm(ro[cn]); if (/BELUM|TIDAK/.test(nk)) { r.nbl++; ns = 'B'; } else if (/VERIFIKASI|SUDAH|VALID/.test(nk)) { r.nok++; ns = 'V'; } else { r.nlain++; ns = '?'; } }
+      var kt = ck >= 0 ? String(ro[ck] == null ? '' : ro[ck]).replace(/\s+/g, ' ').trim() : '';
+      r.p.push([String(ro[cp >= 0 ? cp : 2] == null ? '' : ro[cp >= 0 ? cp : 2]).replace(/\s+/g, '').slice(0, 30), String(cm >= 0 ? ro[cm] : ro[1]).replace(/\s+/g, ' ').trim().slice(0, 160), cs, ns, kt === '-' ? '' : kt.slice(0, 160)]);
+      if (ck >= 0 && /BELUM|TIDAK/.test(st)) { var al = nrm(ro[ck]); if (al && al !== '-') { al = al.slice(0, 90); r.al[al] = (r.al[al] || 0) + 1; } }
+    }
+    if (!r.total) throw new Error('Tidak ada baris pegawai yang terbaca.');
+    r.al = Object.keys(r.al).sort(function (a, b) { return r.al[b] - r.al[a]; }).slice(0, 8).map(function (k) { return [k, r.al[k]]; });
+    return r;
+  }
+  function ikdPrev() {
+    $('ikd-import').hidden = !ui.ikdq.length;
+    $('ikd-prev').innerHTML = ui.ikdq.map(function (x, i) {
+      if (x.err) return '<div class="ikdrow err"><div><strong>' + esc(x.name) + '</strong></div><div>' + esc(x.err) + '</div></div>';
+      var r = x.r;
+      return '<div class="ikdrow"><div><label class="f" for="ikd-n' + i + '">Nama OPD<input type="text" id="ikd-n' + i + '" class="ikd-opd" data-i="' + i + '" maxlength="120" value="' + esc(x.opd) + '"></label><div class="fn">' + esc(x.name) + '</div></div>' +
+        '<div><strong>' + nf(r.total) + '</strong> pegawai · <strong>' + nf(r.aktif) + '</strong> sudah aktif · <strong>' + nf(r.belum) + '</strong> belum aktif' + (r.lain ? ' · ' + r.lain + ' tidak diketahui' : '') +
+        (r.hasNik ? '<br><span class="note">NIK terverifikasi ' + nf(r.nok) + ', belum ' + nf(r.nbl) + '</span>' : '') + (ikd.some(function (o) { return o.id === ikdId(x.opd); }) ? '<br><span class="note">OPD ini sudah ada; datanya akan diperbarui.</span>' : '') + '</div></div>';
+    }).join('');
+  }
+  function ikdId(opd) { return 'o-' + String(opd).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60); }
+  function ikdFiles(files) {
+    ui.ikdq = [];
+    var list = Array.prototype.slice.call(files, 0, 60);
+    list.reduce(function (p, f) {
+      return p.then(function () {
+        var item = { name: f.name };
+        if (f.size > 12 * 1024 * 1024) { item.err = 'Berkas terlalu besar (maksimal 12 MB).'; ui.ikdq.push(item); return; }
+        var rd = /\.csv$/i.test(f.name) ? f.text().then(readCsv) : f.arrayBuffer().then(readXlsx);
+        return rd.then(function (rows) { item.r = analyzeIkd(rows, f.name); item.opd = item.r.opd; }).catch(function (e) { item.err = e.message || 'Berkas tidak bisa dibaca.'; }).then(function () { ui.ikdq.push(item); });
+      });
+    }, Promise.resolve()).then(ikdPrev);
+  }
+  function pushIkd(o) {
+    if (!REMOTE) return;
+    failed = false; inflight++; refreshSync();
+    api({ action: 'upsertikd', item: o }).catch(onFail).then(function () { inflight--; refreshSync(); });
+  }
+  function ikdSave() {
+    var n = 0;
+    ui.ikdq.forEach(function (x) {
+      if (x.err || !x.opd.trim()) return;
+      var o = normIkd({ id: ikdId(x.opd), opd: x.opd.trim(), tgl: iso(0), total: x.r.total, aktif: x.r.aktif, belum: x.r.belum, lain: x.r.lain, nok: x.r.nok, nbl: x.r.nbl, nlain: x.r.nlain, al: x.r.al });
+      ikd = ikd.filter(function (v) { return v.id !== o.id; }); ikd.push(o); o = Object.assign({}, o, { p: x.r.p }); pushIkd(o); n++;
+    });
+    ui.ikdq = []; saveIkd(); ikdPrev(); renderAll();
+    toast(n ? n + ' OPD tersimpan' : 'Tidak ada data yang disimpan');
+  }
+
+  var PAL = ['--p2', '--p7', '--p3', '--p4', '--p5', '--p6', '--p8', '--p1'];
+  function pc(i) { return 'var(' + PAL[i % PAL.length] + ')'; }
+  function donut(items, centre, sub) {
+    var tot = items.reduce(function (s, x) { return s + x.v; }, 0);
+    if (!tot) return '<p class="note" style="margin:0">Belum ada data.</p>';
+    var C = 2 * Math.PI * 52, off = 0, segs = '', leg = '';
+    items.forEach(function (x) {
+      if (!x.v) return;
+      var len = x.v / tot * C;
+      segs += '<circle cx="70" cy="70" r="52" fill="none" stroke-width="22" style="stroke:' + x.c + '" stroke-dasharray="' + len.toFixed(2) + ' ' + (C - len).toFixed(2) + '" stroke-dashoffset="' + (-off).toFixed(2) + '" transform="rotate(-90 70 70)"><title>' + esc(x.l) + ': ' + x.v + '</title></circle>';
+      off += len;
+    });
+    items.forEach(function (x) { leg += '<li><i style="background:' + x.c + '"></i><span>' + esc(x.l) + '</span><b>' + nf(x.v) + ' · ' + Math.round(x.v / tot * 100) + '%</b></li>'; });
+    return '<div class="donut"><svg viewBox="0 0 140 140" role="img" aria-label="Diagram lingkaran, total ' + centre + '"><circle cx="70" cy="70" r="52" fill="none" stroke-width="22" style="stroke:var(--surface-2)"/>' + segs +
+      '<text x="70" y="72" text-anchor="middle" class="dn-v">' + esc(String(centre)) + '</text><text x="70" y="90" text-anchor="middle" class="dn-s">' + esc(sub || '') + '</text></svg><ul class="legend">' + leg + '</ul></div>';
+  }
+  function columns(items, ci) {
+    var mx = items.reduce(function (m, x) { return Math.max(m, x.v); }, 0);
+    if (!items.length || !mx) return '<p class="note" style="margin:0">Belum ada data.</p>';
+    var W = 320, Ht = 170, L = 8, R = 8, T = 18, B = 24, n = items.length, slot = (W - L - R) / n, bw = Math.min(30, slot * 0.62), ph = Ht - T - B, g = '', b = '';
+    [0.5, 1].forEach(function (f) { var y = T + ph - ph * f; g += '<line class="gl" x1="' + L + '" x2="' + (W - R) + '" y1="' + y + '" y2="' + y + '" stroke-dasharray="3 4"/>'; });
+    g += '<line class="gl" x1="' + L + '" x2="' + (W - R) + '" y1="' + (T + ph) + '" y2="' + (T + ph) + '"/>';
+    items.forEach(function (x, k) {
+      var h = Math.max(x.v ? 3 : 0, x.v / mx * ph), cx = L + slot * k + slot / 2, y = T + ph - h;
+      b += '<rect x="' + (cx - bw / 2).toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="6" style="fill:' + pc(ci || 0) + '"><title>' + esc(x.l) + ': ' + esc(x.s || String(x.v)) + '</title></rect>';
+      if (x.v && n <= 12) b += '<text class="vl" x="' + cx.toFixed(1) + '" y="' + (y - 4).toFixed(1) + '" text-anchor="middle">' + nf(x.v) + '</text>';
+      if (n <= 7 || k % 2 === 0) b += '<text class="ax" x="' + cx.toFixed(1) + '" y="' + (Ht - 7) + '" text-anchor="middle">' + esc(x.l) + '</text>';
+    });
+    return '<svg class="cols" viewBox="0 0 ' + W + ' ' + Ht + '" role="img" aria-label="Diagram batang">' + g + b + '</svg>';
+  }
+  function monthItems(list, valFn) {
+    var m = {};
+    list.forEach(function (a) { var k = String(a.date).slice(0, 7); if (/^\d{4}-\d{2}$/.test(k)) m[k] = (m[k] || 0) + valFn(a); });
+    return Object.keys(m).sort().slice(-12).map(function (k) {
+      var d = new Date(+k.slice(0, 4), +k.slice(5, 7) - 1, 1);
+      return { l: d.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' }), v: m[k], s: nf(m[k]) };
+    });
+  }
+  function card(h, body) { return '<h2>' + h + '</h2>' + body; }
   function barRows(items, color) {
     var mx = items.reduce(function (m, x) { return Math.max(m, x.v); }, 0);
     if (!items.length || !mx) return '<p class="note" style="margin:0">Belum ada data.</p>';
@@ -471,11 +805,11 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
       var d = new Date(+m.slice(0, 4), +m.slice(5, 7) - 1, 1);
       return { l: d.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' }), v: mon[m].t, s: mon[m].n + ' kegiatan · ' + nf(mon[m].t) };
     });
-    $('jb-bm').innerHTML = '<h2>Warga terlayani per bulan</h2>' + barRows(ml, 2);
+    $('jb-bm').innerHTML = '<h2>Warga terlayani per bulan</h2>' + columns(ml, 0);
     var kl = Object.keys(kec).sort(function (a, b) { return kec[b] - kec[a]; }).slice(0, 8).map(function (k) { return { l: k, v: kec[k], s: nf(kec[k]) }; });
     $('jb-bw').innerHTML = '<h2>Warga terlayani per kecamatan</h2>' + barRows(kl, 5);
     var hl = HSL.map(function (h) { return { l: h[1], v: hs[h[0]], s: nf(hs[h[0]]) }; }).filter(function (x) { return x.v > 0; });
-    $('jb-bh').innerHTML = '<h2>Hasil layanan</h2>' + barRows(hl, 3);
+    $('jb-bh').innerHTML = '<h2>Hasil layanan</h2>' + donut(hl.map(function (x, k) { return { l: x.l, v: x.v, c: pc(k) }; }), nf(hl.reduce(function (s, x) { return s + x.v; }, 0)), 'layanan');
     var nAda = jbp.filter(function (v) { return v.files.length; }).length;
     $('jb-chips').innerHTML = [['all', 'Semua', jbp.length], ['ada', 'Ada dokumentasi', nAda], ['belum', 'Belum ada dokumentasi', jbp.length - nAda]].map(function (c) {
       return '<button class="chip" type="button" data-act="jbdoc" data-s="' + c[0] + '" aria-pressed="' + (ui.jdoc === c[0]) + '">' + c[1] + ' <span class="mono">' + c[2] + '</span></button>';
@@ -697,6 +1031,10 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
       '<div class="tile"><span class="k">Direncanakan</span><span class="v">' + n.rencana + '</span><span class="s">akan dilakukan</span></div>' +
       '<div class="tile"><span class="k">Sedang berjalan</span><span class="v">' + n.jalan + '</span><span class="s">dalam pelaksanaan</span></div>' +
       '<div class="tile"><span class="k">Sudah berjalan</span><span class="v">' + n.selesai + '</span><span class="s">selesai dilaksanakan</span></div>';
+    $('inov-charts').innerHTML = '<div class="bars">' + card('Status inovasi', donut([
+      { l: IST.selesai, v: n.selesai, c: 'var(--ok)' }, { l: IST.jalan, v: n.jalan, c: 'var(--p7)' },
+      { l: IST.rencana, v: n.rencana, c: 'var(--p3)' }, { l: IST.tunda, v: n.tunda, c: 'var(--p1)' }], inov.length, 'inovasi')) + '</div><div class="bars">' +
+      card('Inovasi per bidang', barRows(cfg.bidang.map(function (b) { var c = inov.filter(function (v) { return v.b === b.id; }).length; return { l: b.n, v: c, s: String(c) }; }), 1)) + '</div>';
     $('inov-chips').innerHTML = [['all', 'Semua', inov.length], ['rencana', IST.rencana, n.rencana], ['jalan', IST.jalan, n.jalan], ['selesai', IST.selesai, n.selesai], ['tunda', IST.tunda, n.tunda]].map(function (c) {
       return '<button class="chip" type="button" data-act="ivs" data-s="' + c[0] + '" aria-pressed="' + (ui.vs === c[0]) + '">' + esc(c[1]) + ' <span class="mono">' + c[2] + '</span></button>';
     }).join('');
@@ -823,36 +1161,64 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
       : 'Kegiatan yang diusulkan atau sudah masuk DPA. Pantau status, pagu, realisasi, dan kelengkapan dokumen dari usulan sampai SPJ.';
   }
 
-  function renderSummary() {
-    var sc = scoped(), lbl = ui.tab === 'dpa' ? ' kegiatan DPA' : ui.tab === 'jb' ? ' kegiatan jemput bola' : ' kegiatan';
+  function sumOf(sc) {
     var all = sc.map(function (a) { return { a: a, i: info(a) }; });
-    var td = 0, tt = 0, late = 0, soon = 0, done = 0;
+    var s = { all: all, c: { selesai: 0, terlambat: 0, berjalan: 0, belum: 0 }, td: 0, tt: 0, soon: 0 };
     all.forEach(function (x) {
-      td += x.i.d; tt += x.i.t;
-      if (x.i.st === 'selesai') done++;
-      else if (x.i.st === 'terlambat') late++;
-      else if (x.i.days <= 7) soon++;
+      s.td += x.i.d; s.tt += x.i.t; s.c[x.i.st]++;
+      if (x.i.st !== 'selesai' && x.i.st !== 'terlambat' && x.i.days <= 7) s.soon++;
     });
-    var attn = late + soon, pct = tt ? Math.round(td / tt * 100) : 0;
-    $('tiles').innerHTML =
-      '<div class="tile"><span class="k">Kegiatan aktif</span><span class="v">' + (all.length - done) + '</span><span class="s">dari ' + all.length + lbl + '</span></div>' +
-      '<div class="tile"><span class="k">Dokumen lengkap</span><span class="v">' + pct + '%</span><span class="s">' + td + ' dari ' + tt + ' dokumen</span></div>' +
-      '<div class="tile' + (attn ? ' alert' : '') + '"><span class="k">Perlu perhatian</span><span class="v">' + attn + '</span><span class="s">' + late + ' terlambat, ' + soon + ' jatuh tempo ≤ 7 hari</span></div>' +
+    return s;
+  }
+  function tilesHtml(s, lbl) {
+    var late = s.c.terlambat, done = s.c.selesai, attn = late + s.soon, pct = s.tt ? Math.round(s.td / s.tt * 100) : 0;
+    return '<div class="tile"><span class="k">Kegiatan aktif</span><span class="v">' + (s.all.length - done) + '</span><span class="s">dari ' + s.all.length + lbl + '</span></div>' +
+      '<div class="tile"><span class="k">Dokumen lengkap</span><span class="v">' + pct + '%</span><span class="s">' + s.td + ' dari ' + s.tt + ' dokumen</span></div>' +
+      '<div class="tile' + (attn ? ' alert' : '') + '"><span class="k">Perlu perhatian</span><span class="v">' + attn + '</span><span class="s">' + late + ' terlambat, ' + s.soon + ' jatuh tempo ≤ 7 hari</span></div>' +
       '<div class="tile"><span class="k">Selesai</span><span class="v">' + done + '</span><span class="s">semua dokumen lengkap</span></div>';
+  }
+  function statusDonut(s) {
+    return card('Status kegiatan', donut([
+      { l: 'Selesai', v: s.c.selesai, c: 'var(--ok)' }, { l: 'Berjalan', v: s.c.berjalan, c: 'var(--p7)' },
+      { l: 'Belum mulai', v: s.c.belum, c: 'var(--p1)' }, { l: 'Terlambat', v: s.c.terlambat, c: 'var(--crit)' }], s.all.length, 'kegiatan'));
+  }
+  function bidangBars(s) {
     var rows = cfg.bidang.map(function (b) {
       var d = 0, t = 0;
-      all.forEach(function (x) { if (x.a.b === b.id) { d += x.i.d; t += x.i.t; } });
+      s.all.forEach(function (x) { if (x.a.b === b.id) { d += x.i.d; t += x.i.t; } });
       var p = t ? Math.round(d / t * 100) : 0;
       return '<div class="brow" style="--c:' + cv(b.c) + '" title="' + esc(b.s) + '"><div class="l"><span><i class="dot"></i>' + esc(b.n) + '</span><span class="mono">' + (t ? d + '/' + t + ' · ' + p + '%' : 'belum ada') + '</span></div><div class="track"><i style="width:' + p + '%"></i></div></div>';
     }).join('');
-    $('bars').innerHTML = '<h2>Kelengkapan dokumen per bidang</h2>' + rows;
+    return card('Kelengkapan dokumen per bidang', rows);
+  }
+  function renderSummary() {
+    var g = sumOf(state.acts);
+    $('tiles').innerHTML = tilesHtml(g, ' kegiatan');
+    $('d-status').innerHTML = statusDonut(g);
+    $('d-bulan').innerHTML = card('Kegiatan per bulan (menurut tanggal)', columns(monthItems(state.acts, function () { return 1; }), 1));
+    $('bars').innerHTML = bidangBars(g);
+    $('d-warga').innerHTML = card('Warga terlayani jemput bola per bulan', columns(monthItems(jbp, function (v) { return v.ter || 0; }), 0));
+    var ni = { rencana: 0, jalan: 0, selesai: 0, tunda: 0 };
+    inov.forEach(function (v) { if (ni[v.st] !== undefined) ni[v.st]++; });
+    $('d-inov').innerHTML = card('Status inovasi', donut([
+      { l: IST.selesai, v: ni.selesai, c: 'var(--ok)' }, { l: IST.jalan, v: ni.jalan, c: 'var(--p7)' },
+      { l: IST.rencana, v: ni.rencana, c: 'var(--p3)' }, { l: IST.tunda, v: ni.tunda, c: 'var(--p1)' }], inov.length, 'inovasi'));
+    var ks = ikdSum();
+    $('d-ikd').innerHTML = card('Aktivasi IKD (semua OPD)', ikdDonut(ks));
+    $('d-myasn').innerHTML = card('Verifikasi NIK di MyASN (semua OPD)', ks.nok + ks.nbl + ks.nlain ? maDonut(ks) : '<p class="note" style="margin:0">Belum ada data.</p>');
+    if (ui.tab === 'dpa' || ui.tab === 'jb') {
+      var s = sumOf(scoped());
+      $('keg-tiles').innerHTML = tilesHtml(s, ui.tab === 'dpa' ? ' kegiatan DPA' : ' kegiatan jemput bola');
+      $('keg-charts').innerHTML = '<div class="bars">' + statusDonut(s) + '</div><div class="bars">' + bidangBars(s) + '</div>';
+    }
     $('n-dpa').textContent = state.acts.filter(function (a) { return a.j === 'dpa'; }).length;
     $('n-jb').textContent = state.acts.filter(function (a) { return a.j === 'jb'; }).length;
     $('n-bank').textContent = state.acts.length;
     $('n-tag').textContent = cfg.tags.length;
     $('n-inov').textContent = inov.length;
     $('n-jbl').textContent = jbp.length;
-    $('banner').hidden = REMOTE || ui.tab === 'jbl' || ui.tab === 'inov' || !state.acts.some(function (a) { return a.sample; });
+    $('n-ikd').textContent = ikd.length;
+    $('banner').hidden = REMOTE || !(ui.tab === 'dash' || ui.tab === 'dpa' || ui.tab === 'jb') || !state.acts.some(function (a) { return a.sample; });
   }
 
   function renderList() {
@@ -930,6 +1296,7 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
     if (ui.tab === 'tag') renderTags();
     if (ui.tab === 'inov') renderInov();
     if (ui.tab === 'jbl') renderJb();
+    if (ui.tab === 'ikd') renderIkd();
     if (!$('jb-form').hidden) $('jf-tags').innerHTML = tagPicker(ui.jtags, 'jform', '');
     if (!$('inov-form').hidden) $('iv-tags').innerHTML = tagPicker(ui.vtags, 'iform', '');
   }
@@ -1003,12 +1370,13 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
     $('view-keg').hidden = !(t === 'dpa' || t === 'jb');
     $('view-inov').hidden = t !== 'inov';
     $('view-jbl').hidden = t !== 'jbl';
-    document.querySelector('.summary').hidden = t === 'jbl';
+    $('view-ikd').hidden = t !== 'ikd';
+    $('view-dash').hidden = t !== 'dash';
     $('view-bank').hidden = t !== 'bank';
     $('view-tag').hidden = t !== 'tag';
     $('view-ide').hidden = t !== 'ide';
     $('view-set').hidden = t !== 'set';
-    ['dpa', 'jbl', 'jb', 'inov', 'bank', 'tag', 'ide', 'set'].forEach(function (k) { $('tab-' + k).setAttribute('aria-selected', t === k); });
+    ['dash', 'dpa', 'jbl', 'jb', 'inov', 'ikd', 'bank', 'tag', 'ide', 'set'].forEach(function (k) { $('tab-' + k).setAttribute('aria-selected', t === k); });
     if (t === 'bank') fillBankSelects();
     renderAll();
     if (t === 'set') renderSettings();
@@ -1061,6 +1429,9 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
       '<div class="tile"><span class="k">Total pagu DPA</span><span class="v sm">' + rpS(pagu) + '</span><span class="s">realisasi ' + rpS(real) + (pagu > 0 ? ' (' + Math.round(real / pagu * 100) + '%)' : '') + '</span></div>' +
       '<div class="tile"><span class="k">Warga terlayani</span><span class="v">' + ter.toLocaleString('id-ID') + '</span><span class="s">' + (sas > 0 ? 'dari target ' + sas.toLocaleString('id-ID') + ' (' + Math.round(ter / sas * 100) + '%)' : 'jemput bola') + '</span></div>' +
       '<div class="tile"><span class="k">Dokumen lengkap</span><span class="v">' + (tt ? Math.round(td / tt * 100) : 0) + '%</span><span class="s">' + td + ' dari ' + tt + ' dokumen</span></div>';
+    var byY = {}; rows.forEach(function (a) { var y = yr(a); byY[y] = (byY[y] || 0) + 1; });
+    $('bank-charts').innerHTML = '<div class="bars">' + card('Komposisi kategori', donut([{ l: 'Kegiatan DPA', v: nd, c: 'var(--p2)' }, { l: 'Jemput bola', v: nj, c: 'var(--p3)' }], rows.length, 'kegiatan')) + '</div><div class="bars">' +
+      card('Kegiatan per tahun', columns(Object.keys(byY).sort().map(function (y) { return { l: y, v: byY[y], s: byY[y] + ' kegiatan' }; }), 1)) + '</div>';
     if (!rows.length) { $('bank-table').innerHTML = '<div class="empty" style="border:0">Tidak ada kegiatan yang cocok dengan saringan.</div>'; return; }
     $('bank-table').innerHTML = '<table class="bank"><thead><tr><th>Tanggal</th><th>Kegiatan</th><th>Kategori</th><th>Bidang</th><th>Dokumen</th><th>Rincian</th><th></th></tr></thead><tbody>' +
       rows.map(function (a) {
@@ -1136,6 +1507,7 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
     state.acts = j.acts.map(normAct);
     inov = (j.inov || []).map(normInov);
     jbp = (j.jbl || []).map(normJb);
+    ikd = (j.ikd || []).map(normIkd);
     publik = j.publik !== false;
     if (!cached) {
       if (auth && j.sesi === false) { sesiHabis(true); }
@@ -1157,7 +1529,7 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
     return api({ action: 'list' }).then(function (j) {
       showOffline(false);
       applyList(j, false);
-      try { var c = JSON.stringify({ t: Date.now(), data: { cfg: j.cfg, acts: j.acts, inov: j.inov, jbl: j.jbl, publik: j.publik } }); if (c.length < 4500000) lsSet(CACHEK, c); } catch (x) {}
+      try { var c = JSON.stringify({ t: Date.now(), data: { cfg: j.cfg, acts: j.acts, inov: j.inov, jbl: j.jbl, ikd: j.ikd, publik: j.publik } }); if (c.length < 4500000) lsSet(CACHEK, c); } catch (x) {}
     }).catch(function (e) {
       if (QUIET.indexOf(e.message) > -1) return;
       var netDown = e.message === 'offline' || e.name === 'TypeError';
@@ -1445,7 +1817,7 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
   }
 
   /* ---------- login, akun, peran ---------- */
-  var SAFE = ['open', 'ichip', 'ikat', 'ivs', 'iv-open', 'jb-open', 'jb-close', 'jbdoc', 'tg-view', 'tg-viewi', 'tg-viewj', 'bank-open', 'goto-tag', 'sset'];
+  var SAFE = ['open', 'ichip', 'ikat', 'ivs', 'iv-open', 'jb-open', 'jb-close', 'jbdoc', 'tg-view', 'tg-viewi', 'tg-viewj', 'bank-open', 'goto-tag', 'sset', 'ikd-peg', 'ikd-pclose'];
   function readOnly() { return !canEdit() || !!ui.offline; }
   function lockUI() {
     var ro = readOnly();
@@ -1471,7 +1843,7 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
     $('btn-login').hidden = li; $('btn-acct').hidden = !li;
     if (li) $('btn-acct').textContent = auth.me.nama + ' · ' + (ROLES[auth.me.peran] || '');
     $('tab-set').hidden = !isAdmin();
-    if (!isAdmin() && ui.tab === 'set') setTab('dpa');
+    if (!isAdmin() && ui.tab === 'set') setTab('dash');
     lockUI();
   }
   function modalOpen(id, on) {
@@ -1489,7 +1861,7 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
   }
   function hideLogin() { modalOpen('login-modal', false); }
   function sesiHabis(quiet) {
-    auth = null; clearAuthStore(); lsDel(CACHEK);
+    auth = null; clearAuthStore(); lsDel(CACHEK); if (ui.ikdm) closeIkdm();
     applyRole(); rebuildAll(); refreshSync();
     if (!quiet || !publik) showLogin('Sesi Anda berakhir. Silakan masuk lagi.');
     else toast('Sesi Anda berakhir. Silakan masuk lagi.');
@@ -1542,7 +1914,7 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
   function doLogout(all) {
     var done = function () {
       auth = null; clearAuthStore(); lsDel(CACHEK); ui.must = false; modalOpen('acct-modal', false);
-      state.acts = []; inov = []; jbp = []; ui.jsel = null; renderJbModal();
+      state.acts = []; inov = []; jbp = []; ikd = []; if (ui.ikdm) closeIkdm(); ui.jsel = null; renderJbModal();
       applyRole(); rebuildAll(); toast('Anda sudah keluar'); pull();
     };
     api({ action: all ? 'logoutall' : 'logout' }).catch(function () {}).then(done);
@@ -1551,6 +1923,18 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
   /* ---------- pemasangan event ---------- */
 
   $('btn-new').addEventListener('click', function () { openForm(); });
+  function paintTheme() {
+    var dk = document.documentElement.getAttribute('data-theme') === 'dark';
+    $('btn-theme').textContent = dk ? 'Mode terang' : 'Mode gelap';
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) { m.setAttribute('content', dk ? '#0C1514' : '#F8FCFB'); });
+  }
+  $('btn-theme').addEventListener('click', function () {
+    var nx = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', nx);
+    try { localStorage.setItem('dukcapil-tema', nx); } catch (e) {}
+    paintTheme();
+  });
+  paintTheme();
   $('btn-cancel').addEventListener('click', function () { $('form').hidden = true; });
   $('f-tipe').addEventListener('change', preview);
   $('f-kat').addEventListener('change', function () {
@@ -1598,6 +1982,18 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
     if (pend.length) uploadJbFiles(v.id, pend);
   });
   $('btn-new-inov').addEventListener('click', function () { openInovForm(); });
+  $('btn-new-ikd').addEventListener('click', function () { if (!readOnly()) $('ikd-file').click(); });
+  $('ikd-file').addEventListener('change', function (e) { var fl = e.target.files; if (fl && fl.length && !readOnly()) ikdFiles(fl); e.target.value = ''; });
+  $('ikd-prev').addEventListener('input', function (e) { var el = e.target; if (el.classList.contains('ikd-opd')) { var x = ui.ikdq[+el.getAttribute('data-i')]; if (x) x.opd = el.value; } });
+  $('ikd-q').addEventListener('input', renderIkd);
+  $('ikm-q').addEventListener('input', renderIkdm);
+  $('ikm-fi').addEventListener('change', renderIkdm);
+  $('ikm-fn').addEventListener('change', renderIkdm);
+  $('ikm-csv').addEventListener('click', ikdmCsv);
+  $('ikd-modal').addEventListener('click', function (e) { if (e.target === this) closeIkdm(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && ui.ikdm) closeIkdm(); });
+  $('ikd-sort').addEventListener('change', renderIkd);
+  $('btn-csv-ikd').addEventListener('click', function () { saveCsv(ikdCsvText(), 'aktivasi-ikd-' + iso(0) + '.csv'); });
   $('btn-iv-cancel').addEventListener('click', function () { $('inov-form').hidden = true; });
   $('ivf-b').addEventListener('change', function (e) { ui.vb = e.target.value; renderInov(); });
   $('ivf-t').addEventListener('change', function (e) { ui.vt = e.target.value; renderInov(); });
@@ -1736,6 +2132,13 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
     else if (act === 'iv-del-no') { ui.vdel = null; renderInov(); }
     else if (act === 'iv-del-yes') { inov = inov.filter(function (v) { return v.id !== id; }); ui.vdel = null; saveInov(); pushDelInov(id); renderAll(); toast('Inovasi dihapus'); }
     else if (act === 'ivs') { ui.vs = el.getAttribute('data-s'); renderInov(); }
+    else if (act === 'ikd-peg') openIkdm(id);
+    else if (act === 'ikd-pclose') closeIkdm();
+    else if (act === 'ikd-save') { if (!readOnly()) ikdSave(); }
+    else if (act === 'ikd-cancel') { ui.ikdq = []; ikdPrev(); }
+    else if (act === 'ikd-del') { ui.ikdel = id; renderIkd(); }
+    else if (act === 'ikd-del-no') { ui.ikdel = null; renderIkd(); }
+    else if (act === 'ikd-del-yes') { ikd = ikd.filter(function (v) { return v.id !== id; }); ui.ikdel = null; saveIkd(); if (REMOTE) { inflight++; refreshSync(); api({ action: 'delikd', id: id }).catch(onFail).then(function () { inflight--; refreshSync(); }); } renderAll(); toast('Data OPD dihapus'); }
     else if (act === 'iv-clear-sample') { inov = inov.filter(function (v) { return !v.sample; }); saveInov(); renderAll(); toast('Contoh inovasi dihapus'); }
     else if (act === 'tg-viewi') { ui.vt = id; ui.vs = 'all'; ui.vb = 'all'; ui.vq = ''; $('ivf-q').value = ''; buildSelects(); setTab('inov'); }
     else if (act === 'tg-del') { ui.tconfirm = id; renderTags(); }
@@ -1783,7 +2186,7 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
     var f = state.acts.filter(function (a) { return a.j === kt; }).map(function (a) { return { a: a, i: info(a) }; }).sort(function (p, r) { return ORD[p.i.st] - ORD[r.i.st] || p.a.date.localeCompare(r.a.date); })[0];
     if (f) ui.open[f.a.id] = true;
   });
-  setTab('dpa');
+  setTab('dash');
   (function () {
     var qt = new URLSearchParams(location.search).get('tab');
     if (qt && ['dpa', 'jbl', 'jb', 'inov', 'bank', 'tag', 'ide'].indexOf(qt) > -1) setTab(qt);
