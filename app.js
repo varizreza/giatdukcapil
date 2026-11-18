@@ -284,7 +284,7 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
   function saveInov() { if (REMOTE) return; lsSet(KEYI, JSON.stringify({ items: inov })); }
   function findInov(id) { return inov.filter(function (v) { return v.id === id; })[0]; }
 
-  var ui = { ikdm: null, ikdq: [], ikdel: null, tab: 'dash', kat: 'dpa', fb: 'all', fs: 'all', ft: 'all', ftags: [], tconfirm: null, q: '', ib: 'all', ik: 'all', bk: { kat: 'all', th: 'all', b: 'all', tg: 'all', q: '' }, open: {}, confirm: null, busy: {}, loadErr: REMOTE ? 'Memuat data…' : '', jdoc: 'all', jsel: null, jy: 'all', jb: 'all', jk: 'all', jt: 'all', jq: '', jopen: {}, jtags: [], jdel: null, jup: {}, jfiles: [], vs: 'all', vb: 'all', vt: 'all', vq: '', vopen: {}, vtags: [], vdel: null, sset: 'conn', sib: 'all', dirty: false };
+  var ui = { srvIkd: false, ikdm: null, ikdq: [], ikdel: null, tab: 'dash', kat: 'dpa', fb: 'all', fs: 'all', ft: 'all', ftags: [], tconfirm: null, q: '', ib: 'all', ik: 'all', bk: { kat: 'all', th: 'all', b: 'all', tg: 'all', q: '' }, open: {}, confirm: null, busy: {}, loadErr: REMOTE ? 'Memuat data…' : '', jdoc: 'all', jsel: null, jy: 'all', jb: 'all', jk: 'all', jt: 'all', jq: '', jopen: {}, jtags: [], jdel: null, jup: {}, jfiles: [], vs: 'all', vb: 'all', vt: 'all', vq: '', vopen: {}, vtags: [], vdel: null, sset: 'conn', sib: 'all', dirty: false };
 
   function info(a) {
     var t = a.docs.length, d = a.docs.filter(function (x) { return x.d; }).length, days = dayDiff(a.date), st;
@@ -438,6 +438,7 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
     return rows;
   }
   function renderIkd() {
+    $('ikd-old').hidden = !(REMOTE && !ui.srvIkd && canEdit());
     var s = ikdSum(), nikT = s.nok + s.nbl + s.nlain, nikOpd = ikd.filter(function (o) { return o.nok + o.nbl + o.nlain > 0; });
     $('ikd-tiles').innerHTML =
       '<div class="tile"><span class="k">Pegawai terdata</span><span class="v">' + nf(s.total) + '</span><span class="s">dari ' + s.n + ' OPD</span></div>' +
@@ -1535,6 +1536,7 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
     inov = (j.inov || []).map(normInov);
     jbp = (j.jbl || []).map(normJb);
     ikd = (j.ikd || []).map(normIkd);
+    ui.srvIkd = (j.ikdv || 0) >= 2;
     publik = j.publik !== false;
     if (!cached) {
       if (auth && j.sesi === false) { sesiHabis(true); }
@@ -2258,6 +2260,8 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
   });
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
     window.addEventListener('load', function () {
+      var hadCtl = !!navigator.serviceWorker.controller, reloaded = false;
+      navigator.serviceWorker.addEventListener('controllerchange', function () { if (hadCtl && !reloaded && !ui.ikdq.length) { reloaded = true; location.reload(); } });
       navigator.serviceWorker.register('sw.js').then(function (reg) {
         reg.addEventListener('updatefound', function () {
           var nw = reg.installing;
