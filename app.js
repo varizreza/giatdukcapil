@@ -517,7 +517,11 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
     $('ikd-modal').hidden = false; document.body.classList.add('noscroll'); renderIkdm();
     api({ action: 'ikdpeg', id: id }).then(function (j) {
       if (ui.ikdm && ui.ikdm.id === id) { ui.ikdm.rows = (j.p || []).map(function (r) { return [str(r[0], 30), str(r[1], 160), str(r[2], 1), str(r[3], 1), str(r[4], 160)]; }); renderIkdm(); }
-    }).catch(function (e) { if (ui.ikdm && ui.ikdm.id === id) { ui.ikdm.err = 'Daftar pegawai tidak bisa dimuat. Periksa koneksi lalu coba lagi.'; renderIkdm(); } });
+    }).catch(function (e) { if (ui.ikdm && ui.ikdm.id === id) { var em = e && e.message || '';
+      ui.ikdm.err = /aksi tidak dikenal/.test(em) ? 'Apps Script Anda belum versi terbaru (belum mengenal daftar pegawai). Tempel Code.gs terbaru ke Apps Script, lalu Deploy > Kelola deployment > Edit > Versi baru > Deploy. Setelah itu unggah ulang berkas Excel OPD ini.'
+        : em === 'offline' ? 'Anda sedang offline. Sambungkan internet lalu buka lagi.'
+        : em === 'Failed to fetch' ? 'Tidak bisa menghubungi Google Apps Script. Periksa koneksi, atau pastikan akses Web App diatur ke "Siapa saja" dan URL di config.js benar.'
+        : 'Daftar pegawai tidak bisa dimuat (' + em + ').'; renderIkdm(); } });
   }
   function closeIkdm() { ui.ikdm = null; $('ikd-modal').hidden = true; document.body.classList.toggle('noscroll', !$('login-modal').hidden || !$('acct-modal').hidden || !$('jb-modal').hidden); }
   function ikdmCsv() {
@@ -614,6 +618,18 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
     return rows;
   }
   function nrm(s) { return String(s == null ? '' : s).replace(/\s+/g, ' ').trim().toUpperCase(); }
+  var GENERIC = /^(REKAP|DATA|FILE|EXCEL|AKTIVASI|IDENTITAS|KEPENDUDUKAN|DIGITAL|IKD|ASN|PNS|PPPK|NIPPPK|DAN|DI|YANG|TELAH|SUDAH|TERVERIFIKASI|VERIFIKASI|NIK|NIP|MYASN|MY|DENGAN|PEGAWAI|TAHUN|JAN\w*|FEB\w*|MAR\w*|APR\w*|MEI|JUN\w*|JUL\w*|AGU\w*|SEP\w*|OKT\w*|NOV\w*|DES\w*|\d+)$/i;
+  function opdFromFile(fn) {
+    var s = String(fn || '').replace(/^[0-9a-f]{8}-(?=[A-Za-z])/, '').replace(/\.[a-z0-9]+$/i, '').split(/\s+-\s+|_-_/)[0].replace(/[_]+/g, ' ').replace(/\s+/g, ' ').trim(), tk = s.split(' ');
+    while (tk.length > 1 && GENERIC.test(tk[0])) tk.shift();
+    while (tk.length > 1 && GENERIC.test(tk[tk.length - 1])) tk.pop();
+    return tk.join(' ');
+  }
+  function nipText(v) {
+    var s = String(v == null ? '' : v).replace(/\s+/g, '');
+    if (/^[\d.,]+E\+?\d+$/i.test(s)) { var n = Number(s.replace(',', '.')); if (isFinite(n)) s = n.toLocaleString('fullwide', { useGrouping: false }); }
+    return s.slice(0, 30);
+  }
   function analyzeIkd(rows, fname) {
     var hi = -1, i, j;
     for (i = 0; i < Math.min(rows.length, 30) && hi < 0; i++) {
@@ -633,9 +649,9 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
     var opd = '';
     for (i = 0; i < hi && !opd; i++) for (j = 0; j < (rows[i] || []).length && !opd; j++) {
       var t = nrm(rows[i][j]);
-      if (t.length > 4 && !/^(PROVINSI|PEMERINTAH|KABUPATEN|KOTA|REKAP|DATA|DAFTAR|LAMPIRAN|TAHUN)/.test(t)) opd = String(rows[i][j]).replace(/\s+/g, ' ').trim();
+      if (t.length > 4 && /DINAS|BADAN|BIRO|SEKRETARIAT|KANTOR|BAGIAN|INSPEKTORAT|SATUAN|KECAMATAN|KELURAHAN|\bUPT|RSUD|RUMAH SAKIT|SEKOLAH|SMA|SMK/.test(t) && !/DATA|VERIFIKASI|AKTIVASI|REKAP|PROVINSI|PEMERINTAH/.test(t)) opd = String(rows[i][j]).replace(/\s+/g, ' ').trim();
     }
-    if (!opd) opd = String(fname || '').replace(/\.[a-z0-9]+$/i, '').replace(/[_-]+/g, ' ').trim();
+    if (!opd) opd = opdFromFile(fname);
     var r = { p: [], opd: str(opd, 120), total: 0, aktif: 0, belum: 0, lain: 0, nok: 0, nbl: 0, nlain: 0, al: {}, hasNik: cn >= 0 };
     for (i = hi + 1; i < rows.length; i++) {
       var ro = rows[i] || [], nm = nrm(cm >= 0 ? ro[cm] : ro[1]);
@@ -645,10 +661,11 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
       if (/BELUM|TIDAK/.test(st)) { r.belum++; cs = 'B'; } else if (/SUDAH|AKTIF|^YA$/.test(st)) { r.aktif++; cs = 'A'; } else { r.lain++; cs = '?'; }
       if (cn >= 0) { var nk = nrm(ro[cn]); if (/BELUM|TIDAK/.test(nk)) { r.nbl++; ns = 'B'; } else if (/VERIFIKASI|SUDAH|VALID/.test(nk)) { r.nok++; ns = 'V'; } else { r.nlain++; ns = '?'; } }
       var kt = ck >= 0 ? String(ro[ck] == null ? '' : ro[ck]).replace(/\s+/g, ' ').trim() : '';
-      r.p.push([String(ro[cp >= 0 ? cp : 2] == null ? '' : ro[cp >= 0 ? cp : 2]).replace(/\s+/g, '').slice(0, 30), String(cm >= 0 ? ro[cm] : ro[1]).replace(/\s+/g, ' ').trim().slice(0, 160), cs, ns, kt === '-' ? '' : kt.slice(0, 160)]);
+      r.p.push([nipText(ro[cp >= 0 ? cp : 2]), String(cm >= 0 ? ro[cm] : ro[1]).replace(/\s+/g, ' ').trim().slice(0, 160), cs, ns, kt === '-' ? '' : kt.slice(0, 160)]);
       if (ck >= 0 && /BELUM|TIDAK/.test(st)) { var al = nrm(ro[ck]); if (al && al !== '-') { al = al.slice(0, 90); r.al[al] = (r.al[al] || 0) + 1; } }
     }
     if (!r.total) throw new Error('Tidak ada baris pegawai yang terbaca.');
+    r.nipCut = r.p.filter(function (x) { return /^\d{18}$/.test(x[0]) && /000$/.test(x[0]); }).length > r.total * 0.25;
     r.al = Object.keys(r.al).sort(function (a, b) { return r.al[b] - r.al[a]; }).slice(0, 8).map(function (k) { return [k, r.al[k]]; });
     return r;
   }
@@ -659,7 +676,7 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
       var r = x.r;
       return '<div class="ikdrow"><div><label class="f" for="ikd-n' + i + '">Nama OPD<input type="text" id="ikd-n' + i + '" class="ikd-opd" data-i="' + i + '" maxlength="120" value="' + esc(x.opd) + '"></label><div class="fn">' + esc(x.name) + '</div></div>' +
         '<div><strong>' + nf(r.total) + '</strong> pegawai · <strong>' + nf(r.aktif) + '</strong> sudah aktif · <strong>' + nf(r.belum) + '</strong> belum aktif' + (r.lain ? ' · ' + r.lain + ' tidak diketahui' : '') +
-        (r.hasNik ? '<br><span class="note">NIK terverifikasi ' + nf(r.nok) + ', belum ' + nf(r.nbl) + '</span>' : '') + (ikd.some(function (o) { return o.id === ikdId(x.opd); }) ? '<br><span class="note">OPD ini sudah ada; datanya akan diperbarui.</span>' : '') + '</div></div>';
+        (r.hasNik ? '<br><span class="note">NIK terverifikasi ' + nf(r.nok) + ', belum ' + nf(r.nbl) + '</span>' : '<br><span class="note">Kolom status NIK/MyASN tidak ditemukan.</span>') + (r.nipCut ? '<br><span class="note" style="color:var(--warn)">Banyak NIP berakhiran 000. Kemungkinan NIP terpotong oleh Excel (kolom berformat angka). Perbaiki dengan format Teks di berkas asal.</span>' : '') + (ui.ikdq.filter(function (y) { return !y.err && y.opd.trim().toLowerCase() === x.opd.trim().toLowerCase(); }).length > 1 ? '<br><span class="note" style="color:var(--warn)">Nama OPD sama dengan berkas lain di daftar ini; hanya yang terakhir yang disimpan.</span>' : '') + (ikd.some(function (o) { return o.id === ikdId(x.opd); }) ? '<br><span class="note">OPD ini sudah ada; datanya akan diperbarui.</span>' : '') + '</div></div>';
     }).join('');
   }
   function ikdId(opd) { return 'o-' + String(opd).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60); }
@@ -676,19 +693,29 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
     }, Promise.resolve()).then(ikdPrev);
   }
   function pushIkd(o) {
-    if (!REMOTE) return;
+    if (!REMOTE) return Promise.resolve();
     failed = false; inflight++; refreshSync();
-    api({ action: 'upsertikd', item: o }).catch(onFail).then(function () { inflight--; refreshSync(); });
+    var once = function () { return api({ action: 'upsertikd', item: o }); };
+    return once().catch(function (e) { if (QUIET.indexOf(e.message) >= 0 || e.message === 'offline') throw e; return new Promise(function (r) { setTimeout(r, 1500); }).then(once); })
+      .then(function () { inflight--; refreshSync(); }, function (e) { inflight--; refreshSync(); throw e; });
   }
   function ikdSave() {
-    var n = 0;
-    ui.ikdq.forEach(function (x) {
-      if (x.err || !x.opd.trim()) return;
-      var o = normIkd({ id: ikdId(x.opd), opd: x.opd.trim(), tgl: iso(0), total: x.r.total, aktif: x.r.aktif, belum: x.r.belum, lain: x.r.lain, nok: x.r.nok, nbl: x.r.nbl, nlain: x.r.nlain, al: x.r.al });
-      ikd = ikd.filter(function (v) { return v.id !== o.id; }); ikd.push(o); o = Object.assign({}, o, { p: x.r.p }); pushIkd(o); n++;
+    var items = ui.ikdq.filter(function (x) { return !x.err && x.opd.trim(); }), done = 0, bad = [];
+    if (!items.length) { toast('Tidak ada data yang disimpan'); return; }
+    ui.ikdq = []; ikdPrev();
+    var chain = Promise.resolve();
+    items.forEach(function (x, idx) {
+      chain = chain.then(function () {
+        var o = normIkd({ id: ikdId(x.opd), opd: x.opd.trim(), tgl: iso(0), total: x.r.total, aktif: x.r.aktif, belum: x.r.belum, lain: x.r.lain, nok: x.r.nok, nbl: x.r.nbl, nlain: x.r.nlain, al: x.r.al });
+        ikd = ikd.filter(function (v) { return v.id !== o.id; }); ikd.push(o); saveIkd(); renderAll();
+        if (items.length > 1) toast('Menyimpan ' + (idx + 1) + ' dari ' + items.length + ': ' + o.opd);
+        return pushIkd(Object.assign({}, o, { p: x.r.p })).then(function () { done++; }, function (e) { bad.push(o.opd + ' (' + (e.message || 'gagal') + ')'); });
+      });
     });
-    ui.ikdq = []; saveIkd(); ikdPrev(); renderAll();
-    toast(n ? n + ' OPD tersimpan' : 'Tidak ada data yang disimpan');
+    chain.then(function () {
+      renderAll();
+      toast(bad.length ? done + ' OPD tersimpan, gagal: ' + bad.join('; ') : done + ' OPD tersimpan');
+    });
   }
 
   var PAL = ['--p2', '--p7', '--p3', '--p4', '--p5', '--p6', '--p8', '--p1'];
@@ -1489,7 +1516,7 @@ try { if (window.top !== window.self) { document.documentElement.style.display =
       });
   }
   var QUIET = ['unauthorized', 'must_change', 'forbidden'];
-  function onFail(e) { if (QUIET.indexOf(e.message) < 0) { failed = true; toast(e.message === 'offline' ? 'Anda sedang offline, perubahan tidak tersimpan' : 'Gagal menyimpan ke Google Sheets'); } }
+  function onFail(e) { if (QUIET.indexOf(e.message) < 0) { failed = true; toast(e.message === 'offline' ? 'Anda sedang offline, perubahan tidak tersimpan' : 'Gagal menyimpan ke Google Sheets (' + (e.message || 'galat') + ')'); } }
   function findAct(id) { return state.acts.filter(function (x) { return x.id === id; })[0]; }
   function num0(v) { return Math.max(0, Math.round(+v || 0)); }
   function normAct(a) {
