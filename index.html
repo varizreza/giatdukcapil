@@ -460,6 +460,19 @@ body.ro #btn-new, body.ro #btn-new-jbl, body.ro #btn-new-inov, body.ro #btn-new-
 .cols .gl { stroke: var(--line); stroke-width: 1; }
 .cols rect { transition: opacity .2s; }
 .cols rect:hover { opacity: .8; }
+/* Akun, menu, edit pegawai */
+.chks { display: flex; flex-wrap: wrap; gap: 8px; }
+.chk { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: var(--surface-2); font-size: 13.5px; cursor: pointer; }
+.chk input { width: auto; min-height: 0; padding: 0; margin: 0; accent-color: var(--accent); }
+.mrow { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 16px; background: var(--surface-2); }
+.mrow .nm { flex: 1; min-width: 0; font-weight: 600; }
+.mrow .no { font-family: var(--f-mono); color: var(--muted); width: 1.6em; }
+.mpanel { margin-top: 10px; padding: 12px 14px; border-radius: 18px; background: var(--surface-2); display: grid; gap: 10px; }
+.ikdadd { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 14px; border-radius: 18px; background: var(--surface-2); }
+.ikdadd input, .ikdadd select { flex: 1 1 150px; min-width: 0; }
+.ikdsave { align-items: center; position: sticky; top: 0; z-index: 3; background: var(--surface); padding: 8px 0; }
+.ikm-sel { min-width: 150px; }
+.ikm-ket { min-width: 180px; width: 100%; }
 /* IKD */
 .sech { font-family: var(--f-display); font-size: 1.05rem; font-weight: 700; margin: 8px 0 -4px; }
 .ikdpad { padding: 20px 22px 26px; display: flex; flex-direction: column; gap: 14px; }
@@ -482,30 +495,105 @@ table.ikt td .stk { margin-bottom: 4px; }
 .stk i { display: block; height: 100%; }
 table.bank td.num, table.bank th.num { text-align: right; font-variant-numeric: tabular-nums; }
 table.ikt { min-width: 760px; }
+
+/* ===== UX v2: sidebar, header ringkas, keterbacaan ===== */
+body { font-size: 16px; line-height: 1.5; }
+.note, .tile .k, .tile .s, .sync { font-size: 14px; }
+.tile .k, .tile .s { color: var(--ink); opacity: .78; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.btn, .chip, select, input, textarea { min-height: 44px; }
+.btn.small { min-height: 44px; padding: 8px 18px; font-size: 15px; }
+.btn.ico { padding: 0 14px; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
+.btn.ico svg, .tab svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.tile, .tiles > .tile:nth-child(2), .tiles > .tile:nth-child(3) { border-radius: 22px; padding: 16px 18px; }
+.tile .v { font-size: 2.1rem; }
+.tile:hover { transform: none; }
+.vhead h2 { font-size: 1.6rem; }
+.view { gap: 16px; }
+.chartgrid > .bars { max-height: 460px; overflow: auto; }
+.fold { background: var(--surface); border-radius: 22px; box-shadow: var(--elev1); }
+.fold > summary { cursor: pointer; min-height: 48px; padding: 12px 20px; font-weight: 650; list-style: none; display: flex; align-items: center; gap: 10px; }
+.fold > summary::-webkit-details-marker { display: none; }
+.fold > summary::before { content: "▸"; transition: transform .2s; }
+.fold[open] > summary::before { transform: rotate(90deg); }
+.fold > .chartgrid { padding: 0 12px 12px; }
+.fold > .chartgrid > .bars { box-shadow: none; background: var(--surface-2); }
+table th, table td { padding-block: 10px; }
+.empty { padding: 28px 16px; font-size: 15px; }
+
+/* header ringkas */
+.top { border-radius: 24px; padding: 12px 18px; align-items: center; flex-wrap: nowrap; gap: 12px; }
+.top::before, .top::after { display: none; }
+.top h1 { font-size: clamp(1.15rem, 2.6vw, 1.55rem); line-height: 1.2; }
+.top .eyebrow { font-size: 12px; }
+.top-l { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.top-r { flex-direction: row; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+.top .row-btns { flex-wrap: nowrap; }
+#btn-menu { display: none; }
+.scrim { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 39; }
+.scrim[hidden] { display: none; }
+
+/* sidebar (desktop) */
+.tabs { position: fixed; left: 0; top: 0; bottom: 0; width: 252px; z-index: 40; flex-direction: column; gap: 4px; border-radius: 0 28px 28px 0; padding: 16px 12px 24px; overflow-y: auto; overflow-x: hidden; background: var(--surface); box-shadow: var(--elev1); }
+.tabs .brand { display: flex; align-items: center; gap: 10px; padding: 8px 10px 16px; font-weight: 750; font-size: 1.05rem; line-height: 1.2; }
+.tabs .brand i { width: 38px; height: 38px; border-radius: 12px; background: var(--primary-c); color: var(--on-primary-c); display: grid; place-items: center; font-style: normal; font-weight: 800; flex: none; }
+.tab { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 10px 14px; border-radius: 16px; text-align: left; font-size: 15.5px; white-space: normal; color: var(--ink); }
+.tab .n { margin-left: auto; font-size: 13px; padding: 2px 9px; }
+.tab[aria-selected="true"] { box-shadow: none; font-weight: 700; }
+body { padding-left: 276px; }
+.wrap { max-width: 1160px; }
+
+/* HP / tablet: menu jadi laci */
+@media (max-width: 1000px) {
+  body { padding-left: max(16px, env(safe-area-inset-left, 0px)); }
+  #btn-menu { display: inline-flex; }
+  .tabs { transform: translateX(-105%); transition: transform .25s ease; width: min(84vw, 300px); box-shadow: 0 0 40px rgba(0,0,0,.3); }
+  body.nav-open .tabs { transform: none; }
+  body.nav-open { overflow: hidden; }
+  .top { position: sticky; top: 8px; z-index: 30; box-shadow: var(--elev1); }
+  .top .sync { display: none; }
+  .top .bl, .top #btn-acct .nm { display: none; }
+  .top-r { flex-wrap: nowrap; }
+}
+@media (max-width: 520px) {
+  .top { padding: 10px 12px; border-radius: 20px; }
+  .top .eyebrow { display: none; }
+  .top h1 { font-size: .95rem; }
+  #btn-acct { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 12px; }
+  .tiles.t4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tile .v { font-size: 1.8rem; }
+}
+.top-l { flex: 1 1 0; min-width: 0; } .top-l > div { min-width: 0; } #btn-menu { flex: none; } .top .top-r { flex: none; width: auto; } .top .eyebrow { letter-spacing: .04em; }
+#btn-acct .ini { display: none; width: 28px; height: 28px; border-radius: 50%; background: var(--primary-c); color: var(--on-primary-c); place-items: center; font-weight: 700; }
+@media (max-width: 1000px) { #btn-acct { padding: 0 8px; } #btn-acct .ini { display: grid; } }
+@media (prefers-reduced-motion: reduce) { .tabs { transition: none; } }
 </style>
 </head>
 <body>
 
 <div class="wrap">
   <header class="top">
-    <div>
-      <div class="eyebrow" id="today">Dukcapil</div>
-      <h1 id="h1">Dashboard Kegiatan Dukcapil</h1>
-      <p>Pantau kegiatan per bidang, lengkapi dokumennya, dan ambil ide kegiatan baru.</p>
+    <div class="top-l">
+      <button class="btn ghost small ico" id="btn-menu" type="button" aria-label="Buka menu" aria-controls="nav-main" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <div>
+        <div class="eyebrow" id="today">Dukcapil</div>
+        <h1 id="h1">Dashboard Kegiatan Dukcapil</h1>
+      </div>
     </div>
     <div class="top-r">
       <span class="sync" id="sync"><i></i><span id="sync-t">Memuat…</span></span>
       <div class="row-btns">
         <button class="btn ghost small" id="btn-install" type="button" hidden>Pasang aplikasi</button>
-        <button class="btn ghost small" id="btn-refresh" type="button">Muat ulang</button>
-        <button class="btn ghost small" id="btn-login" type="button" hidden>Masuk</button>
+        <button class="btn ghost small ico" id="btn-refresh" type="button" aria-label="Muat ulang data" title="Muat ulang data"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v4.5h-4.5"/></svg><span class="bl">Muat ulang</span></button>
+        <button class="btn small" id="btn-login" type="button" hidden>Masuk</button>
         <button class="btn ghost small" id="btn-acct" type="button" hidden></button>
-        <button class="btn ghost small" id="btn-theme" type="button" aria-label="Ganti tema">Mode gelap</button>
+        <button class="btn ghost small ico" id="btn-theme" type="button" aria-label="Ganti tema" title="Ganti tema"></button>
       </div>
     </div>
   </header>
+  <div class="scrim" id="nav-scrim" hidden></div>
 
-  <nav class="tabs" role="tablist">
+  <nav class="tabs" id="nav-main" role="tablist" aria-label="Menu utama">
     <button class="tab" role="tab" id="tab-dash" data-tab="dash" aria-selected="true">Ringkasan</button>
     <button class="tab" role="tab" id="tab-dpa" data-tab="dpa" aria-selected="false">Kegiatan DPA<span class="n" id="n-dpa">0</span></button>
     <button class="tab" role="tab" id="tab-jbl" data-tab="jbl" aria-selected="false">Jemput Bola<span class="n" id="n-jbl">0</span></button>
@@ -515,6 +603,7 @@ table.ikt { min-width: 760px; }
     <button class="tab" role="tab" id="tab-bank" data-tab="bank" aria-selected="false">Bank data<span class="n" id="n-bank">0</span></button>
     <button class="tab" role="tab" id="tab-tag" data-tab="tag" aria-selected="false">Tagging<span class="n" id="n-tag">0</span></button>
     <button class="tab" role="tab" id="tab-ide" data-tab="ide" aria-selected="false">Bank ide<span class="n" id="n-ide">0</span></button>
+    <button class="tab" role="tab" id="tab-akun" data-tab="akun" aria-selected="false" hidden>Akun</button>
     <button class="tab" role="tab" id="tab-set" data-tab="set" aria-selected="false">Pengaturan</button>
   </nav>
 
@@ -525,7 +614,7 @@ table.ikt { min-width: 760px; }
   </div>
 
   <section class="view" id="view-dash">
-    <div class="vhead"><div><h2 style="font-size:1.25rem">Ringkasan</h2><p class="note" style="margin:4px 0 0">Gambaran seluruh kegiatan, jemput bola, dan inovasi. Pilih tab di atas untuk melihat rinciannya.</p></div></div>
+    <div class="vhead"><div><h2 style="font-size:1.25rem">Ringkasan</h2><p class="note" style="margin:4px 0 0">Gambaran seluruh kegiatan, jemput bola, dan inovasi. Pilih menu di samping untuk melihat rinciannya.</p></div></div>
     <div class="tiles t4" id="tiles"></div>
     <div class="chartgrid">
       <div class="bars" id="d-status"></div>
@@ -768,7 +857,7 @@ table.ikt { min-width: 760px; }
 
   <section class="view" id="view-ikd" hidden>
     <div class="vhead"><div><h2 style="font-size:1.25rem">Aktivasi IKD</h2><p class="note" style="margin:4px 0 0">Rekap aktivasi Identitas Kependudukan Digital (IKD) pegawai per OPD. Unggah berkas Excel (.xlsx) atau CSV berisi nama, NIP/NIPPPK, dan status IKD. Satu berkas untuk satu OPD; boleh pilih beberapa berkas sekaligus.</p></div><button class="btn" id="btn-new-ikd" type="button">+ Unggah Excel</button></div>
-    <div class="banner" id="ikd-old" hidden><span>Apps Script Anda belum versi terbaru, jadi nama dan NIP pegawai belum bisa tersimpan. Tempel Code.gs terbaru, lalu Deploy &gt; Kelola deployment &gt; Edit &gt; Versi baru &gt; Deploy.</span></div>
+    <div class="banner" id="ikd-old" hidden><span>Apps Script Anda belum versi terbaru, jadi nama dan NIP pegawai belum bisa tersimpan. Tempel Code.gs terbaru, lalu Deploy &gt; Kelola deployment &gt; Edit &gt; Versi baru &gt; Deploy. Alamat yang sedang dipakai aplikasi: <b id="ikd-old-url"></b>. Cocokkan dengan alamat Web App di Apps Script.</span></div>
     <input type="file" id="ikd-file" accept=".xlsx,.csv,text/csv" multiple hidden>
     <div class="panel" id="ikd-import" hidden>
       <h2>Periksa sebelum disimpan</h2>
@@ -789,6 +878,11 @@ table.ikt { min-width: 760px; }
       <button class="btn ghost" id="btn-csv-ikd" type="button">Unduh CSV</button>
     </div>
     <div class="tablewrap" id="ikd-table"></div>
+  </section>
+
+  <section class="view" id="view-akun" hidden>
+    <div class="vhead"><div><h2 style="font-size:1.25rem">Akun</h2><p class="note" style="margin:4px 0 0">Daftar akun, peran, dan menu yang boleh dilihat tiap akun. Di sini admin juga mengatur urutan menu dan apa yang terlihat oleh tamu yang belum masuk.</p></div></div>
+    <div id="akun-body"></div>
   </section>
 
   <section class="view" id="view-bank" hidden>
@@ -854,16 +948,7 @@ table.ikt { min-width: 760px; }
     </form>
     <form id="lg-setup" class="fcol" style="gap:12px" hidden>
       <p class="note" style="margin:0">Aplikasi belum tersambung ke server. Tempel URL Web App Apps Script (berakhiran /exec).</p>
-     <label class="f" for="lg-url">
-  URL Web App
-  <input 
-    type="text" 
-    id="lg-url" 
-    value="https://script.google.com/macros/s/AKfycbyZUNFVV_JwLuxab8bpGtMF16BC-V6LhkUwrX-d98tGlWCuAowYQR1DGwaSVl-4Fg4QQA/exec" 
-    autocomplete="off" 
-    spellcheck="false"
-  >
-</label>
+      <label class="f" for="lg-url">URL Web App<input type="text" id="lg-url" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off" spellcheck="false"></label>
       <div id="lg-smsg" class="note" role="status"></div>
       <div class="row-btns"><button class="btn" type="submit">Simpan dan hubungkan</button></div>
     </form>
@@ -897,6 +982,15 @@ table.ikt { min-width: 760px; }
       <select id="ikm-fn" aria-label="Status MyASN"><option value="all">MyASN: semua</option><option value="V">MyASN: terverifikasi</option><option value="B">MyASN: belum terverifikasi</option><option value="?">MyASN: tidak diketahui</option></select>
       <button class="btn ghost" id="ikm-csv" type="button">Unduh CSV</button>
     </div>
+    <div class="ikdadd" id="ikm-add" hidden>
+      <strong>Tambah pegawai</strong>
+      <input type="text" id="ik-an" placeholder="Nama" maxlength="160" aria-label="Nama pegawai">
+      <input type="text" id="ik-ap" placeholder="NIP/NIPPPK" maxlength="30" inputmode="numeric" aria-label="NIP pegawai">
+      <select id="ik-ai" aria-label="Status IKD"><option value="B">IKD belum aktif</option><option value="A">IKD sudah aktif</option></select>
+      <select id="ik-ak" aria-label="Status MyASN"><option value="?">MyASN tidak diketahui</option><option value="V">MyASN terverifikasi</option><option value="B">MyASN belum terverifikasi</option><option value="">MyASN tidak ada data</option></select>
+      <button class="btn ghost small" type="button" data-act="ikm-add">Tambah</button>
+    </div>
+    <div class="row-btns ikdsave" id="ikm-saverow" hidden><span class="note" id="ikm-dirty"></span><button class="btn" type="button" data-act="ikm-save">Simpan perubahan</button><button class="btn ghost" type="button" data-act="ikm-undo">Batalkan perubahan</button></div>
     <div id="ikm-sum" class="ikdsum"></div>
     <div class="tablewrap" id="ikm-table"></div>
   </div></div>
